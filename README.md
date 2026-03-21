@@ -128,7 +128,12 @@ hack-a-bot-2026/
 ## Supported By
 
 <p align="center">
-  <a href="https://www.arm.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="40"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://manchesterstudentsunion.com/activities/view/eeesoc"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="40"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="The University of Manchester" height="40"/></a>
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="35"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="35"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="University of Manchester" height="35"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/robosoc.svg" alt="RoboSoc" height="35"/></a>
+</p>
+
+<p align="center">
+  <em>Part of <a href="https://hackabot-2026.com">Hack-A-Bot 2026</a> — supported by ARM, EEESoc, RoboSoc, Makerspace, Quanser, Cradle, Amentum, Ice Nine, Google Developer Groups, UKRI, RAICo</em>
 </p>
