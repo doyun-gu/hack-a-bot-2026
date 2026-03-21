@@ -913,23 +913,25 @@ Judges can SEE the difference. That's not just a demo — it's a **proof of conc
 
 Use cardboard, paper labels, and coloured wire to make it LOOK like a factory:
 
-```
-┌─────────────────────────────────────────────────┐
-│  ╔═══════╗     ╔═══════╗     ╔═══════╗         │
-│  ║ PUMP  ║────>║ FILL  ║────>║  QC   ║───> OUT │
-│  ║ [M1]  ║     ║ [S1]  ║     ║ [S2]  ║         │
-│  ╚═══════╝     ╚═══════╝     ╚═══════╝         │
-│       │             │             │              │
-│  ╔════╧════════════╧═════════════╧═══╗          │
-│  ║          CONVEYOR BELT [M2]        ║          │
-│  ╚════════════════════════════════════╝          │
-│                                                  │
-│  [Pico A]  [IMU]  [PCA9685]  [nRF]   [LEDs]    │
-│  ─────────── FACTORY FLOOR ──────────────       │
-├──────────────────────────────────────────────────┤
-│        CONTROL ROOM (separate table)             │
-│  [Pico B]  [OLED]  [Joystick]  [Pot]            │
-└──────────────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph FLOOR["FACTORY FLOOR"]
+        direction LR
+        PUMP["PUMP<br/>DC Motor 1"] -->|water| FILL["FILL STATION<br/>Servo 1"]
+        FILL -->|bottle| QC["QUALITY CHECK<br/>Servo 2"]
+        QC -->|pass| OUT[Good Output]
+        QC -->|reject| WASTE[Reject Bin]
+
+        BELT["CONVEYOR BELT — DC Motor 2"]
+
+        CTRL["Pico A + IMU + PCA9685 + nRF + LEDs"]
+    end
+
+    subgraph ROOM["CONTROL ROOM (separate table)"]
+        SCADA["Pico B + OLED + Joystick + Potentiometer"]
+    end
+
+    FLOOR -->|"wireless nRF24L01+"| ROOM
 ```
 
 Labels on each station: "PUMP STATION", "FILLING", "QUALITY CHECK", "CONVEYOR". LEDs as "factory stack lights" (green/yellow/red). This transforms breadboards into a **miniature world** that judges can walk around and explore.
