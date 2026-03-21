@@ -91,7 +91,7 @@ def main():
                         help='Serial port for Pico USB')
     parser.add_argument('--baud', type=int, default=115200,
                         help='Baud rate')
-    parser.add_argument('--web-port', type=int, default=5000,
+    parser.add_argument('--web-port', type=int, default=8080,
                         help='Web server port')
     parser.add_argument('--no-serial', action='store_true',
                         help='Run web server without serial connection (for testing)')
