@@ -124,7 +124,7 @@
         .sub-label { font-size: 10px; font-weight: 500; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* ─── Power Flow ─── */
-        .flow-canvas { width: 100%; height: 280px; display: block; }
+        .flow-canvas { width: 100%; height: 320px; display: block; }
 
         /* ─── Charts ─── */
         .chart-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 14px; }
@@ -229,8 +229,8 @@
             <div class="progress"><div class="progress-bar"><div class="progress-fill" id="s2-bar" style="width:50%;background:#a371f7"></div></div></div>
         </div>
 
-        <!-- Row 3: Production | Faults -->
-        <div class="card">
+        <!-- Row 3: Production (full width) -->
+        <div class="card full-span">
             <div class="card-header"><h3>Production Line</h3><span class="badge badge-green" id="prod-badge">RUNNING</span></div>
             <div class="prod-stats">
                 <div class="prod-numbers">
@@ -241,7 +241,8 @@
                 <div class="donut-wrap"><canvas id="reject-donut" width="64" height="64"></canvas></div>
             </div>
         </div>
-        <div class="card">
+        <!-- Row 4: Faults & Diagnostics (full width) -->
+        <div class="card full-span">
             <div class="card-header"><h3>Faults &amp; Diagnostics</h3><span class="badge badge-green" id="fault-badge">CLEAR</span></div>
             <div style="display:flex;gap:20px;margin-bottom:8px">
                 <div><span class="sub-label">Faults Today</span><div class="metric"><span class="val c-green" id="faults" style="font-size:20px">0</span></div></div>
@@ -295,7 +296,9 @@
             <button class="modal-close" id="about-close">&times;</button>
             <h2>GridBox</h2>
             <p>Smart Infrastructure Control System</p>
-            <p style="margin-top:8px;font-size:11px;color:var(--text-dim)">Hack-A-Bot 2026 &mdash; Project 6: Creative &mdash; Group 1</p>
+            <p style="margin-top:4px;font-size:11px;color:var(--text-dim)">Version v2.0</p>
+            <p style="margin-top:4px;font-size:11px;color:var(--text-dim)">Hack-A-Bot 2026 &mdash; Project 6: Creative &mdash; Group 1</p>
+            <p style="margin-top:4px;font-size:11px;color:var(--text-dim)">Built with MicroPython + C SDK on RP2350</p>
             <div class="team">
                 <span><strong>Doyun Gu</strong> &mdash; System Designer</span>
                 <span><strong>Wooseong Jung</strong> &mdash; Electronics</span>
@@ -414,8 +417,11 @@
 
         // ─── Charts (preserved) ───
         function drawChart(canvas, datasets, maxY, colors) {
+            const dpr = window.devicePixelRatio || 1;
+            const w = canvas.offsetWidth, h = canvas.offsetHeight;
+            canvas.width = w * dpr; canvas.height = h * dpr;
             const ctx = canvas.getContext('2d');
-            const w = canvas.width, h = canvas.height;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             ctx.clearRect(0, 0, w, h);
             ctx.strokeStyle = tc('--border'); ctx.lineWidth = 0.5;
             for (let i = 0; i <= 4; i++) {
@@ -438,144 +444,162 @@
             });
         }
 
-        // ─── Power Flow (all boxes 140x44, orthogonal wires, animated dots) ───
-        let flowTick = 0;
+        // ─── Power Flow — retina, orthogonal wires, requestAnimationFrame dots ───
+        let latestData = {};
+
         function drawPowerFlow(canvas, d) {
+            const dpr = window.devicePixelRatio || 1;
+            const cssW = canvas.offsetWidth, cssH = canvas.offsetHeight;
+            canvas.width = cssW * dpr; canvas.height = cssH * dpr;
             const ctx = canvas.getContext('2d');
-            // Use fixed internal resolution, scale to fit element
-            const IW = 960, IH = 280;
-            canvas.width = IW; canvas.height = IH;
-            const cw = IW, ch = IH;
-            const sx = canvas.clientWidth / IW, sy = canvas.clientHeight / IH;
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.clearRect(0, 0, cw, ch);
-            flowTick++;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, cssW, cssH);
+            const now = performance.now();
 
             const m1On = (d.m1_speed || 0) > 0, m2On = (d.m2_speed || 0) > 0;
             const busV = (d.bus_v || 0).toFixed(1);
-            const m1mA = (d.m1_mA || 0).toFixed(0);
-            const m2mA = (d.m2_mA || 0).toFixed(0);
+            const m1mA = (d.m1_mA || 0).toFixed(0), m2mA = (d.m2_mA || 0).toFixed(0);
+            const m1Spd = Math.round(d.m1_speed || 0), m2Spd = Math.round(d.m2_speed || 0);
+            const m1W = (d.m1_W || 0).toFixed(1), m2W = (d.m2_W || 0).toFixed(1);
             const totalW = (d.total_W || 0).toFixed(1);
+            const eff = Math.round(d.efficiency || 0);
             const state = d.state || 'UNKNOWN';
 
-            // All boxes same size: 140x44
-            const bw = 140, bh = 44, br = 6;
+            // Box dimensions (all identical)
+            const bw = 160, bh = 50, br = 6;
 
-            // 3 columns evenly spaced across 960px
-            const col0x = 30;
-            const col1x = 340;
-            const col2x = 650;
-
-            // 4 output rows in col2
-            const rowGap = 10;
-            const rows = []; for (let i = 0; i < 4; i++) rows.push(28 + i * (bh + rowGap));
-
-            // Converters centered between output pairs
-            const buckY = (rows[0] + rows[1]) / 2;
-            const boostY = (rows[2] + rows[3]) / 2;
-            const psuY = (buckY + boostY) / 2;
+            // Layout grid — 3 columns
+            const col1x = 30, col2x = 280, col3x = 560;
+            // PSU centered vertically between Buck and Boost
+            const psuY = 120, buckY = 40, boostY = 200;
+            // Output rows
+            const m1Y = 20, m2Y = 100, servoY = 180, ledY = 260;
             const midY = (y) => y + bh / 2;
 
-            // ─── Draw box (150x48, same size) ───
-            function box(x, y, title, sub, active, statusColor) {
-                ctx.fillStyle = tc('--card');
-                ctx.strokeStyle = active ? statusColor : tc('--border');
-                ctx.lineWidth = 1;
+            // Wire corridors
+            const corrA = 220, corrB = 500;
+            const psuR = col1x + bw, buckR = col2x + bw;
+
+            // ─── Box drawing ───
+            function box(x, y, title, sub, active, borderColor) {
+                ctx.fillStyle = '#161b22';
+                ctx.strokeStyle = active ? borderColor : tc('--border');
+                ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.roundRect(x, y, bw, bh, br); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = tc('--text'); ctx.font = '500 11px Inter';
-                ctx.fillText(title, x + 10, y + 19);
+                ctx.fillStyle = tc('--text'); ctx.font = '600 12px Inter';
+                ctx.fillText(title, x + 10, y + 20);
                 if (sub) {
-                    ctx.fillStyle = active ? statusColor : tc('--text-dim');
-                    ctx.font = '500 10px "JetBrains Mono"';
-                    ctx.fillText(sub, x + 10, y + 34);
+                    ctx.fillStyle = active ? borderColor : tc('--text-dim');
+                    ctx.font = '400 10px "JetBrains Mono"';
+                    ctx.fillText(sub, x + 10, y + 38);
                 }
-                ctx.fillStyle = active ? statusColor : tc('--text-dim');
-                ctx.beginPath(); ctx.arc(x + bw - 14, y + 14, 4, 0, Math.PI * 2); ctx.fill();
+                // Status dot (6px, top-right)
+                ctx.fillStyle = active ? borderColor : tc('--text-dim');
+                ctx.beginPath(); ctx.arc(x + bw - 14, y + 14, 3, 0, Math.PI * 2); ctx.fill();
                 if (!active) {
                     ctx.strokeStyle = tc('--text-dim'); ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
-                    ctx.beginPath(); ctx.arc(x + bw - 14, y + 14, 4, 0, Math.PI * 2); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(x + bw - 14, y + 14, 3, 0, Math.PI * 2); ctx.stroke();
                     ctx.setLineDash([]);
                 }
             }
 
-            // ─── Draw wire + animated flowing dots ───
-            function wire(points, active, dotColor) {
-                ctx.strokeStyle = active ? (dotColor || '#3fb950') : tc('--border');
-                ctx.lineWidth = 1; ctx.setLineDash([]);
+            // ─── Wire drawing (2px, orthogonal) ───
+            function wire(points, active, color) {
+                ctx.strokeStyle = active ? (color || '#3fb950') : tc('--border');
+                ctx.lineWidth = 2; ctx.setLineDash([]);
                 ctx.beginPath();
                 ctx.moveTo(points[0][0], points[0][1]);
                 for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0], points[i][1]);
                 ctx.stroke();
-                if (active) {
-                    const c = dotColor || '#3fb950';
-                    let totalLen = 0;
-                    const segs = [];
-                    for (let i = 1; i < points.length; i++) {
-                        const dx = points[i][0] - points[i-1][0], dy = points[i][1] - points[i-1][1];
-                        const len = Math.sqrt(dx*dx + dy*dy);
-                        segs.push({ x0: points[i-1][0], y0: points[i-1][1], dx, dy, len });
-                        totalLen += len;
+            }
+
+            // ─── Animated dot (3px radius, follows orthogonal path) ───
+            function animDot(points, active, color, phaseOffset) {
+                if (!active) return;
+                let totalLen = 0;
+                const segs = [];
+                for (let i = 1; i < points.length; i++) {
+                    const dx = points[i][0] - points[i-1][0], dy = points[i][1] - points[i-1][1];
+                    const len = Math.abs(dx) + Math.abs(dy); // Manhattan for orthogonal
+                    segs.push({ x0: points[i-1][0], y0: points[i-1][1], dx, dy, len: Math.sqrt(dx*dx+dy*dy) });
+                    totalLen += segs[segs.length-1].len;
+                }
+                const speed = 80;
+                let pos = ((now / 1000 * speed + phaseOffset) % totalLen);
+                if (pos < 0) pos += totalLen;
+                let acc = 0;
+                for (const s of segs) {
+                    if (pos <= acc + s.len) {
+                        const t = (pos - acc) / s.len;
+                        ctx.fillStyle = color || '#3fb950'; ctx.globalAlpha = 0.85;
+                        ctx.beginPath(); ctx.arc(s.x0 + s.dx * t, s.y0 + s.dy * t, 3, 0, Math.PI * 2); ctx.fill();
+                        ctx.globalAlpha = 1;
+                        return;
                     }
-                    const spacing = 40, nDots = Math.max(1, Math.floor(totalLen / spacing));
-                    for (let n = 0; n < nDots; n++) {
-                        let pos = ((flowTick * 2.5 + n * spacing) % totalLen);
-                        let acc = 0;
-                        for (const s of segs) {
-                            if (pos <= acc + s.len) {
-                                const t = (pos - acc) / s.len;
-                                ctx.fillStyle = c; ctx.globalAlpha = 0.7;
-                                ctx.beginPath(); ctx.arc(s.x0 + s.dx * t, s.y0 + s.dy * t, 2.5, 0, Math.PI * 2); ctx.fill();
-                                ctx.globalAlpha = 1;
-                                break;
-                            }
-                            acc += s.len;
-                        }
-                    }
+                    acc += s.len;
                 }
             }
 
-            // Junction x (midpoint between col1 right edge and col2 left edge)
-            const jx = col1x + bw + 60;
+            // ═══ WIRES — all orthogonal, using corridors ═══
+            const pMid = midY(psuY), bkMid = midY(buckY), btMid = midY(boostY);
 
-            // ═══ WIRES (behind boxes) ═══
-            const midCol01 = (col0x + bw + col1x) / 2; // midpoint between PSU and converters
-            // PSU → Buck (L-path up)
-            wire([[col0x + bw, midY(psuY)], [midCol01, midY(psuY)], [midCol01, midY(buckY)], [col1x, midY(buckY)]], true);
-            // PSU → Boost (L-path down)
-            wire([[col0x + bw, midY(psuY) + 6], [midCol01 - 10, midY(psuY) + 6], [midCol01 - 10, midY(boostY)], [col1x, midY(boostY)]], true, '#d29922');
-            // Buck → junction
-            wire([[col1x + bw, midY(buckY)], [jx, midY(buckY)]], true);
-            // Vertical trunk (buck side: rows 0-1)
-            wire([[jx, midY(rows[0])], [jx, midY(rows[1])]], true);
-            // Trunk → Motor 1
-            wire([[jx, midY(rows[0])], [col2x, midY(rows[0])]], m1On);
-            // Trunk → Motor 2
-            wire([[jx, midY(rows[1])], [col2x, midY(rows[1])]], m2On, '#58a6ff');
-            // Boost → junction2
-            const jx2 = jx - 12;
-            wire([[col1x + bw, midY(boostY)], [jx2, midY(boostY)]], true, '#d29922');
-            // Vertical trunk (boost side: rows 2-3)
-            wire([[jx2, midY(rows[2])], [jx2, midY(rows[3])]], true, '#d29922');
-            // Trunk → Servos
-            wire([[jx2, midY(rows[2])], [col2x, midY(rows[2])]], true, '#a371f7');
-            // Trunk → LEDs
-            wire([[jx2, midY(rows[3])], [col2x, midY(rows[3])]], state !== 'FAULT', state === 'FAULT' ? '#f85149' : '#3fb950');
+            // PSU → Buck: right to corrA, up to buckMidY, right to col2
+            const wPsuBuck = [[psuR, pMid], [corrA, pMid], [corrA, bkMid], [col2x, bkMid]];
+            wire(wPsuBuck, true, '#58a6ff');
+            animDot(wPsuBuck, true, '#58a6ff', 0);
 
-            // ═══ BOXES (all 140x44) ═══
-            box(col0x, psuY, '12V PSU', busV + 'V  ' + totalW + 'W', true, '#58a6ff');
-            box(col1x, buckY, 'Buck Converter', '12V \u2192 5V', true, '#3fb950');
-            box(col1x, boostY, 'Buck-Boost', '12V \u2192 6-9V', true, '#d29922');
-            box(col2x, rows[0], 'Motor 1: Fan', m1mA + 'mA', m1On, '#3fb950');
-            box(col2x, rows[1], 'Motor 2: Conveyor', m2mA + 'mA', m2On, '#58a6ff');
-            box(col2x, rows[2], 'Servos (PCA9685)', '2ch PWM', true, '#a371f7');
-            box(col2x, rows[3], 'Status LEDs', state, state !== 'FAULT', state === 'FAULT' ? '#f85149' : '#3fb950');
+            // PSU → Boost: right to corrA-5, down to boostMidY, right to col2
+            const wPsuBoost = [[psuR, pMid + 4], [corrA - 5, pMid + 4], [corrA - 5, btMid], [col2x, btMid]];
+            wire(wPsuBoost, true, '#d29922');
+            animDot(wPsuBoost, true, '#d29922', 60);
 
-            // Column labels
-            ctx.fillStyle = tc('--text-dim'); ctx.font = '400 8px Inter';
-            ctx.fillText('SUPPLY', col0x, psuY - 4);
-            ctx.fillText('CONVERSION', col1x, buckY - 4);
-            ctx.fillText('OUTPUTS', col2x, rows[0] - 4);
+            // Buck → Motor 1: right to corrB, up to m1MidY, right to col3
+            const wBkM1 = [[buckR, bkMid - 4], [corrB, bkMid - 4], [corrB, midY(m1Y)], [col3x, midY(m1Y)]];
+            wire(wBkM1, m1On, '#3fb950');
+            animDot(wBkM1, m1On, '#3fb950', 120);
+
+            // Buck → Motor 2: right to corrB-6, down to m2MidY, right to col3
+            const wBkM2 = [[buckR, bkMid], [corrB - 6, bkMid], [corrB - 6, midY(m2Y)], [col3x, midY(m2Y)]];
+            wire(wBkM2, m2On, '#58a6ff');
+            animDot(wBkM2, m2On, '#58a6ff', 180);
+
+            // Buck → Servos: right to corrB-12, down to servoMidY, right to col3
+            const wBkServo = [[buckR, bkMid + 4], [corrB - 12, bkMid + 4], [corrB - 12, midY(servoY)], [col3x, midY(servoY)]];
+            wire(wBkServo, true, '#a371f7');
+            animDot(wBkServo, true, '#a371f7', 240);
+
+            // Buck → LEDs: right to corrB-18, down to ledMidY, right to col3
+            const ledActive = state !== 'FAULT';
+            const ledColor = state === 'FAULT' ? '#f85149' : '#3fb950';
+            const wBkLed = [[buckR, bkMid + 8], [corrB - 18, bkMid + 8], [corrB - 18, midY(ledY)], [col3x, midY(ledY)]];
+            wire(wBkLed, ledActive, ledColor);
+            animDot(wBkLed, ledActive, ledColor, 300);
+
+            // ═══ BOXES (all 160x50) ═══
+            box(col1x, psuY, '12V PSU', busV + 'V \u00b7 ' + totalW + 'W \u00b7 ' + eff + '%', true, '#58a6ff');
+            box(col2x, buckY, 'Buck Converter', '12V \u2192 5V', true, '#3fb950');
+            box(col2x, boostY, 'Buck-Boost', '12V \u2192 6\u20139V', true, '#d29922');
+            box(col3x, m1Y, 'Motor 1: Fan', m1mA + 'mA \u00b7 ' + m1Spd + '% \u00b7 ' + m1W + 'W', m1On, '#3fb950');
+            box(col3x, m2Y, 'Motor 2: Conveyor', m2mA + 'mA \u00b7 ' + m2Spd + '% \u00b7 ' + m2W + 'W', m2On, '#58a6ff');
+            box(col3x, servoY, 'Servos PCA9685', '2ch \u00b7 active', true, '#a371f7');
+            box(col3x, ledY, 'Status LEDs', state, ledActive, ledColor);
+
+            // ═══ COLUMN LABELS (9px uppercase grey) ═══
+            ctx.fillStyle = tc('--text-dim'); ctx.font = '400 9px Inter';
+            ctx.fillText('SUPPLY', col1x, 14);
+            ctx.fillText('CONVERSION', col2x, 14);
+            ctx.fillText('OUTPUTS', col3x, 14);
         }
+
+        // ─── Power flow animation loop (requestAnimationFrame) ───
+        function powerFlowLoop() {
+            const canvas = document.getElementById('power-flow');
+            if (canvas && Object.keys(latestData).length > 0) {
+                drawPowerFlow(canvas, latestData);
+            }
+            requestAnimationFrame(powerFlowLoop);
+        }
+        requestAnimationFrame(powerFlowLoop);
 
         // ─── Main update loop (data logic preserved) ───
         async function update() {
@@ -705,12 +729,8 @@
                 if (pH.length > MAX_PTS) pH.shift();
                 if (m1H.length > MAX_PTS) m1H.shift();
                 if (m2H.length > MAX_PTS) m2H.shift();
-                const pc = document.getElementById('power-chart');
-                pc.width = pc.offsetWidth; pc.height = 200;
-                drawChart(pc, [pH], 12, ['#3fb950']);
-                const cc = document.getElementById('current-chart');
-                cc.width = cc.offsetWidth; cc.height = 200;
-                drawChart(cc, [m1H, m2H], 800, ['#3fb950', '#58a6ff']);
+                drawChart(document.getElementById('power-chart'), [pH], 12, ['#3fb950']);
+                drawChart(document.getElementById('current-chart'), [m1H, m2H], 800, ['#3fb950', '#58a6ff']);
 
                 // Servo angles — derive from state (mock data doesn't send angles)
                 const s1a = (d.state === 'NORMAL' || d.state === 'DRIFT') ? 90 : 0;
@@ -720,9 +740,8 @@
                 document.getElementById('s2-angle-val').textContent = s2a;
                 document.getElementById('s2-bar').style.width = (s2a / 180 * 100) + '%';
 
-                // Power flow diagram (uses fixed 960x280 internal resolution)
-                const pf = document.getElementById('power-flow');
-                drawPowerFlow(pf, d);
+                // Store data for power flow animation loop
+                latestData = d;
 
             } catch (e) {
                 document.getElementById('conn-dot').className = 'conn-dot lost';
