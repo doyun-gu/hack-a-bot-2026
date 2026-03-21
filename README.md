@@ -127,28 +127,29 @@ hack-a-bot-2026/
 
 ## Supported By
 
-<p align="center">
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="University of Manchester" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="50"/></a>
-</p>
-
-<p align="center">
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="45"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="45"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Amentum.svg" alt="Amentum" height="45"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Dominos.svg" alt="Dominos" height="45"/></a>
-</p>
-
-<p align="center">
-  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/RoboSoc-222?style=for-the-badge&logoColor=white" alt="RoboSoc" height="28"/></a>&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Cradle-222?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI4IiBjeT0iOCIgcj0iMyIgZmlsbD0id2hpdGUiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjgiIHI9IjMiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTQgMTRoMTZ2MkE0IDQgMCAwIDEgMTYgMjBIOEE0IDQgMCAwIDEgNCAxNnoiIGZpbGw9IndoaXRlIi8+PC9zdmc+&logoColor=white" alt="Cradle" height="28"/></a>&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Google_Developer_Groups-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="GDG" height="28"/></a>&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/UKRI-222?style=for-the-badge&logoColor=white" alt="UKRI" height="28"/></a>&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/RAICo-222?style=for-the-badge&logoColor=white" alt="RAICo" height="28"/></a>&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Red_Bull-DB0A40?style=for-the-badge&logo=redbull&logoColor=white" alt="Red Bull" height="28"/></a>
-</p>
+<table align="center">
+<tr>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="40"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="40"/></a></td>
+<td align="center"><a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="UoM" height="40"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="40"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="40"/></a></td>
+</tr>
+<tr>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="40"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Amentum.svg" alt="Amentum" height="40"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Dominos.svg" alt="Dominos" height="40"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/RoboSoc-1a1a2e?style=for-the-badge" alt="RoboSoc" height="30"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Cradle-1a1a2e?style=for-the-badge" alt="Cradle" height="30"/></a></td>
+</tr>
+<tr>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Google_Dev_Groups-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="GDG" height="30"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/UKRI-1a1a2e?style=for-the-badge" alt="UKRI" height="30"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/RAICo-1a1a2e?style=for-the-badge" alt="RAICo" height="30"/></a></td>
+<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Red_Bull-DB0A40?style=for-the-badge&logo=redbull&logoColor=white" alt="Red Bull" height="30"/></a></td>
+<td align="center"></td>
+</tr>
+</table>
 
 <p align="center">
   <em><a href="https://hackabot-2026.com">Hack-A-Bot 2026</a> — Project 6: Creative — University of Manchester</em>

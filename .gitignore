@@ -8,6 +8,9 @@ CLAUDE.md
 # Build artifacts
 src/master-pico/c_sdk/build/
 src/slave-pico/c_sdk/build/
+
+# Worker scripts (internal dev tools)
+scripts/
 *.uf2
 *.elf
 *.bin
