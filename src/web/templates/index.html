@@ -482,7 +482,7 @@
 
             // ─── Box drawing ───
             function box(x, y, title, sub, active, borderColor) {
-                ctx.fillStyle = '#161b22';
+                ctx.fillStyle = tc('--card');
                 ctx.strokeStyle = active ? borderColor : tc('--border');
                 ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.roundRect(x, y, bw, bh, br); ctx.fill(); ctx.stroke();
