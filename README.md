@@ -137,24 +137,24 @@ hack-a-bot-2026/
 
 <table align="center">
 <tr>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="40"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="40"/></a></td>
+<td align="center"><a href="https://www.arm.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="40"/></a></td>
+<td align="center"><a href="https://manchesterstudentsunion.com/activities/view/eeesoc"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="40"/></a></td>
 <td align="center"><a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="UoM" height="40"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="40"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="40"/></a></td>
+<td align="center"><a href="https://www.makerspace.manchester.ac.uk"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="40"/></a></td>
+<td align="center"><a href="https://www.quanser.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="40"/></a></td>
 </tr>
 <tr>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="40"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Amentum.svg" alt="Amentum" height="40"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Dominos.svg" alt="Dominos" height="40"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/RoboSoc-1a1a2e?style=for-the-badge" alt="RoboSoc" height="30"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Cradle-1a1a2e?style=for-the-badge" alt="Cradle" height="30"/></a></td>
+<td align="center"><a href="https://www.intechopen.com/profiles/213610"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="40"/></a></td>
+<td align="center"><a href="https://www.amentum.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Amentum.svg" alt="Amentum" height="40"/></a></td>
+<td align="center"><a href="https://www.dominos.co.uk"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Dominos.svg" alt="Dominos" height="40"/></a></td>
+<td align="center"><a href="https://manchesterstudentsunion.com/activities/view/robosoc"><img src="https://img.shields.io/badge/RoboSoc-1a1a2e?style=for-the-badge" alt="RoboSoc" height="30"/></a></td>
+<td align="center"><a href="https://cradle.bio"><img src="https://img.shields.io/badge/Cradle-1a1a2e?style=for-the-badge" alt="Cradle" height="30"/></a></td>
 </tr>
 <tr>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Google_Dev_Groups-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="GDG" height="30"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/UKRI-1a1a2e?style=for-the-badge" alt="UKRI" height="30"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/RAICo-1a1a2e?style=for-the-badge" alt="RAICo" height="30"/></a></td>
-<td align="center"><a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Red_Bull-DB0A40?style=for-the-badge&logo=redbull&logoColor=white" alt="Red Bull" height="30"/></a></td>
+<td align="center"><a href="https://gdg.community.dev"><img src="https://img.shields.io/badge/Google_Dev_Groups-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="GDG" height="30"/></a></td>
+<td align="center"><a href="https://www.ukri.org"><img src="https://img.shields.io/badge/UKRI-1a1a2e?style=for-the-badge" alt="UKRI" height="30"/></a></td>
+<td align="center"><a href="https://raico.org"><img src="https://img.shields.io/badge/RAICo-1a1a2e?style=for-the-badge" alt="RAICo" height="30"/></a></td>
+<td align="center"><a href="https://www.redbull.com"><img src="https://img.shields.io/badge/Red_Bull-DB0A40?style=for-the-badge&logo=redbull&logoColor=white" alt="Red Bull" height="30"/></a></td>
 <td align="center"></td>
 </tr>
 </table>

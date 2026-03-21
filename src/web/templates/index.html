@@ -422,19 +422,22 @@
             canvas.width = w * dpr; canvas.height = h * dpr;
             const ctx = canvas.getContext('2d');
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            const pad = 35; // left padding for Y-axis labels
             ctx.clearRect(0, 0, w, h);
             ctx.strokeStyle = tc('--border'); ctx.lineWidth = 0.5;
             for (let i = 0; i <= 4; i++) {
                 const y = h * i / 4;
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w, y); ctx.stroke();
                 ctx.fillStyle = tc('--text-dim'); ctx.font = '400 9px Inter';
-                ctx.fillText((maxY * (4 - i) / 4).toFixed(0), 4, y + 10);
+                ctx.textAlign = 'right';
+                ctx.fillText((maxY * (4 - i) / 4).toFixed(0), pad - 4, y + 4);
+                ctx.textAlign = 'left';
             }
             datasets.forEach((data, di) => {
                 if (data.length < 2) return;
                 ctx.strokeStyle = colors[di]; ctx.lineWidth = 1.5; ctx.beginPath();
                 data.forEach((v, i) => {
-                    const x = i / (MAX_PTS - 1) * w, y = h - Math.min(v, maxY) / maxY * h;
+                    const x = pad + i / (MAX_PTS - 1) * (w - pad), y = h - Math.min(v, maxY) / maxY * h;
                     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
                 });
                 ctx.stroke();
@@ -466,10 +469,10 @@
             const state = d.state || 'UNKNOWN';
 
             // Box dimensions (all identical)
-            const bw = 160, bh = 50, br = 6;
+            const bw = Math.min(180, w * 0.2), bh = 50, br = 6;
 
             // Layout grid — 3 columns
-            const col1x = 30, col2x = 280, col3x = 560;
+            const col1x = w * 0.03, col2x = w * 0.33, col3x = w * 0.67;
             // PSU centered vertically between Buck and Boost
             const psuY = 120, buckY = 40, boostY = 200;
             // Output rows
@@ -477,7 +480,7 @@
             const midY = (y) => y + bh / 2;
 
             // Wire corridors
-            const corrA = 220, corrB = 500;
+            const corrA = w * 0.25, corrB = w * 0.58;
             const psuR = col1x + bw, buckR = col2x + bw;
 
             // ─── Box drawing ───
