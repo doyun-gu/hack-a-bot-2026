@@ -49,7 +49,7 @@
         }
         .health-dot.warn { background: #d29922; }
         .health-dot.fault { background: #f85149; }
-        .health-dot.off { background: #484f58; border: 1px dashed var(--text-dim); background: transparent; }
+        .health-dot.off { background: transparent; border: 1px dashed var(--text-dim); }
 
         /* ─── State Badge ─── */
         .state { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 4px; letter-spacing: 0.5px; }
@@ -84,7 +84,7 @@
         .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 20px; }
 
         /* ─── Cards ─── */
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 14px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 14px; min-height: 120px; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .card-header h3 {
             font-size: 10px; font-weight: 500; color: var(--text-dim);
@@ -122,6 +122,7 @@
         .fault-time { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-dim); white-space: nowrap; }
         .fault-msg { color: var(--text-muted); }
         .no-faults { font-size: 11px; color: var(--text-dim); padding: 6px 0; }
+        .sub-label { font-size: 10px; font-weight: 500; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
 
         /* ─── Power Flow ─── */
         .power-flow-section { padding: 0 20px 8px; }
@@ -221,15 +222,15 @@
 
         <!-- Servo cards — same height as motor cards -->
         <div class="two-col" style="padding: 0 20px 8px;">
-            <div class="card" style="padding: 14px;">
+            <div class="card">
                 <div class="card-header"><h3>Servo 1 — Fill Valve</h3><span class="badge badge-green" id="s1-badge">ACTIVE</span></div>
-                <div class="metric"><span class="val c-purple" id="s1-angle" style="color:#a371f7">--</span><span class="unit">degrees</span></div>
+                <div class="metric"><span class="val c-purple" id="s1-angle">--</span><span class="unit">degrees</span></div>
                 <div class="sub-metrics"><span>PCA9685 ch0</span><span style="margin-left:8px">Range: 0-180</span></div>
                 <div class="progress"><div class="progress-bar"><div class="progress-fill" id="s1-bar" style="width:50%;background:#a371f7"></div></div></div>
             </div>
-            <div class="card" style="padding: 14px;">
+            <div class="card">
                 <div class="card-header"><h3>Servo 2 — Sort Gate</h3><span class="badge badge-green" id="s2-badge">ACTIVE</span></div>
-                <div class="metric"><span class="val c-purple" id="s2-angle-val" style="color:#a371f7">--</span><span class="unit">degrees</span></div>
+                <div class="metric"><span class="val c-purple" id="s2-angle-val">--</span><span class="unit">degrees</span></div>
                 <div class="sub-metrics"><span>PCA9685 ch1</span><span style="margin-left:8px">Range: 0-180</span></div>
                 <div class="progress"><div class="progress-bar"><div class="progress-fill" id="s2-bar" style="width:50%;background:#a371f7"></div></div></div>
             </div>
@@ -251,9 +252,9 @@
             <div class="card">
                 <div class="card-header"><h3>Faults &amp; Diagnostics</h3><span class="badge badge-green" id="fault-badge">CLEAR</span></div>
                 <div style="display:flex;gap:20px;margin-bottom:8px">
-                    <div><span style="font-size:10px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">Faults Today</span><div class="metric"><span class="val c-green" id="faults" style="font-size:20px">0</span></div></div>
-                    <div><span style="font-size:10px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">IMU RMS</span><div class="metric"><span class="val c-green" id="imu-rms" style="font-size:20px">--</span><span class="unit">g</span></div></div>
-                    <div><span style="font-size:10px;font-weight:500;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px">ES Divergence</span><div class="metric"><span class="val c-green" id="es-score" style="font-size:20px">--</span></div></div>
+                    <div><span class="sub-label">Faults Today</span><div class="metric"><span class="val c-green" id="faults" style="font-size:20px">0</span></div></div>
+                    <div><span class="sub-label">IMU RMS</span><div class="metric"><span class="val c-green" id="imu-rms" style="font-size:20px">--</span><span class="unit">g</span></div></div>
+                    <div><span class="sub-label">ES Divergence</span><div class="metric"><span class="val c-green" id="es-score" style="font-size:20px">--</span></div></div>
                 </div>
                 <div id="fault-log"><div class="no-faults">No fault events recorded</div></div>
             </div>
