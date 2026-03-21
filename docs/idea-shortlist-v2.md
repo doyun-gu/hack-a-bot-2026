@@ -37,15 +37,13 @@
 
 ```mermaid
 graph LR
-    IMU["BMI160 IMU<br/>Tremor measurement"] --> CORE["NeuroSync"]
-    SERVO["Servos<br/>Difficulty levels<br/>Pointer arm"] --> CORE
-    MOTOR["DC Motor<br/>Reaction wheel<br/>Resistance test"] --> CORE
-    JOY["Joystick<br/>Test selection<br/>Patient input"] --> CORE
-    POT["Potentiometer<br/>Sensitivity dial<br/>PID tuning"] --> CORE
-    OLED["OLED<br/>Scores, fingerprint<br/>Condition report"] --> CORE
-    NRF["nRF24L01+<br/>Tray → Base station"] --> CORE
-
-    style CORE fill:#e74c3c,color:#fff,stroke-width:3px
+    IMU[BMI160 IMU] --> CORE[NeuroSync]
+    SERVO[Servos] --> CORE
+    MOTOR[DC Motor] --> CORE
+    JOY[Joystick] --> CORE
+    POT[Potentiometer] --> CORE
+    OLED[OLED] --> CORE
+    NRF[nRF24L01+] --> CORE
 ```
 
 ### Architecture
@@ -53,25 +51,19 @@ graph LR
 ```mermaid
 graph LR
     subgraph TRAY["Pico A — Diagnostic Tray"]
-        T_IMU["BMI160: tremor angle + frequency"]
-        T_SERVO["Servos: difficulty tilt + pointer"]
-        T_MOTOR["DC Motor: reaction wheel + resistance"]
-        T_POT["Potentiometer: sensitivity adjust"]
-        T_NRF["nRF24L01+ TX"]
-        T_LED["LEDs: green/yellow/red status"]
+        T1[BMI160 IMU]
+        T2[Servos]
+        T3[DC Motor]
+        T4[nRF24L01+ TX]
     end
 
-    subgraph BASE["Pico B — Clinician Base Station"]
-        B_NRF["nRF24L01+ RX"]
-        B_OLED["OLED: scores, fingerprint, report"]
-        B_JOY["Joystick: select test, start/stop"]
-        B_LED["LEDs: patient status"]
+    subgraph BASE["Pico B — Base Station"]
+        B1[nRF24L01+ RX]
+        B2[OLED]
+        B3[Joystick]
     end
 
-    TRAY -->|"wireless 100Hz"| BASE
-
-    style TRAY fill:#fce4e4,stroke:#e74c3c,stroke-width:2px
-    style BASE fill:#d4edda,stroke:#27ae60,stroke-width:2px
+    TRAY -->|wireless 100Hz| BASE
 ```
 
 ### Key Features
@@ -107,59 +99,46 @@ graph LR
 
 ```mermaid
 graph LR
-    IMU["BMI160 IMU<br/>Balance angle"] --> CORE["Self-Balancer"]
-    MOTOR["DC Motor<br/>Reaction wheel flywheel"] --> CORE
-    SERVO["Servos<br/>Base adjustment<br/>Pointer display"] --> CORE
-    POT["Potentiometer<br/>Live PID tuning"] --> CORE
-    JOY["Joystick<br/>Perturbation control"] --> CORE
-    OLED["OLED<br/>Balance angle, PID values"] --> CORE
-    NRF["nRF24L01+<br/>Robot → Remote"] --> CORE
-
-    style CORE fill:#3498db,color:#fff,stroke-width:3px
+    IMU[BMI160 IMU] --> CORE[Self-Balancer]
+    MOTOR[DC Motor] --> CORE
+    SERVO[Servos] --> CORE
+    POT[Potentiometer] --> CORE
+    JOY[Joystick] --> CORE
+    OLED[OLED] --> CORE
+    NRF[nRF24L01+] --> CORE
 ```
 
 ### Architecture
 
 ```mermaid
 graph LR
-    subgraph ROBOT["Pico A — Robot (balances)"]
-        R_IMU["BMI160: measures tilt from vertical"]
-        R_MOTOR["DC Motor: flywheel — speed up/down to correct tilt"]
-        R_SERVO["Servo: adjustable base angle"]
-        R_NRF["nRF24L01+ TX: streams balance data"]
-        R_LED["LEDs: balance status"]
+    subgraph ROBOT["Pico A — Robot"]
+        R1[BMI160: tilt]
+        R2[DC Motor: flywheel]
+        R3[Servo: base angle]
+        R4[nRF24L01+ TX]
     end
 
-    subgraph REMOTE["Pico B — Remote Control"]
-        C_JOY["Joystick: push the robot (perturbation)"]
-        C_POT["Potentiometer: tune Kp/Kd/Ki LIVE"]
-        C_OLED["OLED: tilt angle graph, PID values, motor speed"]
-        C_NRF["nRF24L01+ RX/TX"]
-        C_LED["LEDs: connected/disconnected"]
+    subgraph REMOTE["Pico B — Remote"]
+        C1[Joystick: perturbation]
+        C2[Pot: live PID tuning]
+        C3[OLED: tilt + PID values]
+        C4[nRF24L01+ RX]
     end
 
-    ROBOT <-->|"wireless"| REMOTE
-
-    style ROBOT fill:#e8f4fd,stroke:#3498db,stroke-width:2px
-    style REMOTE fill:#fef9e7,stroke:#d4ac0d,stroke-width:2px
+    ROBOT <-->|wireless| REMOTE
 ```
 
 ### How It Works
 
 ```mermaid
 flowchart LR
-    READ["Read IMU: tilt angle from vertical"] --> PID["PID Controller<br/>error = 0° - current_angle"]
-    PID --> MOTOR_CMD["Adjust motor speed:<br/>Tilting left → speed up motor (pushes right)<br/>Tilting right → slow down motor (pushes left)"]
-    MOTOR_CMD --> BALANCE["Robot stays vertical"]
+    READ[Read IMU tilt] --> PID[PID: error = 0° - angle]
+    PID --> CMD[Adjust motor speed]
+    CMD --> BALANCE[Robot stays vertical]
     BALANCE --> READ
-
-    REMOTE_PUSH["Remote: joystick pushes robot"] -.->|"wireless perturbation"| READ
-    REMOTE_TUNE["Remote: potentiometer adjusts PID gains"] -.->|"wireless Kp/Kd update"| PID
-
-    style READ fill:#9b59b6,color:#fff
-    style PID fill:#27ae60,color:#fff
-    style MOTOR_CMD fill:#e67e22,color:#fff
-    style BALANCE fill:#3498db,color:#fff
+    PUSH[Joystick push] -.->|perturbation| READ
+    TUNE[Pot: adjust gains] -.->|Kp/Kd update| PID
 ```
 
 ### Demo Script
@@ -194,25 +173,20 @@ flowchart LR
 
 ```mermaid
 graph LR
-    subgraph CTRL["Pico A — Controller (handheld)"]
-        C_IMU["BMI160: tilt = steering direction"]
-        C_JOY["Joystick: fine control override"]
-        C_POT["Potentiometer: speed limit dial"]
-        C_OLED["OLED: speedometer + signal strength"]
-        C_NRF["nRF24L01+ TX"]
+    subgraph CTRL["Pico A — Controller"]
+        C1[BMI160: tilt = steer]
+        C2[Joystick: fine control]
+        C3[Pot: speed limit]
+        C4[nRF24L01+ TX]
     end
 
     subgraph CAR["Pico B — Vehicle"]
-        V_MOTOR["DC Motor: drive wheels"]
-        V_SERVO["Servo: steering mechanism"]
-        V_NRF["nRF24L01+ RX"]
-        V_LED["LEDs: headlights + brake lights"]
+        V1[DC Motor: drive]
+        V2[Servo: steering]
+        V3[nRF24L01+ RX]
     end
 
-    CTRL -->|"tilt data wireless"| CAR
-
-    style CTRL fill:#e8f4fd,stroke:#3498db,stroke-width:2px
-    style CAR fill:#fce4e4,stroke:#e74c3c,stroke-width:2px
+    CTRL -->|tilt data| CAR
 ```
 
 ### Scoring
@@ -238,25 +212,18 @@ graph LR
 ```mermaid
 graph LR
     subgraph P1["Pico A — Player 1"]
-        P1_JOY["Joystick: game input"]
-        P1_POT["Potentiometer: difficulty"]
-        P1_SERVO["Servo: physical paddle"]
-        P1_IMU["IMU: gesture power-ups"]
-        P1_LED["LEDs: score indicator"]
+        A1[Joystick]
+        A2[Servo: paddle]
+        A3[IMU: gestures]
     end
 
     subgraph P2["Pico B — Player 2"]
-        P2_JOY["Joystick: game input"]
-        P2_OLED["OLED: scores + timer"]
-        P2_MOTOR["DC Motor: spinning challenge wheel"]
-        P2_SERVO["Servo: physical paddle"]
-        P2_LED["LEDs: winner flash"]
+        B1[Joystick]
+        B2[DC Motor: spin wheel]
+        B3[OLED: scores]
     end
 
-    P1 <-->|"wireless"| P2
-
-    style P1 fill:#3498db,color:#fff
-    style P2 fill:#e74c3c,color:#fff
+    P1 <-->|wireless| P2
 ```
 
 ### Game Modes
@@ -288,24 +255,19 @@ graph LR
 ```mermaid
 graph LR
     subgraph POURER["Pico A — Pourer"]
-        P_MOTOR["DC Motor: tilts bottle cradle"]
-        P_SERVO["Servo: flow control gate"]
-        P_IMU["BMI160: pour angle measurement"]
-        P_POT["Potentiometer: set target volume"]
-        P_NRF["nRF24L01+ TX"]
-        P_LED["LEDs: pouring status"]
+        P1[DC Motor: tilt cradle]
+        P2[Servo: flow gate]
+        P3[BMI160: pour angle]
+        P4[nRF24L01+ TX]
     end
 
     subgraph DASH["Pico B — Dashboard"]
-        D_OLED["OLED: target vs actual volume"]
-        D_JOY["Joystick: select drink preset"]
-        D_NRF["nRF24L01+ RX"]
+        D1[OLED: volume display]
+        D2[Joystick: preset select]
+        D3[nRF24L01+ RX]
     end
 
-    POURER -->|"wireless"| DASH
-
-    style POURER fill:#e67e22,color:#fff
-    style DASH fill:#27ae60,color:#fff
+    POURER -->|wireless| DASH
 ```
 
 ### Scoring
@@ -330,25 +292,21 @@ graph LR
 
 ```mermaid
 graph LR
-    subgraph WEAR["Pico A — Wearable (belt/wrist)"]
-        W_MOTOR["DC Motor: vibration feedback<br/>Different speeds = different directions"]
-        W_SERVO["Servo: directional pointer on wrist"]
-        W_IMU["BMI160: user heading + step count"]
-        W_NRF["nRF24L01+ RX"]
-        W_LED["LED: status"]
+    subgraph WEAR["Pico A — Wearable"]
+        W1[DC Motor: vibration]
+        W2[Servo: wrist pointer]
+        W3[BMI160: heading]
+        W4[nRF24L01+ RX]
     end
 
-    subgraph NAV["Pico B — Navigator (companion holds)"]
-        N_JOY["Joystick: set direction"]
-        N_POT["Potentiometer: vibration intensity"]
-        N_OLED["OLED: map/heading display"]
-        N_NRF["nRF24L01+ TX"]
+    subgraph NAV["Pico B — Navigator"]
+        N1[Joystick: set direction]
+        N2[Pot: vibration intensity]
+        N3[OLED: heading display]
+        N4[nRF24L01+ TX]
     end
 
-    NAV -->|"direction commands"| WEAR
-
-    style WEAR fill:#9b59b6,color:#fff
-    style NAV fill:#27ae60,color:#fff
+    NAV -->|direction commands| WEAR
 ```
 
 ### Scoring
@@ -373,24 +331,21 @@ graph LR
 
 ```mermaid
 graph LR
-    subgraph GLOVE["Pico A — Controller (wearable)"]
-        G_IMU["BMI160: hand tilt → arm direction"]
-        G_POT["Potentiometer: grip force control"]
-        G_JOY["Joystick: fine position override"]
-        G_NRF["nRF24L01+ TX"]
+    subgraph GLOVE["Pico A — Controller"]
+        G1[BMI160: hand tilt]
+        G2[Pot: grip force]
+        G3[Joystick: fine control]
+        G4[nRF24L01+ TX]
     end
 
     subgraph ARM["Pico B — Robot Arm"]
-        A_SERVO["3x Servos: shoulder + elbow + gripper"]
-        A_MOTOR["DC Motor: wrist rotation (360°)"]
-        A_OLED["OLED: arm angles, grip force, mode"]
-        A_NRF["nRF24L01+ RX"]
+        A1[3x Servos: joints]
+        A2[DC Motor: wrist rotation]
+        A3[OLED: arm status]
+        A4[nRF24L01+ RX]
     end
 
-    GLOVE -->|"wireless gestures"| ARM
-
-    style GLOVE fill:#3498db,color:#fff
-    style ARM fill:#e67e22,color:#fff
+    GLOVE -->|wireless gestures| ARM
 ```
 
 ### Scoring
@@ -492,27 +447,21 @@ Autonomous robot navigates toward people using camera vision. Streams live video
 ```mermaid
 graph LR
     subgraph ROBOT["Robot (Pico A + ESP32-CAM)"]
-        CAM["ESP32-CAM<br/>Live video stream<br/>Basic motion detection"]
-        MOTOR_L["DC Motor L: left wheel"]
-        MOTOR_R["DC Motor R: right wheel"]
-        SERVO_CAM["Servo: camera pan/tilt"]
-        IMU_R["BMI160: slope + collision detection"]
-        NRF_R["nRF24L01+ TX: telemetry"]
+        R1[ESP32-CAM]
+        R2[DC Motors x2]
+        R3[Servo: camera pan]
+        R4[BMI160: slope detect]
+        R5[nRF24L01+ TX]
     end
 
     subgraph CTRL["Controller (Pico B)"]
-        JOY_C["Joystick: drive direction"]
-        POT_C["Potentiometer: speed limit"]
-        OLED_C["OLED: telemetry dashboard"]
-        NRF_C["nRF24L01+ RX"]
+        C1[Joystick: drive]
+        C2[OLED: telemetry]
+        C3[nRF24L01+ RX]
     end
 
-    ROBOT -->|"wireless"| CTRL
-    CAM -->|"WiFi video"| PHONE["Phone/laptop<br/>live camera feed"]
-
-    style ROBOT fill:#e74c3c,color:#fff
-    style CTRL fill:#3498db,color:#fff
-    style PHONE fill:#27ae60,color:#fff
+    ROBOT -->|nRF wireless| CTRL
+    R1 -->|WiFi video| PHONE[Phone: live feed]
 ```
 
 **Why 95 pts:** Life-saving application. Camera + mobility + wireless = genuinely useful robot. Judges can see live video feed while driving the robot with joystick. ESP32-CAM streams via WiFi to phone while Pico handles motor control via nRF24L01+.
@@ -527,16 +476,12 @@ Robot follows a line autonomously, delivers package, returns. Camera detects the
 
 ```mermaid
 graph LR
-    CAM["ESP32-CAM<br/>line detection"] --> PICO["Pico A<br/>Motor control + navigation"]
-    PICO --> ML["DC Motor L"]
-    PICO --> MR["DC Motor R"]
-    PICO --> SERVO["Servo: cargo levelling"]
-    IMU["IMU: tilt detection"] --> PICO
-    PICO -->|"wireless"| BASE["Pico B: OLED dashboard"]
-
-    style CAM fill:#e67e22,color:#fff
-    style PICO fill:#3498db,color:#fff
-    style BASE fill:#27ae60,color:#fff
+    CAM[ESP32-CAM] --> PICO[Pico A: navigation]
+    IMU[BMI160: tilt] --> PICO
+    PICO --> ML[Motor L]
+    PICO --> MR[Motor R]
+    PICO --> SERVO[Servo: cargo level]
+    PICO -->|wireless| BASE[Pico B: OLED]
 ```
 
 ---
@@ -558,22 +503,19 @@ Remote-controlled mobile robot with camera — family members can "visit" elderl
 ```mermaid
 graph LR
     subgraph ROBOT["Telepresence Robot"]
-        CAM2["ESP32-CAM: live video to family"]
-        WHEELS["DC Motors: mobility"]
-        SERVO2["Servo: wave arm / point"]
-        OLED2["OLED: show caller name / emoji"]
-        IMU2["IMU: fall detection if knocked over"]
+        R1[ESP32-CAM]
+        R2[DC Motors]
+        R3[Servo: wave arm]
+        R4[OLED: caller display]
+        R5[IMU: fall detect]
     end
 
-    subgraph FAMILY["Family Member (remote)"]
-        PHONE2["Phone/laptop: see video"]
-        CTRL2["Pico controller:<br/>Joystick drives robot"]
+    subgraph FAM["Family (remote)"]
+        F1[Phone: video feed]
+        F2[Pico: joystick control]
     end
 
-    ROBOT <--> FAMILY
-
-    style ROBOT fill:#9b59b6,color:#fff
-    style FAMILY fill:#27ae60,color:#fff
+    ROBOT <--> FAM
 ```
 
 **Why 93 pts:** Loneliness epidemic in elderly. Family can't always visit. This lets them "be there" physically. Emotional impact is massive.

@@ -25,19 +25,14 @@ Patient holds a tray. Ball sits on the tray. The device measures everything abou
 
 ```mermaid
 graph LR
-    PATIENT["Patient holds tray<br/>with ball on top"] --> TRAY["TremorTray<br/>(Pico A)"]
-    TRAY -->|"wireless 100Hz"| BASE["Clinician Station<br/>(Pico B)"]
-
-    TRAY --> M1["Measures:<br/>• Tremor amplitude<br/>• Tremor frequency<br/>• Stability score<br/>• Ball position<br/>• Endurance time"]
-
-    BASE --> M2["Displays:<br/>• Live score<br/>• History comparison<br/>• Severity level<br/>• Test difficulty<br/>• Frequency analysis"]
-
-    style PATIENT fill:#3498db,color:#fff
-    style TRAY fill:#e74c3c,color:#fff
-    style BASE fill:#27ae60,color:#fff
-    style M1 fill:#fff,stroke:#e74c3c
-    style M2 fill:#fff,stroke:#27ae60
+    P[Patient] --> T[TremorTray - Pico A]
+    T -->|wireless 100Hz| B[Clinician Station - Pico B]
 ```
+
+| Device | Measures / Displays |
+|---|---|
+| TremorTray (Pico A) | Tremor amplitude, frequency, stability score, ball position, endurance time |
+| Clinician Station (Pico B) | Live score, history comparison, severity level, test difficulty, frequency analysis |
 
 ---
 
@@ -59,86 +54,53 @@ graph LR
 
 ```mermaid
 graph LR
-    subgraph TRAY["PICO A — Diagnostic Tray (patient holds)"]
-        direction TB
-        IMU["BMI160 IMU<br/>Mounted on tray surface<br/>Measures tilt + rotation<br/>100Hz sampling<br/>(I2C: GP4 SDA, GP5 SCL)"]
-        JOY_SENSE["Joystick (under tray)<br/>Ball position sensor<br/>Weight shift = deflection<br/>(ADC: GP26 X, GP27 Y)"]
-        PCA_TRAY["PCA9685 + 2x MG90S<br/>Auto-level calibration<br/>Difficulty level tilting<br/>(I2C: same bus as IMU)"]
-        NRF_A["nRF24L01+ TX<br/>Streams diagnostic data<br/>(SPI: GP2-GP6)"]
-        LED_TRAY["LED Array<br/>Green = steady<br/>Yellow = mild shake<br/>Red = strong shake"]
-
-        IMU --> NRF_A
-        JOY_SENSE --> NRF_A
-        PCA_TRAY --> NRF_A
+    subgraph T["Pico A — Diagnostic Tray"]
+        T1[BMI160 IMU]
+        T2[Joystick sensor]
+        T3[PCA9685 + servos]
+        T4[nRF24L01+ TX]
     end
 
-    subgraph LINK["2.4 GHz Wireless"]
-        PACKET["Every 10ms:<br/>{ roll, pitch, gyro_rate,<br/>ball_x, ball_y, test_level,<br/>timestamp }"]
+    subgraph B["Pico B — Clinician Base"]
+        B1[nRF24L01+ RX]
+        B2[OLED dashboard]
+        B3[Joystick control]
     end
 
-    subgraph BASE["PICO B — Clinician Base Station"]
-        direction TB
-        NRF_B["nRF24L01+ RX<br/>Receives all data<br/>(SPI)"]
-        OLED_B["OLED 0.96&quot;<br/>Diagnostic dashboard<br/>Score, frequency, history<br/>(I2C)"]
-        JOY_B["Joystick<br/>Select test level<br/>Start/stop test<br/>Scroll results<br/>(ADC)"]
-        LED_B["LED Array<br/>Patient status<br/>visible across room"]
-
-        NRF_B --> OLED_B
-        JOY_B --> OLED_B
-        NRF_B --> LED_B
-    end
-
-    NRF_A --> PACKET --> NRF_B
-
-    style TRAY fill:#fce4e4,stroke:#e74c3c,stroke-width:2px
-    style BASE fill:#d4edda,stroke:#27ae60,stroke-width:2px
-    style LINK fill:#fff3cd,stroke:#ffc107,stroke-width:2px
-    style IMU fill:#9b59b6,color:#fff
-    style JOY_SENSE fill:#1abc9c,color:#fff
-    style PCA_TRAY fill:#e67e22,color:#fff
-    style NRF_A fill:#3498db,color:#fff
-    style NRF_B fill:#3498db,color:#fff
-    style OLED_B fill:#1a1a2e,color:#00ff88
-    style JOY_B fill:#1abc9c,color:#fff
-    style LED_TRAY fill:#f39c12,color:#fff
-    style LED_B fill:#e74c3c,color:#fff
+    T1 --> T4
+    T2 --> T4
+    T4 -->|"10ms packets"| B1
+    B1 --> B2
+    B3 --> B2
 ```
+
+| Component | Location | Detail |
+|---|---|---|
+| BMI160 IMU | Tray surface (centre) | Tilt + rotation at 100Hz, I2C GP4/GP5 |
+| Joystick sensor | Under tray, stick up | Ball weight deflects stick — ADC GP26/GP27 |
+| PCA9685 + servos | Tray edge | Auto-level calibration + difficulty tilting |
+| nRF24L01+ TX | Pico A | Streams roll, pitch, gyro, ball_x, ball_y, timestamp |
+| OLED 0.96" | Pico B | Score, frequency, history display |
+| Joystick | Pico B | Select test level, start/stop, scroll results |
+| LED array | Both | Patient status visible across room |
 
 ---
 
 ## Where Each Sensor Goes (Physical Layout)
 
 ```mermaid
-graph LR
-    subgraph TRAY_TOP["TRAY TOP VIEW (7×9cm perfboard)"]
-        direction TB
-        BALL["Ball / marble<br/>sits here<br/>(centre of tray)"]
-        IMU_POS["BMI160 IMU<br/>soldered to tray surface<br/>near centre"]
-        EDGE_A["Servo A<br/>edge mount<br/>(roll axis)"]
-        EDGE_B["Servo B<br/>edge mount<br/>(pitch axis)"]
-    end
-
-    subgraph TRAY_UNDER["UNDERNEATH THE TRAY"]
-        JOY_POS["Joystick<br/>stick points UP<br/>through hole in perfboard<br/>ball weight deflects it"]
-        WIRES["Wiring to breadboard below"]
-    end
-
-    subgraph BREADBOARD["BREADBOARD (below tray)"]
-        PICO_A["Pico 2"]
-        PCA["PCA9685"]
-        NRF["nRF24L01+"]
-        LEDS_POS["LEDs on edge<br/>(visible to patient)"]
-    end
-
-    TRAY_TOP --- TRAY_UNDER --- BREADBOARD
-
-    style TRAY_TOP fill:#f39c12,color:#fff,stroke:#d35400,stroke-width:2px
-    style TRAY_UNDER fill:#ecf0f1,stroke:#bdc3c7,stroke-width:2px
-    style BREADBOARD fill:#3498db,color:#fff,stroke:#2980b9,stroke-width:2px
-    style BALL fill:#fff,color:#333,stroke:#333
-    style IMU_POS fill:#9b59b6,color:#fff
-    style JOY_POS fill:#1abc9c,color:#fff
+graph TB
+    TOP[Top: ball + IMU + servos]
+    MID[Under: joystick stick-up]
+    BOT[Below: Pico + PCA9685 + nRF]
+    TOP --- MID --- BOT
 ```
+
+| Layer | Contents |
+|---|---|
+| Top (7×9cm perfboard) | Ball/marble at centre, BMI160 soldered near centre, Servo A (roll edge), Servo B (pitch edge) |
+| Underneath | Joystick stick pointing UP through hole — ball weight deflects it |
+| Breadboard below | Pico A, PCA9685, nRF24L01+, LEDs on edge visible to patient |
 
 ### IMU Mounting Detail
 
@@ -154,24 +116,18 @@ The joystick stick pokes UP through a hole drilled in the perfboard. The ball si
 
 ```mermaid
 graph LR
-    subgraph TREMOR["Patient's Hand Tremor"]
-        SHAKE["Hand shakes"]
-    end
-
-    SHAKE --> IMU_READ["IMU reads:<br/>Tilt angle (degrees)<br/>Rotation speed (deg/s)<br/>Frequency (Hz)"]
-    SHAKE --> JOY_READ["Joystick reads:<br/>Ball position (X,Y)<br/>Weight shift direction<br/>Deflection magnitude"]
-
-    IMU_READ --> COMBINE["Sensor Fusion<br/>Two independent measurements<br/>= more credible diagnosis"]
-    JOY_READ --> COMBINE
-
-    COMBINE --> METRICS["Output Metrics:<br/>• Stability Score (%)<br/>• Tremor Frequency (Hz)<br/>• Tremor Amplitude (°)<br/>• Ball Control Score (%)<br/>• Direction Bias<br/>• Endurance Time"]
-
-    style TREMOR fill:#e74c3c,color:#fff
-    style IMU_READ fill:#9b59b6,color:#fff
-    style JOY_READ fill:#1abc9c,color:#fff
-    style COMBINE fill:#f39c12,color:#fff
-    style METRICS fill:#27ae60,color:#fff
+    SHAKE[Hand tremor] --> IMU[IMU: tilt + frequency]
+    SHAKE --> JOY[Joystick: ball position]
+    IMU --> FUSE[Sensor fusion]
+    JOY --> FUSE
+    FUSE --> OUT[Diagnostic metrics]
 ```
+
+| Sensor | Measures | Limitation alone |
+|---|---|---|
+| IMU | Tilt angle, rotation speed, frequency (Hz) | Can't see the ball |
+| Joystick | Ball X/Y position, weight shift direction | Can't measure frequency or tilt angle |
+| Combined | Stability %, tremor frequency, amplitude, ball control %, direction bias, endurance | Both sensors agreeing = clinically credible |
 
 **Why two sensors matter:**
 - IMU alone: measures tilt but can't see the ball
@@ -185,33 +141,21 @@ graph LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> CALIBRATE: Press joystick button
+    [*] --> CALIBRATE: joystick button
 
-    CALIBRATE --> LEVEL1: Auto-levelled
+    CALIBRATE --> LEVEL1: auto-levelled
 
-    LEVEL1: Level 1 — FLAT
-    LEVEL1: Tray is level (0° tilt)
-    LEVEL1: Baseline tremor test
+    LEVEL1: Level 1 — Flat (0°)
+    LEVEL1 --> LEVEL2: joystick right
 
-    LEVEL1 --> LEVEL2: Joystick right
+    LEVEL2: Level 2 — Mild tilt (3°)
+    LEVEL2 --> LEVEL3: joystick right
 
-    LEVEL2: Level 2 — MILD TILT
-    LEVEL2: Servos tilt tray 3°
-    LEVEL2: Moderate challenge
+    LEVEL3: Level 3 — Strong tilt (6°)
+    LEVEL3 --> LEVEL4: joystick right
 
-    LEVEL2 --> LEVEL3: Joystick right
-
-    LEVEL3: Level 3 — STRONG TILT
-    LEVEL3: Servos tilt tray 6°
-    LEVEL3: Hard challenge
-
-    LEVEL3 --> LEVEL4: Joystick right
-
-    LEVEL4: Level 4 — DYNAMIC
-    LEVEL4: Servos slowly rock tray
-    LEVEL4: Tests reaction time
-
-    LEVEL4 --> LEVEL1: Joystick right (wraps)
+    LEVEL4: Level 4 — Dynamic rocking
+    LEVEL4 --> LEVEL1: joystick right
 ```
 
 **Clinical value of levels:**
@@ -227,39 +171,27 @@ This **differentiates types of tremor** — something even expensive clinical to
 
 ### During Test
 
-```mermaid
-graph LR
-    subgraph SCREEN_LIVE["LIVE TEST DISPLAY"]
-        direction TB
-        TITLE_L["TREMORTRAY  Level 2"]
-        TIMER["Time: 00:18 / 00:30"]
-        SCORE_LIVE["Stability: 74%"]
-        FREQ_L["Frequency: 4.8 Hz"]
-        AMP_L["Amplitude: 3.2°"]
-        BALL_POS["Ball: 30% right"]
-        BAR["[████████░░] 74%"]
-    end
-
-    style SCREEN_LIVE fill:#000,color:#0f8,stroke:#333,stroke-width:2px
+```
+TREMORTRAY  Level 2
+Time: 00:18 / 00:30
+Stability:  74%
+Frequency:  4.8 Hz
+Amplitude:  3.2°
+Ball:       30% right
+[████████░░] 74%
 ```
 
 ### After Test — Results
 
-```mermaid
-graph LR
-    subgraph SCREEN_RESULTS["TEST RESULTS"]
-        direction TB
-        TITLE_R["RESULTS — Level 2"]
-        SC["Stability Score:  74%"]
-        FR["Tremor Frequency: 4.8 Hz"]
-        AM["Tremor Amplitude: 3.2°"]
-        EN["Endurance:        28.4s"]
-        BI["Direction Bias:   RIGHT"]
-        SV["Severity:         MODERATE"]
-        COMP["vs Level 1:       -8%"]
-    end
-
-    style SCREEN_RESULTS fill:#000,color:#0f8,stroke:#333,stroke-width:2px
+```
+RESULTS — Level 2
+Stability Score:  74%
+Tremor Frequency: 4.8 Hz
+Tremor Amplitude: 3.2°
+Endurance:        28.4s
+Direction Bias:   RIGHT
+Severity:         MODERATE
+vs Level 1:       -8%
 ```
 
 ### Severity Classification (automated)
@@ -277,57 +209,28 @@ graph LR
 
 ## vs Current Clinical Methods
 
-```mermaid
-graph LR
-    subgraph CURRENT["Current Method (UPDRS)"]
-        DOC["Doctor watches patient"]
-        SUBJ["Subjective rating 0-4"]
-        NO_DATA["No data saved"]
-        NO_FREQ["No frequency analysis"]
-        COST_HIGH["Free but unreliable"]
-    end
-
-    subgraph PRO["Professional Lab Tool"]
-        ACCEL["Clinical accelerometer"]
-        OBJ["Objective measurement"]
-        DATA_YES["Data recorded"]
-        FREQ_YES["Frequency analysis"]
-        COST_PRO["£5,000 - £10,000+"]
-    end
-
-    subgraph OURS["TremorTray"]
-        DUAL["Dual sensor (IMU + joystick)"]
-        OBJ2["Objective measurement"]
-        DATA2["Wireless data logging"]
-        FREQ2["Frequency + amplitude + score"]
-        COST_US["~£15"]
-        LEVELS["Multi-level difficulty testing"]
-    end
-
-    style CURRENT fill:#fff5f5,stroke:#e74c3c
-    style PRO fill:#fff3cd,stroke:#ffc107
-    style OURS fill:#d4edda,stroke:#27ae60
-```
+| Feature | UPDRS (clinical) | Lab tool | TremorTray |
+|---|---|---|---|
+| Method | Doctor watches patient | Clinical accelerometer | IMU + joystick (dual sensor) |
+| Objectivity | Subjective rating 0-4 | Objective | Objective |
+| Data saved | No | Yes | Wireless logging |
+| Frequency analysis | No | Yes | Yes |
+| Difficulty levels | No | No | Yes (4 levels) |
+| Cost | Free | £5,000–£10,000+ | ~£15 |
 
 ---
 
 ## Physical Build (Kit Only)
 
-```mermaid
-graph LR
-    subgraph BUILD["Assembly — Kit Parts Only"]
-        P["Perfboard 7×9cm<br/>(full size = tray surface)"]
-        S1["MG90S Servo A<br/>screwed to edge"]
-        S2["MG90S Servo B<br/>screwed to edge"]
-        J["Joystick<br/>stick through hole<br/>in perfboard centre"]
-        I["BMI160 breakout<br/>soldered near centre"]
-        B["Breadboard below<br/>holds Pico + PCA9685<br/>+ nRF24L01+"]
-        W["22AWG wire<br/>all connections"]
-        SC["M3 screws<br/>mount servos + structure"]
-    end
-
-    style BUILD fill:#f8f9fa,stroke:#dee2e6
-```
+| Part | Quantity | Use |
+|---|---|---|
+| Perfboard 7×9cm | 1 | Tray surface (full size — no cutting) |
+| MG90S Servo | 2 | Screwed to tray edges (roll + pitch) |
+| Joystick | 1 | Stick up through hole in perfboard centre |
+| BMI160 breakout | 1 | Soldered to tray near centre |
+| Breadboard | 1 | Below tray — holds Pico + PCA9685 + nRF |
+| 22AWG wire | — | All connections |
+| M3 screws | — | Mount servos + structure |
 
 **Assembly time: ~1.5 hours**
 
@@ -376,19 +279,21 @@ gantt
 
 ```mermaid
 graph LR
-    D1["1. CALIBRATE<br/>Press button<br/>Servos level tray<br/>OLED: Ready"] --> D2["2. PLACE BALL<br/>Ball on tray<br/>Joystick detects weight<br/>OLED: Ball detected"]
-    D2 --> D3["3. JUDGE HOLDS<br/>30-second test<br/>Ball wobbles<br/>LEDs show stability"]
-    D3 --> D4["4. RESULTS<br/>Score: 74%<br/>Freq: 2.1Hz<br/>Severity: MILD"]
-    D4 --> D5["5. LEVEL UP<br/>Servo tilts tray 3°<br/>Repeat test<br/>Score drops to 58%"]
-    D5 --> D6["6. COMPARE<br/>Base station shows<br/>both results<br/>Clinical comparison"]
-
-    style D1 fill:#ffc107,color:#333
-    style D2 fill:#17a2b8,color:#fff
-    style D3 fill:#e74c3c,color:#fff
-    style D4 fill:#27ae60,color:#fff
-    style D5 fill:#9b59b6,color:#fff
-    style D6 fill:#e67e22,color:#fff
+    D1[1. Calibrate] --> D2[2. Place ball]
+    D2 --> D3[3. Judge holds 30s]
+    D3 --> D4[4. Results]
+    D4 --> D5[5. Level up]
+    D5 --> D6[6. Compare]
 ```
+
+| Step | What Judges See |
+|---|---|
+| 1. Calibrate | Press button — servos auto-level, OLED: Ready |
+| 2. Place ball | Ball on tray, joystick detects weight, OLED: Ball detected |
+| 3. Judge holds 30s | Ball wobbles, LEDs show stability live |
+| 4. Results | Score: 74%, Freq: 2.1Hz, Severity: MILD |
+| 5. Level up | Servo tilts tray 3°, repeat — score drops to 58% |
+| 6. Compare | Base station shows both results side-by-side |
 
 **Key demo moments:**
 1. Judge holds tray, gets **personal tremor score** — they become the patient
@@ -406,33 +311,24 @@ graph LR
 Other teams may use the same IMU. Here's why we're six layers deeper:
 
 ```mermaid
-graph LR
-    subgraph OTHER["What other teams build"]
-        O1["IMU reads shaking → shows numbers"]
-    end
-
-    subgraph OURS["Our six layers of depth"]
-        L1["Layer 1: Dual-sensor measurement<br/>IMU (tilt/frequency) + ball (visual proof)"]
-        L2["Layer 2: Frequency analysis<br/>Tremor type classification via zero-crossing"]
-        L3["Layer 3: Adaptive servo difficulty<br/>Real-time autonomous adjustment during test"]
-        L4["Layer 4: Gamified scoring<br/>Points, streaks, stars, competition mode"]
-        L5["Layer 5: Tremor fingerprint<br/>Polar pattern unique to each person"]
-        L6["Layer 6: Biofeedback therapy<br/>Servo nudges teach patient self-correction"]
-
-        L1 --> L2 --> L3 --> L4 --> L5 --> L6
-    end
-
-    OTHER -.->|"They stop here"| L1
-
-    style OTHER fill:#ffcccc,stroke:#e74c3c,stroke-width:2px
-    style OURS fill:#d4edda,stroke:#27ae60,stroke-width:2px
-    style L1 fill:#3498db,color:#fff
-    style L2 fill:#2980b9,color:#fff
-    style L3 fill:#9b59b6,color:#fff
-    style L4 fill:#e67e22,color:#fff
-    style L5 fill:#e74c3c,color:#fff
-    style L6 fill:#c0392b,color:#fff
+graph TB
+    L1[1. Dual-sensor] --> L2[2. Frequency analysis]
+    L2 --> L3[3. Adaptive difficulty]
+    L3 --> L4[4. Gamified scoring]
+    L4 --> L5[5. Tremor fingerprint]
+    L5 --> L6[6. Biofeedback therapy]
 ```
+
+Other teams stop at Layer 1.
+
+| Layer | Feature |
+|---|---|
+| 1 | Dual-sensor: IMU (tilt/frequency) + ball (visual proof) |
+| 2 | Frequency analysis — tremor type classification via zero-crossing |
+| 3 | Adaptive servo difficulty — real-time autonomous adjustment |
+| 4 | Gamified scoring — points, streaks, stars, competition mode |
+| 5 | Tremor fingerprint — polar pattern unique to each person |
+| 6 | Biofeedback therapy — servo nudges teach patient self-correction |
 
 ---
 
@@ -440,29 +336,12 @@ graph LR
 
 Every person's tremor produces a unique pattern — like a fingerprint. We plot roll (X) vs pitch (Y) over time on the OLED as a **polar/Lissajous pattern:**
 
-```mermaid
-graph LR
-    subgraph HEALTHY["Healthy Hands"]
-        H["Tight central dot<br/>Minimal movement<br/>No visible pattern"]
-    end
-
-    subgraph PARK["Parkinson's (4-6Hz)"]
-        P["Slow wide loops<br/>Circular/elliptical<br/>Consistent rhythm"]
-    end
-
-    subgraph ESSENTIAL["Essential Tremor (8-12Hz)"]
-        E["Tight fast oscillation<br/>Linear back-and-forth<br/>Along one axis mainly"]
-    end
-
-    subgraph STRESS["Stress/Caffeine"]
-        S["Small jittery cloud<br/>No clear pattern<br/>Random directions"]
-    end
-
-    style HEALTHY fill:#27ae60,color:#fff
-    style PARK fill:#e74c3c,color:#fff
-    style ESSENTIAL fill:#e67e22,color:#fff
-    style STRESS fill:#3498db,color:#fff
-```
+| Pattern | Shape on OLED | Condition |
+|---|---|---|
+| Tight central dot | Minimal movement, no pattern | Healthy |
+| Slow wide loops | Circular/elliptical, consistent rhythm | Parkinson's (4–6Hz) |
+| Tight fast oscillation | Linear back-and-forth, one axis | Essential tremor (8–12Hz) |
+| Small jittery cloud | No clear pattern, random directions | Stress/caffeine |
 
 **Implementation:** Store last 200 IMU readings. Plot roll on X-axis, pitch on Y-axis. Each dot is one reading. The shape that forms IS the fingerprint.
 
@@ -476,29 +355,18 @@ Instead of a boring clinical test, the patient plays a **game:**
 
 ```mermaid
 flowchart LR
-    START["TEST BEGINS<br/>OLED: 'Hold steady...'"] --> STABLE{"Tray within ±2°?"}
-
-    STABLE -->|"Yes — stable"| POINTS["Award points<br/>+10 pts/second<br/>Streak counter: +1s<br/>LED: GREEN"]
-    STABLE -->|"No — shaking"| PENALTY["Deduct points<br/>-5 pts/second<br/>Streak resets to 0<br/>LED: RED"]
-
-    POINTS --> COMBO{"Streak > 5s?"}
-    COMBO -->|"Yes"| BONUS["COMBO BONUS<br/>Points × 2 multiplier<br/>OLED: 'COMBO!'"]
-    COMBO -->|"No"| CONTINUE["Continue test"]
+    START[Test begins] --> STABLE{Within ±2°?}
+    STABLE -->|stable| POINTS[+10 pts/s, streak++]
+    STABLE -->|shaking| PENALTY[-5 pts/s, streak=0]
+    POINTS --> COMBO{Streak > 5s?}
+    COMBO -->|yes| BONUS[x2 multiplier]
+    COMBO -->|no| CONTINUE[continue]
     BONUS --> CONTINUE
     PENALTY --> CONTINUE
-
-    CONTINUE --> TIME{"30 seconds done?"}
-    TIME -->|"No"| STABLE
-    TIME -->|"Yes"| RESULTS["FINAL RESULTS<br/>Total points: 1,247<br/>Longest streak: 8.1s<br/>Stars: ★★★☆☆<br/>Frequency: 4.8Hz"]
-
-    RESULTS --> COMPARE["COMPARE MODE<br/>'Challenge a friend!'<br/>Second person takes test<br/>Side-by-side scores"]
-
-    style START fill:#ffc107,color:#333
-    style POINTS fill:#27ae60,color:#fff
-    style PENALTY fill:#e74c3c,color:#fff
-    style BONUS fill:#f39c12,color:#fff
-    style RESULTS fill:#3498db,color:#fff
-    style COMPARE fill:#9b59b6,color:#fff
+    CONTINUE --> TIME{30s done?}
+    TIME -->|no| STABLE
+    TIME -->|yes| RESULTS[Final results]
+    RESULTS --> COMPARE[Compare mode]
 ```
 
 **Star Rating System:**
@@ -519,28 +387,16 @@ Servos don't just set a fixed difficulty — they **continuously adapt during th
 
 ```mermaid
 flowchart LR
-    BEGIN["Test begins — tray flat (0°)"] --> SAMPLE["Measure stability<br/>for 3-second window"]
-
-    SAMPLE --> EVAL{"Average stability<br/>in last 3 seconds?"}
-
-    EVAL -->|"> 85% stable"| HARDER["INCREASE DIFFICULTY<br/>Servo tilts +1° more<br/>OLED: 'Getting harder...'"]
-    EVAL -->|"60-85% stable"| HOLD["HOLD CURRENT LEVEL<br/>Patient at their limit<br/>OLED: 'Hold steady...'"]
-    EVAL -->|"< 60% stable"| EASIER["DECREASE DIFFICULTY<br/>Servo eases back 1°<br/>OLED: 'Take it easy...'"]
-
-    HARDER --> SAMPLE
+    BEGIN[Tray flat - 0°] --> SAMPLE[Measure 3s window]
+    SAMPLE --> EVAL{Stability?}
+    EVAL -->|> 85%| HARDER[+1° harder]
+    EVAL -->|60-85%| HOLD[hold level]
+    EVAL -->|< 60%| EASIER[-1° easier]
+    HARDER --> MAX{At 8° max?}
+    MAX -->|yes| CAP[Record breaking point]
+    MAX -->|no| SAMPLE
     HOLD --> SAMPLE
     EASIER --> SAMPLE
-
-    HARDER --> MAX{"Max tilt 8°?"}
-    MAX -->|"Yes"| CAP["Stay at max<br/>Record: 'Patient stable<br/>up to 8° tilt'"]
-    MAX -->|"No"| SAMPLE
-
-    style BEGIN fill:#27ae60,color:#fff
-    style EVAL fill:#f39c12,color:#fff
-    style HARDER fill:#e74c3c,color:#fff
-    style HOLD fill:#3498db,color:#fff
-    style EASIER fill:#27ae60,color:#fff
-    style CAP fill:#9b59b6,color:#fff
 ```
 
 **Clinical value:** The device automatically finds the patient's **breaking point** — the exact difficulty level where their stability drops below 60%. This number IS the diagnosis.
@@ -559,26 +415,23 @@ Frequency analysis identifies tremor TYPE, not just severity:
 
 ```mermaid
 flowchart LR
-    FREQ["Measure tremor<br/>frequency via<br/>zero-crossing method"] --> CLASSIFY{"Dominant<br/>frequency?"}
-
-    CLASSIFY -->|"3-5 Hz"| PARK["Parkinson's Pattern<br/>Slow, rhythmic<br/>Present at rest<br/>Reduces with movement"]
-    CLASSIFY -->|"5-8 Hz"| ESSENTIAL["Essential Tremor<br/>Medium frequency<br/>Appears during action<br/>Worsens with intention"]
-    CLASSIFY -->|"8-12 Hz"| PHYSIO["Physiological Tremor<br/>Fast, fine<br/>Normal / stress / caffeine<br/>Not pathological"]
-    CLASSIFY -->|"Irregular"| CEREBELLAR["Cerebellar Pattern<br/>No consistent frequency<br/>Irregular, jerky<br/>Possible neurological issue"]
-
-    PARK --> DISPLAY["OLED displays:<br/>'Pattern suggests:<br/>[condition name]<br/>Frequency: X.X Hz<br/>Consult neurologist'"]
+    FREQ[Zero-crossing analysis] --> CLASSIFY{Frequency?}
+    CLASSIFY -->|3-5 Hz| PARK[Parkinson's pattern]
+    CLASSIFY -->|5-8 Hz| ESSENTIAL[Essential tremor]
+    CLASSIFY -->|8-12 Hz| PHYSIO[Physiological tremor]
+    CLASSIFY -->|irregular| CEREBELLAR[Cerebellar pattern]
+    PARK --> DISPLAY[OLED: condition suggestion]
     ESSENTIAL --> DISPLAY
     PHYSIO --> DISPLAY
     CEREBELLAR --> DISPLAY
-
-    style FREQ fill:#3498db,color:#fff
-    style CLASSIFY fill:#f39c12,color:#fff
-    style PARK fill:#e74c3c,color:#fff
-    style ESSENTIAL fill:#e67e22,color:#fff
-    style PHYSIO fill:#27ae60,color:#fff
-    style CEREBELLAR fill:#9b59b6,color:#fff
-    style DISPLAY fill:#1a1a2e,color:#0f8
 ```
+
+| Frequency | Pattern | Likely condition |
+|---|---|---|
+| 3–5 Hz | Slow, rhythmic, at rest | Parkinson's |
+| 5–8 Hz | Medium, during action | Essential tremor |
+| 8–12 Hz | Fast, fine, not pathological | Physiological (stress/caffeine) |
+| Irregular | Jerky, no consistent rhythm | Cerebellar — possible neurological issue |
 
 **Implementation:** Count zero-crossings per second on the roll axis. Dominant frequency = crossings ÷ 2. Simple, no FFT needed, runs on Pico easily.
 
@@ -630,20 +483,12 @@ sequenceDiagram
 
 The ball is **visual proof**, not an electronic sensor target:
 
-```mermaid
-graph LR
-    subgraph DESIGN["Ball + Tray Design"]
-        TRAY_SURFACE["Perfboard 7×9cm<br/>Full size — no cutting"]
-        BUMPER["Wire bumper around edge<br/>Bent 22AWG wire<br/>Prevents ball rolling off<br/>~5mm height"]
-        BALL_CHOICE["Ball choice:<br/>• Glass marble (~5g) — best visual<br/>• Steel ball bearing (~30g) — most movement<br/>• Rubber ball (~15g) — won't roll off table if dropped"]
-        IMU_REAL["IMU measures the TRAY tilt<br/>Ball movement = visual confirmation<br/>Both show the same thing:<br/>physics guarantees it"]
-    end
-
-    style DESIGN fill:#f8f9fa,stroke:#dee2e6,stroke-width:2px
-    style BUMPER fill:#f39c12,color:#fff
-    style BALL_CHOICE fill:#3498db,color:#fff
-    style IMU_REAL fill:#9b59b6,color:#fff
-```
+| Element | Detail |
+|---|---|
+| Tray surface | Perfboard 7×9cm — full size, no cutting |
+| Edge bumper | 22AWG wire bent around edge, ~5mm height — prevents ball rolling off |
+| Ball choice | Glass marble (5g) = best visual; steel bearing (30g) = most movement; rubber ball (15g) = won't roll off table if dropped |
+| IMU vs ball | IMU measures tray tilt; ball movement is visual confirmation — physics guarantees both show the same thing |
 
 **Recommendation:** Glass marble — visually clear, judges can see it rolling from across the room.
 
@@ -653,59 +498,21 @@ graph LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> IDLE: Power on
-
-    IDLE: IDLE SCREEN
-    IDLE: "TremorTray v1.0"
-    IDLE: "Press to start"
-    IDLE: Wireless: Connected
-
-    IDLE --> CALIBRATING: Joystick button press
-
-    CALIBRATING: CALIBRATING
-    CALIBRATING: "Hold still..."
-    CALIBRATING: Servos auto-level
-    CALIBRATING: Sets zero reference
-
+    [*] --> IDLE: power on
+    IDLE: IDLE — press to start
+    IDLE --> CALIBRATING: button press
+    CALIBRATING: CALIBRATING — hold still
     CALIBRATING --> READY: 3 seconds
-
-    READY: READY
-    READY: "Place ball on tray"
-    READY: "Hold tray level"
-    READY: "Press to begin test"
-
-    READY --> TESTING: Joystick button press
-
-    TESTING: LIVE TEST
-    TESTING: Score, streak, points
-    TESTING: Star rating building
-    TESTING: Servo adapting difficulty
-    TESTING: 30 second countdown
-
-    TESTING --> RESULTS: Timer ends
-
-    RESULTS: RESULTS SCREEN
-    RESULTS: Total score + stars
-    RESULTS: Frequency + amplitude
-    RESULTS: Condition suggestion
-    RESULTS: Breaking point level
-    RESULTS: "Press for fingerprint"
-
-    RESULTS --> FINGERPRINT: Joystick button press
-
-    FINGERPRINT: TREMOR FINGERPRINT
-    FINGERPRINT: Polar plot of tremor
-    FINGERPRINT: Unique visual pattern
-    FINGERPRINT: "Press to restart"
-
-    FINGERPRINT --> READY: Joystick button press
-
-    RESULTS --> COMPARE: Joystick left/right
-
-    COMPARE: COMPARE MODE
-    COMPARE: "Challenge a friend!"
-    COMPARE: Side-by-side scores
-    COMPARE: Who has steadier hands?
+    READY: READY — place ball
+    READY --> TESTING: button press
+    TESTING: LIVE TEST — 30s countdown
+    TESTING --> RESULTS: timer ends
+    RESULTS: RESULTS — score + stars
+    RESULTS --> FINGERPRINT: button press
+    RESULTS --> COMPARE: joystick left/right
+    FINGERPRINT: FINGERPRINT — polar plot
+    FINGERPRINT --> READY: button press
+    COMPARE: COMPARE — side by side
 ```
 
 ---
@@ -764,26 +571,24 @@ The flat tray is the starting point. The full vision is a **4-test interactive d
 
 ```mermaid
 graph LR
-    DEVICE["NeuroSync Device"] --> T1["TEST 1: Stability Hold<br/>Hold level for 30s<br/>IMU measures resting tremor<br/>Ball shows stability visually"]
-    DEVICE --> T2["TEST 2: Target Tracking<br/>Servo pointer moves<br/>Patient follows with joystick<br/>Measures intention tremor"]
-    DEVICE --> T3["TEST 3: Reaction Challenge<br/>Servo suddenly tilts device<br/>Patient corrects<br/>Measures reaction time + recovery"]
-    DEVICE --> T4["TEST 4: Pattern Reproduction<br/>OLED shows joystick sequence<br/>Patient reproduces it<br/>Measures motor planning"]
-
-    T1 --> REPORT["Combined Diagnostic Report"]
-    T2 --> REPORT
-    T3 --> REPORT
-    T4 --> REPORT
-
-    REPORT --> CLASS["Condition Classification:<br/>Different conditions produce<br/>different patterns across 4 tests"]
-
-    style DEVICE fill:#f39c12,color:#fff,stroke-width:3px
-    style T1 fill:#e74c3c,color:#fff
-    style T2 fill:#3498db,color:#fff
-    style T3 fill:#27ae60,color:#fff
-    style T4 fill:#9b59b6,color:#fff
-    style REPORT fill:#1a1a2e,color:#0f8
-    style CLASS fill:#e67e22,color:#fff
+    D[NeuroSync Device]
+    D --> T1[Test 1: Stability hold]
+    D --> T2[Test 2: Target tracking]
+    D --> T3[Test 3: Reaction challenge]
+    D --> T4[Test 4: Pattern reproduction]
+    T1 --> R[Combined report]
+    T2 --> R
+    T3 --> R
+    T4 --> R
+    R --> C[Condition classification]
 ```
+
+| Test | Method | Measures |
+|---|---|---|
+| 1: Stability hold | Hold level 30s, IMU + ball | Resting tremor |
+| 2: Target tracking | Servo pointer moves, patient follows with joystick | Intention tremor |
+| 3: Reaction challenge | Servo suddenly tilts, patient corrects | Reaction time + recovery |
+| 4: Pattern reproduction | OLED shows sequence, patient reproduces | Motor planning |
 
 ### Condition Differentiation Matrix
 
@@ -805,17 +610,19 @@ Same core technology, different software modes:
 
 ```mermaid
 graph LR
-    CORE["Core Technology<br/>IMU + Servos + Wireless + Display<br/>Measures hand micro-movements"] --> MED["MEDICAL<br/>Tremor diagnosis<br/>Condition classification<br/>Rehab tracking<br/>Treatment monitoring"]
-    CORE --> SEC["SECURITY<br/>Biometric hand-signature<br/>Unique tremor = identity<br/>Can't fake neurological pattern<br/>Duress detection"]
-    CORE --> SAFETY["WORKPLACE SAFETY<br/>Pre-shift fitness test<br/>Fatigue screening<br/>Impairment detection<br/>Aviation, mining, surgery"]
-    CORE --> EDU["EDUCATION<br/>Motor skills assessment<br/>Child development tracking<br/>Neuroscience teaching<br/>Sports performance"]
-
-    style CORE fill:#f39c12,color:#fff,stroke-width:3px
-    style MED fill:#e74c3c,color:#fff
-    style SEC fill:#3498db,color:#fff
-    style SAFETY fill:#27ae60,color:#fff
-    style EDU fill:#9b59b6,color:#fff
+    CORE[Core: IMU + Servos + Wireless]
+    CORE --> MED[Medical]
+    CORE --> SEC[Security]
+    CORE --> SAFETY[Workplace safety]
+    CORE --> EDU[Education]
 ```
+
+| Application | Use case |
+|---|---|
+| Medical | Tremor diagnosis, condition classification, rehab tracking |
+| Security | Biometric hand-signature — unique neurological pattern, duress detection |
+| Workplace safety | Pre-shift fitness test, fatigue/impairment screening (aviation, mining, surgery) |
+| Education | Motor skills assessment, child development, sports performance |
 
 ### Security: Biometric Hand-Signature
 
@@ -850,42 +657,19 @@ If DC motors are available, the device evolves from servo-based to **reaction wh
 
 ```mermaid
 graph LR
-    subgraph REACTION["Reaction Wheel Concept"]
-        MOTOR["DC Motor spins<br/>heavy flywheel disc"]
-        MOMENTUM["Flywheel stores<br/>angular momentum"]
-        CONTROL["Speed up → platform tilts one way<br/>Slow down → platform tilts other way<br/>IMU feedback → PID controls speed"]
-        RESULT["Platform SELF-BALANCES<br/>using angular momentum<br/>No servos needed for stabilisation"]
-
-        MOTOR --> MOMENTUM --> CONTROL --> RESULT
-    end
-
-    style REACTION fill:#f8f9fa,stroke:#333,stroke-width:2px
-    style MOTOR fill:#e67e22,color:#fff
-    style MOMENTUM fill:#3498db,color:#fff
-    style CONTROL fill:#9b59b6,color:#fff
-    style RESULT fill:#27ae60,color:#fff
+    MOTOR[DC Motor] --> FLYWHEEL[Flywheel]
+    FLYWHEEL --> CONTROL[PID speed control]
+    CONTROL --> BALANCE[Self-balances]
+    IMU[IMU feedback] --> CONTROL
 ```
 
 ### Three Operating Modes with Motor
 
-```mermaid
-graph LR
-    subgraph M1["MODE 1: Self-Balance Demo"]
-        M1D["Place device on table tilted<br/>Flywheel spins up<br/>Device levels itself<br/>Push it — it returns<br/><br/>Same tech as ISS attitude control"]
-    end
-
-    subgraph M2["MODE 2: Diagnostic Tests"]
-        M2D["All 4 NeuroSync tests<br/>Motor adds resistance test<br/>(turn dial against force)<br/>Flywheel adds perturbation<br/>(gyroscopic challenges)"]
-    end
-
-    subgraph M3["MODE 3: Active Assist"]
-        M3D["Patient holds device<br/>Flywheel assists stability<br/>Assist level adapts to need<br/><br/>ASSIST AMOUNT = TREMOR SEVERITY<br/>5% assist = steady hands<br/>60% assist = moderate tremor<br/>90% assist = severe tremor"]
-    end
-
-    style M1 fill:#e74c3c,color:#fff
-    style M2 fill:#3498db,color:#fff
-    style M3 fill:#27ae60,color:#fff
-```
+| Mode | What it does |
+|---|---|
+| 1: Self-balance demo | Place tilted — flywheel spins up, device levels itself. Push it — it returns. Same tech as ISS attitude control |
+| 2: Diagnostic tests | All 4 NeuroSync tests + motor resistance test + flywheel perturbation challenges |
+| 3: Active assist | Flywheel assists patient stability. Assist % = tremor severity (5% = steady, 90% = severe) |
 
 ### Motor Components Needed
 

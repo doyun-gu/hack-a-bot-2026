@@ -26,61 +26,44 @@ People with tremor can't eat independently, can't carry a cup of water, can't ho
 
 ```mermaid
 graph LR
-    subgraph PICO_A["PICO A — Wearable Sensor (wrist)"]
-        IMU["BMI160 IMU<br/>6-axis | 100Hz<br/>(I2C: SDA/SCL)"]
-        JOY["Joystick<br/>Mode select / Sensitivity<br/>(ADC: GP26, GP27)"]
-        NRF_TX["nRF24L01+ TX<br/>Streams orientation<br/>(SPI: MOSI/MISO/SCK)"]
-        LED_A["Status LED<br/>Green=OK Red=Fall<br/>(GPIO)"]
-        FALL["Fall Detection<br/>Runs on Core 1<br/>Freefall→Impact→Immobility"]
-
-        IMU --> NRF_TX
-        IMU --> FALL
-        JOY --> NRF_TX
-        FALL --> NRF_TX
-        FALL --> LED_A
+    subgraph A["Pico A — Wrist Sensor"]
+        A1[BMI160 IMU]
+        A2[Joystick]
+        A3[nRF24L01+ TX]
+        A4[Fall Detection]
     end
 
-    subgraph WIRELESS["2.4 GHz Wireless Link"]
-        PACKET["Packet every 10ms<br/>{ roll, pitch, tremor_amp,<br/>mode, fall_alert }"]
+    subgraph B["Pico B — Handheld Platform"]
+        B1[nRF24L01+ RX]
+        B2[PID Controller]
+        B3[PCA9685]
+        B4[Servo A: roll]
+        B5[Servo B: pitch]
+        B6[OLED]
     end
 
-    subgraph PICO_B["PICO B — Stabilised Platform (handheld)"]
-        NRF_RX["nRF24L01+ RX<br/>Receives data + RSSI<br/>(SPI)"]
-        PID["PID Controller<br/>error = 0° - tilt<br/>correction = Kp·e + Kd·de/dt"]
-        PCA["PCA9685 Servo Driver<br/>16-ch PWM | I2C"]
-        SERVO_A["MG90S Servo A<br/>Roll compensation"]
-        SERVO_B["MG90S Servo B<br/>Pitch compensation"]
-        OLED["OLED 0.96&quot;<br/>Health dashboard<br/>4 display modes<br/>(I2C)"]
-        LEDS["LED Array<br/>Green/Yellow/Red<br/>Stability indicator"]
-
-        NRF_RX --> PID
-        PID --> PCA
-        PCA --> SERVO_A
-        PCA --> SERVO_B
-        NRF_RX --> OLED
-        PID --> LEDS
-    end
-
-    NRF_TX -->|"~2ms latency"| PACKET
-    PACKET -->|"~2ms latency"| NRF_RX
-
-    style PICO_A fill:#e8f4fd,stroke:#2471a3,stroke-width:2px
-    style PICO_B fill:#fef9e7,stroke:#d4ac0d,stroke-width:2px
-    style WIRELESS fill:#fff3cd,stroke:#ffc107,stroke-width:2px
-    style IMU fill:#9b59b6,color:#fff
-    style NRF_TX fill:#3498db,color:#fff
-    style NRF_RX fill:#3498db,color:#fff
-    style PCA fill:#e67e22,color:#fff
-    style SERVO_A fill:#e74c3c,color:#fff
-    style SERVO_B fill:#e74c3c,color:#fff
-    style OLED fill:#1a1a2e,color:#00ff88
-    style FALL fill:#c0392b,color:#fff
-    style PID fill:#27ae60,color:#fff
-    style JOY fill:#1abc9c,color:#fff
-    style LED_A fill:#f39c12,color:#fff
-    style LEDS fill:#e74c3c,color:#fff
-    style PACKET fill:#fff3cd,color:#856404
+    A1 --> A3
+    A1 --> A4
+    A2 --> A3
+    A3 -->|"~2ms"| B1
+    B1 --> B2
+    B2 --> B3
+    B3 --> B4
+    B3 --> B5
+    B1 --> B6
 ```
+
+| Component | Location | Role |
+|---|---|---|
+| BMI160 IMU | Pico A (wrist) | 6-axis at 100Hz, I2C |
+| Joystick | Pico A | Mode select, sensitivity, fall cancel |
+| nRF24L01+ TX | Pico A | Streams roll/pitch/tremor/fall at 100Hz |
+| Fall Detection | Pico A Core 1 | Freefall → Impact → Immobility state machine |
+| PID Controller | Pico B | error = 0° − tilt, correction = Kp·e + Kd·de/dt |
+| PCA9685 | Pico B | 16-ch PWM servo driver via I2C |
+| Servo A | Pico B | Roll compensation |
+| Servo B | Pico B | Pitch compensation |
+| OLED 0.96" | Pico B | Health dashboard, 6 display modes |
 
 ---
 
@@ -88,32 +71,25 @@ graph LR
 
 ```mermaid
 flowchart LR
-    START([Every 10ms — 100Hz loop]) --> READ_IMU[Read BMI160<br/>accel_x, accel_y, accel_z<br/>gyro_x, gyro_y, gyro_z]
-    READ_IMU --> FILTER[Complementary Filter<br/>roll = 0.98 × prev_roll + gyro × dt + 0.02 × accel_roll<br/>pitch = same for pitch axis]
-    FILTER --> CHECK_MODE{Which mode?}
-
-    CHECK_MODE -->|Mode 1: Stabiliser| PID_CALC[PID Controller<br/>error = 0° - measured_angle<br/>P = Kp × error<br/>D = Kd × error_change / dt<br/>correction = P + D]
-    PID_CALC --> SERVO_CMD[Send to PCA9685 via I2C<br/>servo_angle = 90° + correction<br/>Servo A = roll correction<br/>Servo B = pitch correction]
-    SERVO_CMD --> TX[Transmit via nRF24L01+<br/>roll, pitch, tremor_amp, mode]
-
-    CHECK_MODE -->|Mode 2: Rehab Trainer| NO_SERVO[Servos stay at 90° neutral<br/>No compensation]
-    NO_SERVO --> SCORE[Calculate steadiness score<br/>score = % time within ±2°]
+    START([100Hz loop]) --> READ[Read BMI160]
+    READ --> FILTER[Complementary filter]
+    FILTER --> MODE{Mode?}
+    MODE -->|Stabiliser| PID[PID correction]
+    MODE -->|Rehab| SCORE[Steadiness score]
+    PID --> SERVO[Set servos via PCA9685]
+    SERVO --> TX[Transmit wireless]
     SCORE --> TX
-
-    TX --> UPDATE_OLED[Update OLED<br/>every 100ms]
-    UPDATE_OLED --> START
-
-    style START fill:#2ecc71,color:#fff
-    style READ_IMU fill:#9b59b6,color:#fff
-    style FILTER fill:#8e44ad,color:#fff
-    style CHECK_MODE fill:#f39c12,color:#fff
-    style PID_CALC fill:#27ae60,color:#fff
-    style SERVO_CMD fill:#e67e22,color:#fff
-    style NO_SERVO fill:#3498db,color:#fff
-    style SCORE fill:#3498db,color:#fff
-    style TX fill:#3498db,color:#fff
-    style UPDATE_OLED fill:#1a1a2e,color:#00ff88
+    TX --> OLED[Update OLED]
+    OLED --> START
 ```
+
+| Step | Detail |
+|---|---|
+| Complementary filter | roll = 0.98 × prev_roll + gyro × dt + 0.02 × accel_roll |
+| PID correction | error = 0° − angle; correction = Kp·e + Kd·de/dt |
+| Set servos | servo_angle = 90° + correction; A = roll, B = pitch |
+| Rehab score | % time within ±2° of level |
+| Total latency | ~4ms: IMU (1ms) + filter (0.1ms) + wireless (2ms) + PID (0.1ms) + servo (0.5ms) |
 
 **Total latency: ~4ms** — IMU read (1ms) + Filter (0.1ms) + Wireless (2ms) + PID (0.1ms) + Servo (0.5ms)
 
@@ -123,22 +99,22 @@ flowchart LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> MONITORING: IMU sampling at 100Hz
+    [*] --> MONITORING: 100Hz sampling
 
-    MONITORING --> FREEFALL: accel magnitude ≈ 0g<br/>(all axes near zero)
-    FREEFALL --> MONITORING: timeout 0.5s<br/>(not a real fall)
+    MONITORING --> FREEFALL: accel ≈ 0g
+    FREEFALL --> MONITORING: timeout 0.5s
 
-    FREEFALL --> IMPACT: accel spike > 3g<br/>(hit the ground)
-    IMPACT --> MONITORING: movement resumes<br/>(stumble, not fall)
+    FREEFALL --> IMPACT: accel spike > 3g
+    IMPACT --> MONITORING: movement resumes
 
-    IMPACT --> IMMOBILE: no movement<br/>for 10 seconds
+    IMPACT --> IMMOBILE: no movement 10s
 
-    IMMOBILE --> ALERT_SENT: Send SOS via wireless<br/>LED turns RED
-    ALERT_SENT --> CANCELLED: Joystick pressed<br/>within 15 seconds<br/>"I'm OK"
-    ALERT_SENT --> CONFIRMED_FALL: No cancel after 15s<br/>Base station alarm activates
+    IMMOBILE --> ALERT: SOS sent, LED red
+    ALERT --> CANCELLED: joystick press within 15s
+    ALERT --> CONFIRMED: no cancel after 15s
 
-    CANCELLED --> MONITORING: Resume normal operation
-    CONFIRMED_FALL --> MONITORING: Manually reset
+    CANCELLED --> MONITORING: resume
+    CONFIRMED --> MONITORING: manual reset
 ```
 
 ---
@@ -147,31 +123,14 @@ stateDiagram-v2
 
 ```mermaid
 graph LR
-    subgraph MODE1["Mode 1: STABILISER"]
-        direction TB
-        S1["Servos ACTIVE"]
-        S2["Cancel tremor"]
-        S3["Spoon/cup stays level"]
-        S4["Daily life use"]
-        S1 --> S2 --> S3 --> S4
-    end
-
-    subgraph MODE2["Mode 2: REHAB TRAINER"]
-        direction TB
-        R1["Servos OFF"]
-        R2["Measure tremor"]
-        R3["Ball on platform tests control"]
-        R4["Clinical scoring"]
-        R1 --> R2 --> R3 --> R4
-    end
-
-    SWITCH["Joystick press<br/>toggles mode"] --> MODE1
-    SWITCH --> MODE2
-
-    style MODE1 fill:#d4edda,stroke:#27ae60,stroke-width:2px
-    style MODE2 fill:#d1ecf1,stroke:#17a2b8,stroke-width:2px
-    style SWITCH fill:#fff3cd,stroke:#ffc107,stroke-width:2px
+    SWITCH[Joystick press] --> MODE1[Mode 1: Stabiliser]
+    SWITCH --> MODE2[Mode 2: Rehab Trainer]
 ```
+
+| Mode | Servos | Purpose | Output |
+|---|---|---|---|
+| Stabiliser | Active — cancel tremor | Daily life use | Spoon/cup stays level |
+| Rehab Trainer | Off — measure tremor | Clinical scoring | Steadiness score + ball test |
 
 ---
 
@@ -181,62 +140,26 @@ graph LR
 
 ```mermaid
 mindmap
-  root((SteadyHand<br/>Users))
+  root((SteadyHand Users))
     Healthcare
-      Parkinson's patients
-        10M worldwide
-        Resting tremor 4-6Hz
-        Can't eat independently
-      Essential tremor
-        7M in US alone
-        Shakes during movement
-        Most common tremor disorder
-      Post-stroke
-        25-50% develop tremor
-        Rehab takes months
-        Need immediate functional aid
-      Elderly
-        15-25% of over-65s
-        Age-related tremor
-        Often untreated
-      Cerebral palsy
-        17M globally
-        Involuntary movements
-      Multiple sclerosis
-        2.8M worldwide
-        Intention tremor
+      Parkinson's 10M+
+      Essential tremor 7M
+      Post-stroke 25-50%
+      Elderly 15-25% over-65
+      Cerebral palsy 17M
+      Multiple sclerosis 2.8M
     Household
-      Eating & drinking
-        Hold spoon level
-        Carry cup without spilling
-        Feed yourself independently
-      Daily tasks
-        Steady phone for video calls
-        Hold reading glasses
-        Carry small objects
-        Pour liquid accurately
-      Hobby & craft
-        Steady paintbrush for art therapy
-        Hold pen for writing
-        Model building
+      Eating and drinking
+      Video calls
+      Pouring liquids
+      Art therapy
     Professional
-      Surgeons & dentists
-        Micro-tremor affects precision
-        Instrument stabilisation
+      Surgeons and dentists
       Lab technicians
-        Pipetting accuracy
-        Sample handling
       Photographers
-        Camera stabilisation
-        DIY gimbal proof of concept
     Clinical
       Occupational therapists
-        Objective tremor measurement
-        Track rehab progress over weeks
-        Quantified steadiness score
       Neurologists
-        Monitor medication effectiveness
-        Tremor frequency analysis
 ```
 
 ---
@@ -265,25 +188,24 @@ The joystick serves **four critical functions** — not filler:
 
 ```mermaid
 graph LR
-    JOY["Analog Joystick<br/>(X-axis ADC + Y-axis ADC + Button)"] --> PRESS["Button Press"]
-    JOY --> X_AXIS["X-Axis (left/right)"]
-    JOY --> Y_AXIS["Y-Axis (up/down)"]
-
-    PRESS -->|"Short press"| MODE["Toggle Mode<br/>Stabiliser ↔ Rehab"]
-    PRESS -->|"Long press 3s"| CALIBRATE["Calibrate Zero Point<br/>Set current angle as 'level'"]
-    PRESS -->|"During fall alert"| CANCEL["Cancel SOS<br/>'I'm OK' — stops alarm"]
-
-    X_AXIS --> SENSITIVITY["Adjust Servo Sensitivity<br/>Left = gentle (elderly)<br/>Right = aggressive (strong tremor)"]
-
-    Y_AXIS --> OLED_SCROLL["Scroll OLED Display<br/>Up/Down cycles through:<br/>Spirit Level → Waveform →<br/>Stats → Calibration → Rehab"]
-
-    style JOY fill:#1abc9c,color:#fff
-    style MODE fill:#27ae60,color:#fff
-    style CALIBRATE fill:#3498db,color:#fff
-    style CANCEL fill:#e74c3c,color:#fff
-    style SENSITIVITY fill:#9b59b6,color:#fff
-    style OLED_SCROLL fill:#e67e22,color:#fff
+    JOY[Joystick] --> BTN[Button]
+    JOY --> X[X-axis]
+    JOY --> Y[Y-axis]
+    BTN -->|short| MODE[Toggle mode]
+    BTN -->|3s hold| CAL[Calibrate zero]
+    BTN -->|during alert| CANCEL[Cancel SOS]
+    X --> SENS[Servo sensitivity]
+    Y --> SCROLL[Scroll OLED]
 ```
+
+| Input | Action |
+|---|---|
+| Button short press | Toggle Stabiliser ↔ Rehab |
+| Button 3s hold | Calibrate zero point (set current angle as level) |
+| Button during alert | Cancel SOS — "I'm OK" |
+| X-axis left | Gentle sensitivity (elderly) |
+| X-axis right | Aggressive sensitivity (strong tremor) |
+| Y-axis up/down | Scroll OLED: Spirit Level → Waveform → Stats → Calibration → Rehab |
 
 ### 3D Printed Joystick Adapter (if available)
 
@@ -294,35 +216,18 @@ If you have access to a 3D printer, you could print a **thumb-grip cap** that si
 ## Physical Build
 
 ```mermaid
-graph LR
-    subgraph TOP["TOP PLATE (5x6cm perfboard)"]
-        CLIP["Spoon/cup clip zone"]
-    end
-
-    subgraph MIDDLE["ACTUATION LAYER"]
-        PIVOT["M3 bolt + nut<br/>(loose = ball joint)"]
-        SA["MG90S Servo A<br/>Controls ROLL<br/>(left/right tilt)"]
-        SB["MG90S Servo B<br/>Controls PITCH<br/>(forward/back tilt)"]
-        ROD_A["Push rod A<br/>22AWG Z-wire"]
-        ROD_B["Push rod B<br/>22AWG Z-wire"]
-    end
-
-    subgraph BASE["HANDLE / BASE"]
-        GRIP["User grips here<br/>(cardboard tube /<br/>perfboard frame)"]
-        PICO["Pico B + PCA9685<br/>+ nRF24L01+ inside"]
-    end
-
-    CLIP --- PIVOT
-    SA -->|"servo arm"| ROD_A -->|"pushes edge"| TOP
-    SB -->|"servo arm"| ROD_B -->|"pushes edge"| TOP
-    PIVOT --- BASE
-    SA --- BASE
-    SB --- BASE
-
-    style TOP fill:#f39c12,color:#fff,stroke:#d35400,stroke-width:2px
-    style MIDDLE fill:#ecf0f1,stroke:#bdc3c7,stroke-width:2px
-    style BASE fill:#8e44ad,color:#fff,stroke:#6c3483,stroke-width:2px
+graph TB
+    TOP[Top plate: spoon/cup clip]
+    MID[Actuation layer: servos + push rods]
+    BASE[Handle: Pico B + electronics]
+    TOP --- MID --- BASE
 ```
+
+| Layer | Components | Notes |
+|---|---|---|
+| Top plate | 5×6cm perfboard, spoon/cup clip | Moving platform |
+| Actuation | M3 ball joint, Servo A (roll), Servo B (pitch), 22AWG push rods | Rods push edges of top plate |
+| Handle/base | Pico B + PCA9685 + nRF24L01+ | User grips here; ~15cm × 6cm × 8cm |
 
 **Dimensions:** ~15cm long, ~6cm wide, ~8cm tall
 **Weight of moving part:** ~70g (platform + spoon)
@@ -361,19 +266,21 @@ See `docs/images/steadyhand_oled_modes.png` for rendered mockups of each screen.
 
 ```mermaid
 graph LR
-    S1["1. SETUP<br/>Spoon on platform<br/>Cereal on spoon"] --> S2["2. SERVOS OFF<br/>Shake hand<br/>Cereal falls off"]
-    S2 --> S3["3. SERVOS ON<br/>Same shaking<br/>Cereal STAYS ON"]
-    S3 --> S4["4. SHOW OLED<br/>Waveform mode<br/>78% reduction"]
-    S4 --> S5["5. REHAB MODE<br/>Ball on platform<br/>Score: 67%"]
-    S5 --> S6["6. JUDGE TRIES<br/>They shake it<br/>Spoon stays level"]
-
-    style S1 fill:#ffc107,color:#333
-    style S2 fill:#e74c3c,color:#fff
-    style S3 fill:#27ae60,color:#fff
-    style S4 fill:#3498db,color:#fff
-    style S5 fill:#9b59b6,color:#fff
-    style S6 fill:#e67e22,color:#fff
+    S1[1. Setup] --> S2[2. Servos OFF]
+    S2 --> S3[3. Servos ON]
+    S3 --> S4[4. Show OLED]
+    S4 --> S5[5. Rehab mode]
+    S5 --> S6[6. Judge tries]
 ```
+
+| Step | What Judges See |
+|---|---|
+| 1. Setup | Spoon on platform with cereal |
+| 2. Servos OFF | Shake hand — cereal falls off |
+| 3. Servos ON | Same shaking — cereal STAYS ON |
+| 4. Show OLED | Waveform mode: "78% reduction" visible |
+| 5. Rehab mode | Ball on platform, score: 67% |
+| 6. Judge tries | They shake it — spoon stays level |
 
 **Drop line:** *"A Liftware Steady costs £200. We built this for £15."*
 
