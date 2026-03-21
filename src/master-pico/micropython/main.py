@@ -44,6 +44,32 @@ except ImportError:
     print("[MASTER] WARNING: protocol.py not found, wireless disabled")
     pack_power = None
 
+# Track send success/fail
+wireless_stats = {'sent': 0, 'failed': 0, 'consecutive_fail': 0}
+
+
+def send_packet(nrf, pkt, critical=False):
+    """Send a wireless packet with optional retries for critical packets.
+
+    ALERT packets: 3 attempts. COMMAND packets: 2 attempts. Others: 1.
+    """
+    nrf.stop_listening()
+    attempts = 3 if critical else 1
+    success = False
+    for _ in range(attempts):
+        if nrf.send(pkt):
+            success = True
+            wireless_stats['sent'] += 1
+            wireless_stats['consecutive_fail'] = 0
+            break
+        time.sleep_ms(1)
+    if not success:
+        wireless_stats['failed'] += 1
+        wireless_stats['consecutive_fail'] += 1
+    nrf.start_listening()
+    return success
+
+
 # State string -> enum mappings
 _STATE_MAP = {"NORMAL": 0, "DRIFT": 1, "WARNING": 2, "FAULT": 3, "EMERGENCY": 4}
 _IMU_MAP = {"HEALTHY": 0, "WARNING": 1, "FAULT": 2}
@@ -495,9 +521,12 @@ def main():
                         uptime = time.ticks_diff(now, boot_ms) // 1000
                         pkt = pack_heartbeat(now, uptime)
 
-                hw['nrf'].stop_listening()
-                hw['nrf'].send(pkt)
-                hw['nrf'].start_listening()
+                # Determine criticality: ALERT=3x, COMMAND=2x, others=1x
+                is_alert = ("alert" in actions)
+                send_packet(hw['nrf'], pkt, critical=is_alert)
+
+                if wireless_stats['consecutive_fail'] >= 10:
+                    print("[MASTER] WIRELESS DEGRADED — 10 consecutive send failures")
 
             # === 10. Print serial JSON for web dashboard ===
             if time.ticks_diff(now, last_serial_ms) >= config.SERIAL_PRINT_MS:
@@ -531,6 +560,8 @@ def main():
                     'dumb_avg_W': comparison['dumb_avg_W'],
                     'smart_avg_W': comparison['smart_avg_W'],
                     'savings_pct': comparison['savings_pct'],
+                    'wireless_sent': wireless_stats['sent'],
+                    'wireless_failed': wireless_stats['failed'],
                 }
                 print(json.dumps(serial_data))
 
