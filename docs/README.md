@@ -26,6 +26,10 @@ docs/
 ├── 02-electrical/            ← WOOSEONG + DOYUN
 │   ├── wiring-connections.md ← 81 wires numbered + test order
 │   ├── power-system.md       ← Power flow, waste targets, fault ladder
+│   ├── motor-specs.md        ← DC motor datasheet + weight sensing
+│   ├── datagram-design.md    ← nRF24L01+ wireless protocol (6 packet types)
+│   ├── debug-system.md       ← LED blink codes, OLED errors, serial logging
+│   ├── failure-handling.md   ← Failure scenarios (F1-F6) + simulator
 │   └── energy-signature/     ← Current-based fault detection (Wooseong)
 │       ├── energy-signature-proposal.md
 │       ├── fault-models.md
@@ -45,8 +49,9 @@ docs/
 │
 ├── 05-archive/               ← Past ideas (reference only)
 │   └── ideas/
-│       ├── idea-shortlist-v2.md
-│       └── tremortray-proposal.md
+│       ├── README.md             ← Archive index
+│       ├── idea-shortlist-v2.md  ← 14 ideas ranked
+│       └── tremortray-proposal.md ← NeuroSync (98pts alternative)
 │
 └── images/                   ← Rendered diagrams
 ```

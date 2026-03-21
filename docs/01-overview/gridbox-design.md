@@ -586,7 +586,7 @@ gantt
 | Document | Contents |
 |---|---|
 | [`gridbox-proposal.md`](gridbox-proposal.md) | Full proposal with factory problems, creativity defense, IMU applications, EEE theory deep dive |
-| [`idea-shortlist-v2.md`](idea-shortlist-v2.md) | All 14 ideas ranked for comparison |
+| [`idea-shortlist-v2.md`](../05-archive/ideas/idea-shortlist-v2.md) | All 14 ideas ranked for comparison |
 | [`hardware-reference.md`](hardware-reference.md) | Kit component reference |
 | `src/README.md` | Software development guide |
 | `src/master-pico/micropython/config.py` | Pin assignments in code (must match this document) |
