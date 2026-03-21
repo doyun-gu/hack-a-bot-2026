@@ -381,34 +381,98 @@ Commit: `"Add calibration routine with flash storage"`
 ### Task 16: SCADA dashboard
 
 Write `src/slave-pico/micropython/dashboard.py`:
-- 5 OLED views, joystick Y-axis scrolls between them:
+- 5 OLED views, joystick Y-axis scrolls between them
+- Use `fill_rect()` for power bars — NOT text block characters (unicode won't render on SSD1306)
+- Only ASCII chars 32-127 work for text. For rating indicators, draw small filled/empty squares
+- Display is 128×64 pixels = 16 chars × 8 lines at 8×8 default font
+- Each view has a `render(oled, data_dict)` method
+- Dashboard class manages view index + joystick scrolling
+- Helper methods: `draw_bar(oled, x, y, width, height, percent)`, `draw_divider(oled, y)`, `draw_rating(oled, x, y, score_out_of_5)`
 
-**View 1: System Status**
-- Motor 1 speed + current, Motor 2 speed + current
-- Servo positions, bus voltage, system state (NORMAL/FAULT/etc)
+**View 1: System Status** (pixel layout)
+```
+Row 0  (y=0):  "GRIDBOX    [LIVE]"          oled.text()
+Row 1  (y=8):  "────────────────"           oled.hline(0, 8, 128, 1)
+Row 2  (y=16): "M1:380mA 2.3W ON"          oled.text()
+Row 3  (y=24): "M2:OFF    0W  --"          oled.text()
+Row 4  (y=32): "S1:OPEN  S2:PASS"          oled.text()
+Row 5  (y=40): "Bus:4.9V  NORMAL"          oled.text()
+Row 6  (y=48): "────────────────"           oled.hline()
+Row 7  (y=56): "Items:23  R:12/m"          oled.text()
+```
 
-**View 2: Power Flow**
-- Per-branch power bars (Motor 1, Motor 2, LEDs)
-- Total power, excess available, efficiency %
+**View 2: Power Flow** (pixel-drawn bars — this is the visual showcase)
+```
+Row 0  (y=0):  "POWER FLOW"                oled.text()
+Row 1  (y=8):  "────────────────"           oled.hline()
+Row 2  (y=16): "M1:" [████████████░░░░░] "80%"
+                      fill_rect(24,16, bar_w, 6, 1) inside rect(24,16, 80, 6, 1)
+Row 3  (y=24): "M2:" [████████░░░░░░░░░] "40%"
+                      same pattern, bar_w = percent * 80 / 100
+Row 4  (y=32): "SV:" [███░░░░░░░░░░░░░░] "15%"
+Row 5  (y=40): "LD:" [█░░░░░░░░░░░░░░░░] " 5%"
+Row 6  (y=48): "────────────────"           oled.hline()
+Row 7  (y=56): "Tot:3.7W  Sv:69%"          + draw_rating(oled, 108, 56, 3)
+                                              3 filled squares + 2 empty = ■■■□□
+```
+
+Helper for power bars:
+```python
+def draw_bar(oled, x, y, max_width, height, percent):
+    """Draw a power bar with outline and fill."""
+    fill_w = int(percent * max_width / 100)
+    oled.rect(x, y, max_width, height, 1)        # outline (full range)
+    oled.fill_rect(x, y, fill_w, height, 1)       # filled portion
+
+def draw_rating(oled, x, y, score, max_score=5):
+    """Draw filled/empty squares as rating."""
+    for i in range(max_score):
+        sx = x + i * 5
+        if i < score:
+            oled.fill_rect(sx, y, 3, 3, 1)        # filled = earned
+        else:
+            oled.rect(sx, y, 3, 3, 1)              # outline = not earned
+```
 
 **View 3: Fault Monitor**
-- All 8 waste targets (W1-W8) with OK/WARN/FAULT status
-- Faults today count, rerouted mWh
+```
+Row 0  (y=0):  "FAULT MONITOR"             oled.text()
+Row 1  (y=8):  "────────────────"
+Row 2  (y=16): "Vib: 0.3g    OK"           show "OK"/"WARN"/"FAULT"
+Row 3  (y=24): "Cur: 340mA   OK"
+Row 4  (y=32): "Std:  30mA   OK"
+Row 5  (y=40): "Bus: 4.9V    OK"
+Row 6  (y=48): "────────────────"
+Row 7  (y=56): "State:NORMAL  F:0"         fault count
+```
 
 **View 4: Production**
-- Items sorted, pass/reject counts, reject rate %
-- Last item weight, belt speed
-- Weight threshold (set by potentiometer)
+```
+Row 0  (y=0):  "PRODUCTION"
+Row 1  (y=8):  "Last: 47g   PASS"          or "REJECT"
+Row 2  (y=16): "────────────────"
+Row 3  (y=24): "Total:  23 items"
+Row 4  (y=32): "Pass:   20 (87%)"
+Row 5  (y=40): "Reject:  3 (13%)"
+Row 6  (y=48): "Thresh: 30-80g"            from potentiometer
+Row 7  (y=56): "Belt:5cm/s   RUN"
+```
 
 **View 5: Manual Override**
-- Joystick X controls Motor 1 speed directly
-- Joystick Y controls Motor 2 speed
-- Button toggles servo positions
-- Potentiometer value shown
+```
+Row 0  (y=0):  "MANUAL OVERRIDE"
+Row 1  (y=8):  "────────────────"
+Row 2  (y=16): "M1:" [bar drawn] "80%"     joystick X controls this
+Row 3  (y=24): "  < JoyX adjust >"
+Row 4  (y=32): "M2:" [bar drawn] "60%"     joystick Y controls this
+Row 5  (y=40): "  < JoyY adjust >"
+Row 6  (y=48): "S1:[OPEN] btn=tog"         button toggles servo
+Row 7  (y=56): "Pot:65% Btn=reset"         potentiometer value + button = fault reset
+```
 
-Each view: `render(oled, data_dict)` method. Dashboard class manages view switching.
+In Manual Override view, joystick X/Y directly controls motor speeds (values sent to Pico A via commander). Button short-press toggles servo position. Long-press (3s) resets fault state.
 
-Commit: `"Add SCADA dashboard with 5 OLED views"`
+Commit: `"Add SCADA dashboard with 5 pixel-drawn OLED views"`
 
 ---
 
