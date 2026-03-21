@@ -19,7 +19,7 @@ A £15 smart infrastructure controller powered by recycled energy. Senses power 
 | **Main design doc** | `docs/01-overview/gridbox-design.md` | Architecture, pin mapping, wiring, software structure, algorithms, demo script, BOM — **single source of truth** |
 | **Full proposal** | `docs/01-overview/gridbox-proposal.md` | Factory problems, cost comparison, creativity defense, IMU applications, EEE theory, all Mermaid diagrams |
 | **Idea shortlist** | `docs/05-archive/ideas/idea-shortlist-v2.md` | All 14 ideas ranked (GridBox chosen) |
-| **Alternative ideas** | `docs/05-archive/ideas/tremortray-proposal.md` | NeuroSync (98pts) — kept for reference |
+| **Alternative ideas** | `docs/05-archive/ideas/tremortray-proposal.md`, `docs/05-archive/ideas/steadyhand-proposal.md` | NeuroSync (98pts) and SteadyHand (95pts) — kept for reference |
 
 ## Hardware
 
