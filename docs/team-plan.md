@@ -8,9 +8,9 @@
 
 | Member | Role | Strengths | Responsibility |
 |---|---|---|---|
-| **Doyun** | Lead / Software | Firmware, software, AI-assisted dev, project management | MicroPython + C firmware, web dashboard, OLED screens, wireless protocol, documentation. Works with Claude Code |
-| **Wooseung** | Electronics | EE, circuit design, soldering, wiring | All wiring, power distribution, MOSFET switching circuits, sensor connections, voltage dividers, I2C/SPI bus, testing circuits |
-| **Billy** | Mechanical | 3D printing, CAD, physical design, motor mounting | Factory chassis/enclosure, motor mounts, servo brackets, conveyor mechanism, physical factory layout, labels |
+| **Doyun** | System Designer / Lead | Power grid architecture, firmware, AI-assisted dev, project management | System architecture design, power distribution scheme, firmware (MicroPython + C), web dashboard, OLED screens, wireless protocol, documentation, team coordination. Works with Claude Code |
+| **Wooseung** | Electronics Engineer | EE, circuit design, soldering, wiring | All wiring, power distribution implementation, MOSFET switching circuits, sensor connections, voltage dividers, I2C/SPI bus, testing circuits |
+| **Billy** | Mechanical Engineer | 3D printing, CAD, physical design, motor mounting | Factory chassis/enclosure, motor mounts, servo brackets, turntable/conveyor mechanism, physical factory layout, labels |
 
 ---
 
