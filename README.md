@@ -1,7 +1,9 @@
 # GridBox — Smart Infrastructure Control System
 
 <p align="center">
-  <img src="https://hackabot-2026.com/live/assets/images/projects/badges/creative.png" alt="Project 6 Creative Badge" width="120"/>
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/brand/Title_Date_Logo.png" alt="Hack-A-Bot 2026" width="200"/></a>
+  &nbsp;&nbsp;
+  <img src="https://hackabot-2026.com/live/assets/images/projects/badges/creative.png" alt="Project 6 Creative Badge" width="100"/>
 </p>
 
 <p align="center">
