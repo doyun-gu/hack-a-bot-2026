@@ -53,13 +53,15 @@ hack-a-bot-2026/
 
 ## Current State
 
-- **Phase:** Idea selection — shortlist of 10 ideas scored in `docs/idea-shortlist.md`
-- **Top candidates:**
-  - Silent Distress Signal (94pts) — IMU gesture + joystick code for domestic violence alert
-  - Fire Escape Direction Finder (93pts) — RSSI-based autonomous guidance away from fire
-  - Gesture-Controlled Gripper Arm (91pts) — wearable IMU controls robotic arm
-  - Elderly Fall Detection (89pts) — multi-phase detection with physical alert
-- **Next:** Lock in idea, scaffold firmware, implement wireless link first
+- **Phase:** Idea refinement — lead idea selected, proposal written
+- **Lead idea: SteadyHand** (95pts) — tremor-stabilising assistive device
+  - Full proposal: `docs/steadyhand-proposal.md`
+  - Dual-mode: stabiliser (spoon stays level) + rehab trainer (ball balance test)
+  - Fall detection as bonus feature on same IMU
+  - OLED health dashboard with 4 display modes
+  - Scaled for MG90S: ~5x6cm platform, ~70g, spoon-sized
+- **Other ideas:** `docs/idea-shortlist.md` (10 ideas scored)
+- **Next:** Lock in final decision with team, scaffold firmware, wireless link first
 
 ## Dev Commands
 
