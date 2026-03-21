@@ -142,7 +142,12 @@ hack-a-bot-2026/
 </p>
 
 <p align="center">
-  Also supported by: <strong>RoboSoc</strong> · <strong>Cradle</strong> · <strong>Google Developer Groups</strong> · <strong>UKRI</strong> · <strong>RAICo</strong> · <strong>Red Bull</strong>
+  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/RoboSoc-222?style=for-the-badge&logoColor=white" alt="RoboSoc" height="28"/></a>&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Cradle-222?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48Y2lyY2xlIGN4PSI4IiBjeT0iOCIgcj0iMyIgZmlsbD0id2hpdGUiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjgiIHI9IjMiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTQgMTRoMTZ2MkE0IDQgMCAwIDEgMTYgMjBIOEE0IDQgMCAwIDEgNCAxNnoiIGZpbGw9IndoaXRlIi8+PC9zdmc+&logoColor=white" alt="Cradle" height="28"/></a>&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Google_Developer_Groups-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="GDG" height="28"/></a>&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/UKRI-222?style=for-the-badge&logoColor=white" alt="UKRI" height="28"/></a>&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/RAICo-222?style=for-the-badge&logoColor=white" alt="RAICo" height="28"/></a>&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://img.shields.io/badge/Red_Bull-DB0A40?style=for-the-badge&logo=redbull&logoColor=white" alt="Red Bull" height="28"/></a>
 </p>
 
 <p align="center">
