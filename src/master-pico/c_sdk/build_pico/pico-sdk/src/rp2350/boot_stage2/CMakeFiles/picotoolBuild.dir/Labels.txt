@@ -1,0 +1,14 @@
+# Target labels
+ picotoolBuild
+# Source files and their labels
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/CMakeFiles/picotoolBuild-complete.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/picotool/src/picotoolBuild-stamp/picotoolBuild-build.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/picotool/src/picotoolBuild-stamp/picotoolBuild-configure.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/picotool/src/picotoolBuild-stamp/picotoolBuild-download.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/picotool/src/picotoolBuild-stamp/picotoolBuild-install.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/picotool/src/picotoolBuild-stamp/picotoolBuild-mkdir.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/picotool/src/picotoolBuild-stamp/picotoolBuild-patch.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/picotool/src/picotoolBuild-stamp/picotoolBuild-test.rule
+/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/build_pico/pico-sdk/src/rp2350/boot_stage2/picotool/src/picotoolBuild-stamp/picotoolBuild-update.rule

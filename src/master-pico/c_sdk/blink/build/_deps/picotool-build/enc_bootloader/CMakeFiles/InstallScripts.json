@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/blink/build/_deps/picotool-build/enc_bootloader/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
