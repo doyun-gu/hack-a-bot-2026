@@ -6,8 +6,9 @@ Quick guide to what's in this folder.
 
 | File | Score | What It Contains |
 |---|---|---|
-| [`tremortray-proposal.md`](tremortray-proposal.md) | **96/100** | **TremorTray** — hand tremor diagnostic tool. Dual-sensor (IMU + joystick-as-position-sensor), servo difficulty levels, clinical severity scoring, UPDRS replacement. Full Mermaid diagrams |
-| [`steadyhand-proposal.md`](steadyhand-proposal.md) | **95/100** | **SteadyHand** — tremor-stabilising assistive device. Dual-mode (stabiliser + rehab), household applications, PID control. Full Mermaid diagrams |
+| [`tremortray-proposal.md`](tremortray-proposal.md) | **98/100** | **NeuroSync** — multi-test neurological diagnostic platform. Tremor fingerprint, gamification, adaptive difficulty, condition classification, reaction wheel. Full Mermaid diagrams |
+| [`gridbox-proposal.md`](gridbox-proposal.md) | **96/100** | **GridBox** — smart energy recycling microgrid. DC motors as generators, servo circuit breakers, IMU fault detection, SCADA dashboard, autonomous load shedding. Full Mermaid diagrams |
+| [`steadyhand-proposal.md`](steadyhand-proposal.md) | **95/100** | **SteadyHand** — tremor-stabilising assistive device. Dual-mode (stabiliser + rehab), household applications, PID control |
 
 ## Reference
 
