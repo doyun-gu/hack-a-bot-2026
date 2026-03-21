@@ -278,10 +278,15 @@ def main():
                     dash.next_view()
             prev_direction = direction
 
-            # === 5. Handle long press (emergency stop) ===
+            # === 5. Handle long press ===
             if long_press and cmd:
-                cmd.send_emergency_stop()
-                telemetry['state'] = 'EMERGENCY'
+                if dash and dash.current_view == config.VIEW_COMPARISON:
+                    # Long-press on comparison view triggers A/B test
+                    cmd.send_mode(2)  # MODE_DUMB triggers comparison on master
+                else:
+                    # Long-press elsewhere = emergency stop
+                    cmd.send_emergency_stop()
+                    telemetry['state'] = 'EMERGENCY'
 
             # === 6. Send commands if in manual mode or input changed ===
             if cmd and dash and dash.current_view == config.VIEW_MANUAL:

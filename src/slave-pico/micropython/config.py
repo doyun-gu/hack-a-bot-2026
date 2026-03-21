@@ -60,9 +60,10 @@ HEARTBEAT_TIMEOUT_MS = 3000    # alert if no packet for 3s
 COMMAND_SEND_MS = 50           # send commands every 50ms
 
 # ============ DASHBOARD ============
-NUM_VIEWS = 5                  # total dashboard views
+NUM_VIEWS = 6                  # total dashboard views
 VIEW_STATUS = 0
 VIEW_POWER = 1
 VIEW_FAULTS = 2
 VIEW_PRODUCTION = 3
 VIEW_MANUAL = 4
+VIEW_COMPARISON = 5

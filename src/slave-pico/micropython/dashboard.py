@@ -19,6 +19,7 @@ class Dashboard:
             self._render_faults,
             self._render_production,
             self._render_manual,
+            self._render_comparison,
         ]
         self._view_names = [
             "System Status",
@@ -26,6 +27,7 @@ class Dashboard:
             "Fault Monitor",
             "Production",
             "Manual Override",
+            "Dumb vs Smart",
         ]
 
     def next_view(self):
@@ -186,6 +188,31 @@ class Dashboard:
         self.oled.text(btn_txt, 72, 42, 1)
         self.oled.text(f"Pot:{pot:3d}%", 72, 52, 1)
 
+    def _render_comparison(self, data):
+        """View 6: Dumb vs Smart — A/B comparison results."""
+        dumb_w = data.get('dumb_avg_W', 0)
+        smart_w = data.get('smart_avg_W', 0)
+        savings = data.get('savings_pct', 0)
+
+        if dumb_w == 0 and smart_w == 0:
+            self.oled.text("No comparison", 0, 14, 1)
+            self.oled.text("data yet.", 0, 26, 1)
+            self.oled.text("Long-press to", 0, 42, 1)
+            self.oled.text("start A/B test", 0, 52, 1)
+        else:
+            self.oled.text("DUMB (100% PWM)", 0, 12, 1)
+            self.oled.text(f"  {dumb_w:.2f} W", 0, 22, 1)
+            self.oled.text("SMART (optimised)", 0, 34, 1)
+            self.oled.text(f"  {smart_w:.2f} W", 0, 44, 1)
+            self.oled.text(f"Saved: {savings:.1f}%", 0, 56, 1)
+
+            # Draw savings bar
+            bar_w = min(int(savings), 100)
+            self.oled.rect(80, 54, 48, 8, 1)
+            if bar_w > 0:
+                fill = min(int(bar_w / 100 * 46), 46)
+                self.oled.fill_rect(81, 55, fill, 6, 1)
+
     def render_link_lost(self):
         """Special screen: no wireless link."""
         self.oled.fill(0)
@@ -224,6 +251,7 @@ if __name__ == "__main__":
             'total_items': 47, 'passed': 42, 'rejected': 5,
             'reject_rate': 10.6, 'last_weight_class': 'PASS',
             'belt_speed': 5, 'threshold': 50,
+            'dumb_avg_W': 3.45, 'smart_avg_W': 1.76, 'savings_pct': 49.0,
             'joy_x': 50, 'joy_y': 50, 'button': False, 'pot_value': 65,
         }
 

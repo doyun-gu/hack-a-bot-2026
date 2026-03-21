@@ -218,6 +218,40 @@ def handle_command(pkt, motor_ctrl, fault_mgr, sorter_inst, mode):
     return mode
 
 
+def run_comparison(power_mgr, motor_ctrl, duration_s=10):
+    """Run dumb mode, then smart mode, calculate savings.
+
+    Returns (dumb_avg_W, smart_avg_W, savings_pct).
+    """
+    print("[MASTER] A/B Comparison: starting DUMB mode...")
+
+    # Dumb mode — all motors 100%
+    motor_ctrl.set_speed(1, 100)
+    motor_ctrl.set_speed(2, 100)
+    dumb_readings = []
+    for _ in range(duration_s * 10):
+        dumb_readings.append(power_mgr.read_all()['total_W'])
+        time.sleep_ms(100)
+    dumb_avg = sum(dumb_readings) / max(len(dumb_readings), 1)
+    print(f"[MASTER] DUMB avg: {dumb_avg:.3f}W")
+
+    # Smart mode — intelligent speeds
+    print("[MASTER] A/B Comparison: starting SMART mode...")
+    motor_ctrl.set_speed(1, 60)
+    motor_ctrl.set_speed(2, 40)
+    smart_readings = []
+    for _ in range(duration_s * 10):
+        smart_readings.append(power_mgr.read_all()['total_W'])
+        time.sleep_ms(100)
+    smart_avg = sum(smart_readings) / max(len(smart_readings), 1)
+    print(f"[MASTER] SMART avg: {smart_avg:.3f}W")
+
+    savings = (1 - smart_avg / max(dumb_avg, 0.001)) * 100
+    print(f"[MASTER] Savings: {savings:.1f}%")
+
+    return dumb_avg, smart_avg, savings
+
+
 def main():
     """Main entry point."""
     print("=" * 40)
@@ -279,6 +313,9 @@ def main():
     mode = MODE_NORMAL
     calibrated = cal.is_calibrated()
 
+    # A/B comparison results (shared via serial JSON)
+    comparison = {'dumb_avg_W': 0, 'smart_avg_W': 0, 'savings_pct': 0, 'done': False}
+
     # Timing
     boot_ms = time.ticks_ms()
     last_wireless_ms = 0
@@ -313,23 +350,34 @@ def main():
                 imu_data = imu_reader.get_data()
                 imu_status = imu_data.get('status', 'HEALTHY')
 
-            # === 4. Run fault manager ===
+            # === 4. Handle DUMB mode (A/B comparison trigger) ===
+            if mode == MODE_DUMB and motor_ctrl and not comparison['done']:
+                # Run blocking comparison, then return to normal
+                dumb_w, smart_w, savings = run_comparison(power_mgr, motor_ctrl)
+                comparison['dumb_avg_W'] = round(dumb_w, 3)
+                comparison['smart_avg_W'] = round(smart_w, 3)
+                comparison['savings_pct'] = round(savings, 1)
+                comparison['done'] = True
+                mode = MODE_NORMAL
+                print(f"[MASTER] Comparison done: {savings:.1f}% savings")
+
+            # === 5. Run fault manager ===
             actions = fault_mgr.update(power_data, imu_status)
 
-            # === 5. Run sorter ===
+            # === 6. Run sorter (only in NORMAL mode) ===
             weight_class = None
             if sorter_inst and mode == MODE_NORMAL:
                 weight_class = sorter_inst.process()
 
-            # === 6. Update LED stations ===
+            # === 7. Update LED stations ===
             if weight_class and not led_stations.is_active():
                 led_stations.run_sequence(weight_class, blocking=False)
 
-            # === 7. Execute fault manager actions ===
+            # === 8. Execute fault manager actions ===
             if actions and motor_ctrl:
                 fault_mgr.execute_actions(actions)
 
-            # === 8. Status LEDs ===
+            # === 9. Status LEDs ===
             state = fault_mgr.get_state()
             if state in ("FAULT", "EMERGENCY"):
                 hw['led_red'].value(1)
@@ -341,7 +389,7 @@ def main():
                 hw['led_red'].value(0)
                 hw['led_green'].value(1)
 
-            # === 9. Send telemetry via wireless (rotation schedule) ===
+            # === 10. Send telemetry via wireless (rotation schedule) ===
             if (hw['nrf'] and pack_power and
                     time.ticks_diff(now, last_wireless_ms) >= config.WIRELESS_SEND_MS):
                 last_wireless_ms = now
@@ -479,6 +527,10 @@ def main():
                     'rejected': sort_stats.get('rejected', 0),
                     'reject_rate': sort_stats.get('reject_rate', 0),
                     'faults_today': fault_stats.get('faults_today', 0),
+                    'comparison_done': comparison['done'],
+                    'dumb_avg_W': comparison['dumb_avg_W'],
+                    'smart_avg_W': comparison['smart_avg_W'],
+                    'savings_pct': comparison['savings_pct'],
                 }
                 print(json.dumps(serial_data))
 
