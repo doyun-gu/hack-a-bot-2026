@@ -28,27 +28,178 @@
 
 ---
 
-## 2. Tremor-Stabilising Platform
+## 2. Tremor-Stabilising Platform — "SteadyHand"
 
-**Theme:** Assistive Technology
-**One-liner:** IMU detects hand tremor on a wearable, wirelessly commands servos on a platform/tray to counter-move and stabilise objects (e.g., a cup).
+**Theme:** Assistive Technology / Autonomy (semi-autonomous)
+**One-liner:** A self-levelling platform that uses inverse kinematic compensation to cancel hand tremor and instability — like noise-cancelling headphones, but for physical movement.
 
-| Pico A (Wearable) | Pico B (Platform) |
+### The Core Principle
+
+```
+Noise cancelling:    Mic detects sound  → speaker produces inverse wave  → silence
+SteadyHand:          IMU detects tilt   → servos produce inverse tilt    → platform stays level
+```
+
+IMU measures the unwanted movement. Servos produce the exact opposite. The object on the platform doesn't move.
+
+### Who Uses This? — Healthcare & Beyond
+
+| End User | Problem | How SteadyHand Helps |
+|---|---|---|
+| **Parkinson's patients** | 6.1 million people worldwide. Resting tremor (4-6Hz) makes eating, drinking, carrying objects humiliating and dangerous | Platform keeps cup/spoon/plate level — restores independence and dignity at mealtimes |
+| **Essential tremor patients** | Most common movement disorder — 7 million in US alone. Hands shake during intentional movement | Stabilises objects during purposeful tasks (writing, eating, holding phone) |
+| **Elderly with age-related tremor** | Affects 15-25% of adults over 65. Often untreated because it's "just aging" | Simple assistive device for daily living — no medication side effects |
+| **Post-stroke patients** | 25-50% develop upper limb tremor. Rehab takes months-years | Immediate functional aid during recovery — eat independently while rehabbing |
+| **Surgeons & dentists** | Even micro-tremors affect precision in microsurgery, dental work, suturing | Instrument stabilisation platform — demonstrated concept used in Da Vinci surgical robots |
+| **Lab technicians** | Pipetting, handling samples, pouring precise volumes — tremor causes errors | Stabilised work surface for precision liquid handling |
+| **Photographers / videographers** | Camera shake ruins shots. Existing gimbals are expensive (£200+) | DIY camera stabiliser for £15 in components — proof of concept for low-cost gimbal |
+| **Soldiers / veterans with PTSD** | Stress-induced tremor affects daily tasks. Stigma prevents seeking help | Discreet assistive device — no visible "medical equipment" look |
+| **Cerebral palsy patients** | Involuntary movements affect 17 million people globally | Stabilised surface for eating, writing, using devices |
+| **Multiple sclerosis patients** | Intention tremor worsens when reaching for objects — the exact moment you need stability | Compensates for the reach-triggered tremor that makes grasping difficult |
+
+### Architecture
+
+| Pico A — Wearable Sensor (on hand/wrist) | Pico B — Stabilised Platform (holds objects) |
 |---|---|
-| BMI160 IMU — tremor detection | PCA9685 + 2 MG90S servos — 2-axis tilt platform |
-| nRF24L01+ TX | OLED — tremor amplitude, stability score |
-| | nRF24L01+ RX |
+| BMI160 IMU — roll, pitch, gyro at 100Hz | PCA9685 + 2x MG90S servos — 2-axis tilt compensation |
+| nRF24L01+ TX — streams orientation data | nRF24L01+ RX — receives tilt data |
+| Joystick — sensitivity adjust, manual override | OLED — real-time display (see below) |
+| LED — status indicator | LEDs — stability indicator (green/yellow/red) |
+
+### How the OLED Display Is Used
+
+The 0.96" OLED (128x64 pixels) serves as a **real-time clinical dashboard.** Four display modes, cycled with joystick press:
+
+**Mode 1 — Live Spirit Level (default)**
+```
+┌──────────────────────┐
+│  STEADYHAND  [LIVE]  │
+│                      │
+│      ┌─────────┐     │
+│      │    o    │     │  ← dot shows current tilt
+│      │  ──┼──  │     │     crosshair = level target
+│      │    │    │     │     dot ON crosshair = perfect
+│      └─────────┘     │
+│  Roll: -2.3°  OK     │
+│  Pitch: +1.1° OK     │
+└──────────────────────┘
+```
+A visual spirit level — the dot moves as the hand tilts. When the platform is compensating correctly, the dot stays centred. Judges can immediately SEE the stabilisation working.
+
+**Mode 2 — Tremor Waveform**
+```
+┌──────────────────────┐
+│  TREMOR WAVEFORM     │
+│                      │
+│  ∿∿∿╲╱∿∿∿∿∿∿∿∿∿∿   │  ← raw tremor (before)
+│  ─────────────────   │  ← after compensation (flat)
+│                      │
+│  Amplitude: 4.2°     │
+│  Frequency: 4.8Hz    │
+│  Reduction: 78%      │
+└──────────────────────┘
+```
+Shows the raw tremor signal vs the compensated output — exactly like showing noise-cancelling before/after. The **reduction percentage** is the key metric. Judges can see "78% tremor reduction" quantified.
+
+**Mode 3 — Session Statistics**
+```
+┌──────────────────────┐
+│  SESSION STATS       │
+│                      │
+│  Duration:  00:04:32 │
+│  Avg tremor: 3.8°    │
+│  Peak tremor: 12.1°  │
+│  Stability:  82%     │
+│  Corrections: 1,847  │
+│  Wireless:   98.2%   │
+└──────────────────────┘
+```
+Tracks the session over time. "Stability score" = percentage of time platform was within ±2° of level. This is the number a clinician would use to assess a patient's tremor severity over time.
+
+**Mode 4 — Calibration**
+```
+┌──────────────────────┐
+│  CALIBRATION         │
+│                      │
+│  Place on flat       │
+│  surface and press   │
+│  joystick to zero.   │
+│                      │
+│  > [CALIBRATE]       │
+│  Sensitivity: ███░░  │
+└──────────────────────┘
+```
+Joystick sets the "level" reference point (not always flat — a tilted work surface is fine). Joystick left/right adjusts servo sensitivity (aggressive vs smooth compensation). This lets different patients tune it to their tremor type.
+
+### Control Loop Detail
+
+```
+PICO A (100Hz loop — every 10ms):
+  1. Read BMI160 accel + gyro
+  2. Complementary filter → roll, pitch (smooth, drift-free)
+  3. Pack into struct: { roll, pitch, tremor_amplitude, timestamp }
+  4. Send via nRF24L01+ (SPI)
+
+     ~~~~ 2.4 GHz wireless (~2ms latency) ~~~~
+
+PICO B (receives + actuates):
+  1. Receive packet from nRF24L01+
+  2. PID controller:
+     error = target_angle - received_angle
+     correction = Kp×error + Kd×(error - prev_error)/dt
+  3. Map correction → servo PWM via PCA9685 (I2C)
+     servo_angle = 90° + correction  (90° = centre)
+  4. Update OLED display (every 100ms — don't slow the servo loop)
+  5. Update stability score, log tremor data
+```
+
+**Total latency budget:** IMU read (1ms) + filter (0.1ms) + wireless TX/RX (2ms) + PID (0.1ms) + servo command (0.5ms) = **~4ms.** Well within the 20ms needed for effective compensation.
+
+### Mechanical Build
+
+```
+SIDE VIEW:                           TOP VIEW:
+
+  ┌─────────────────┐ ← top plate    ┌─────────────────┐
+  │  cup / object   │   (perfboard)  │                 │
+  └────┬───────┬────┘                │   SERVO A ──────┤ push rod
+       │ pivot │                     │       │         │
+       │   ●   │ ← M3 bolt+nut      │    ●  pivot     │
+       │       │    (loose=joint)    │       │         │
+  ┌────┴───────┴────┐                │   SERVO B ──────┤ push rod
+  │  SERVO A  B     │                │                 │
+  │  base plate     │                └─────────────────┘
+  └─────────────────┘
+
+  Servo A arm pushes left edge up/down → controls ROLL
+  Servo B arm pushes front edge up/down → controls PITCH
+  Centre pivot allows 2-axis tilt
+
+  Push rods: 22AWG solid wire bent into Z-shape
+  Connects servo horn → hole in top plate edge
+```
+
+### Demo Script
+
+1. **Setup:** Place SteadyHand on table. Put a cup of water on the platform. OLED shows spirit level — dot is centred
+2. **Pick it up:** Hold the base in your hand. Platform auto-levels — cup stays flat. Spirit level dot stays centred even as your hand moves
+3. **Tilt test:** Deliberately tilt your hand left, right, forward, back. Servo arrows move opposite — cup stays level
+4. **Tremor simulation:** Shake your hand gently. Show the OLED waveform mode — raw tremor line is shaky, compensated line is flat. "78% tremor reduction"
+5. **Walk test:** Walk across the room holding it. Cup stays level, no spilling
+6. **Judge tries it:** Hand it to a judge. They feel the servos fighting to keep it level. Immediate understanding
+
+### Scoring
 
 | Category | Score | Why |
 |---|---|---|
-| Problem Fit (30) | **29** | Parkinson's / essential tremor — deeply human, judges feel the impact immediately |
-| Live Demo (25) | **22** | Shake your hand, platform stays level. Impressive but less interactive than the gripper |
-| Technical (20) | **17** | Real-time tremor filtering (high-pass), inverse compensation, fast wireless loop |
-| Innovation (15) | **14** | Clever signal processing angle — not just moving servos, actively cancelling motion |
-| Docs (10) | **9** | Signal flow diagrams, filter design |
-| **Total** | **91** | |
+| Problem Fit (30) | **29** | Parkinson's + essential tremor + elderly + surgical precision — massive affected population, deeply emotional, real daily impact |
+| Live Demo (25) | **24** | Cup of water stays level while you shake your hand. Judge tries it themselves. OLED shows quantified tremor reduction. Three demo moments |
+| Technical (20) | **19** | Complementary filter, PID control loop, 100Hz sampling, wireless streaming, real-time servo compensation, 4ms latency budget |
+| Innovation (15) | **14** | "Noise cancelling for physical movement" — reframing a known concept (gimbal) as medical assistive technology with clinical metrics |
+| Docs (10) | **9** | PID diagrams, control loop flowchart, signal processing visualisation, mechanical assembly drawing |
+| **Total** | **95** | |
 
-**Risk:** Tremor compensation needs very low latency (<20ms). MG90S may not respond fast enough for fine tremors. Mitigate: focus on slow/large tremors, show improvement not perfection.
+**Risk:** MG90S servos can't cancel high-frequency tremors (>6Hz). Mitigate: focus demo on slow/medium tremor and postural instability (most common clinical need). Show the percentage improvement, not perfection. Frame as "proof of concept — production version uses faster actuators."
 
 ---
 
@@ -325,10 +476,10 @@
 
 | Rank | Idea | Total | Best For | Weakest Area |
 |------|------|-------|----------|--------------|
-| **1** | **Silent Distress Signal** | **94** | Problem Fit (29) — domestic violence | Innovation (14) |
-| **2** | **Fire Escape Direction Finder** | **93** | Technical (19) — RSSI + autonomous logic | Demo (23) — needs temp trigger |
-| 3 | Gesture-Controlled Gripper Arm | **91** | Demo (24) — judge wears the glove | Innovation (12) |
-| 3 | Tremor-Stabilising Platform | **91** | Problem Fit (29) — Parkinson's | Technical (17) |
+| **1** | **Tremor-Stabilising "SteadyHand"** | **95** | Problem Fit (29) + Technical (19) + Demo (24) | — |
+| **2** | **Silent Distress Signal** | **94** | Problem Fit (29) — domestic violence | Innovation (14) |
+| **3** | **Fire Escape Direction Finder** | **93** | Technical (19) — RSSI + autonomous logic | Demo (23) — needs temp trigger |
+| 4 | Gesture-Controlled Gripper Arm | **91** | Demo (24) — judge wears the glove | Innovation (12) |
 | 5 | Elderly Fall Detection | **89** | Problem Fit (29) — #1 elderly killer | Innovation (11) — products exist |
 | 5 | Wireless Braille Display | **89** | Innovation (14) — unique servo use | Technical (16) |
 | 7 | Self-Levelling Cargo Platform | **88** | Demo (24) — self-correcting | Problem Fit (23) |
