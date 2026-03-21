@@ -1,7 +1,0 @@
-/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/blink/build/_deps/picotool/picotool
-/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/blink/build/_deps/picotool/picotoolTargets.cmake
-/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/blink/build/_deps/picotool/picotoolTargets-release.cmake
-/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/blink/build/_deps/picotool/picotoolConfig.cmake
-/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/blink/build/_deps/picotool/picotoolConfigVersion.cmake
-/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/blink/build/_deps/picotool/enc_bootloader.elf
-/Users/doyungu/Developer/hack-a-bot-2026/src/master-pico/c_sdk/blink/build/_deps/picotool/enc_bootloader_mbedtls.elf
