@@ -21,5 +21,9 @@ __pycache__/
 .venv/
 venv/
 
+# Database (local data — not for GitHub)
+*.db
+*.sqlite
+
 # macOS
 .DS_Store
