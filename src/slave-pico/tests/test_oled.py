@@ -31,6 +31,73 @@ try:
                    height=config.OLED_HEIGHT, addr=config.SSD1306_ADDR)
     print(f"OLED OK: {config.OLED_WIDTH}x{config.OLED_HEIGHT}\n")
 
+    # Boot animation — loading sequence
+    print("Boot animation...")
+
+    # Phase 1: Logo fade in (GridBox text appears letter by letter)
+    oled.fill(0)
+    oled.show()
+    time.sleep_ms(300)
+
+    title = "GridBox"
+    for i in range(len(title) + 1):
+        oled.fill(0)
+        oled.text(title[:i], 36, 24, 1)
+        oled.show()
+        led.toggle()
+        time.sleep_ms(150)
+    time.sleep_ms(500)
+
+    # Phase 2: Subtitle slides in
+    oled.text("SCADA System", 20, 38, 1)
+    oled.show()
+    time.sleep_ms(800)
+
+    # Phase 3: Loading bar animation
+    oled.fill(0)
+    oled.text("GridBox", 36, 8, 1)
+    oled.text("SCADA System", 20, 20, 1)
+    oled.hline(14, 36, 100, 1)
+    oled.show()
+    time.sleep_ms(300)
+
+    steps = [
+        ("I2C Bus", 15),
+        ("OLED", 30),
+        ("IMU", 45),
+        ("PCA9685", 55),
+        ("nRF24L01+", 70),
+        ("ADC", 80),
+        ("MOSFETs", 90),
+        ("Ready", 100),
+    ]
+
+    for label, pct in steps:
+        bar_w = int(pct * 100 / 100)
+        oled.fill_rect(14, 38, 100, 6, 0)  # clear bar area
+        oled.rect(14, 38, 100, 6, 1)  # bar outline
+        oled.fill_rect(14, 38, bar_w, 6, 1)  # fill
+        oled.fill_rect(0, 50, 128, 14, 0)  # clear text area
+        oled.text(f"{label}...", 14, 52, 1)
+        oled.show()
+        led.toggle()
+        print(f"  [{pct:3d}%] {label}")
+        time.sleep_ms(250)
+
+    # Phase 4: Ready flash
+    for _ in range(3):
+        oled.invert(True)
+        time.sleep_ms(80)
+        oled.invert(False)
+        time.sleep_ms(80)
+
+    oled.fill(0)
+    oled.text("  SYSTEM READY", 0, 28, 1)
+    oled.show()
+    led.value(1)
+    time.sleep(1)
+    print("Boot complete!\n")
+
     # Screen 1: Title + status (3 seconds)
     oled.fill(0)
     oled.rect(0, 0, 128, 64, 1)
