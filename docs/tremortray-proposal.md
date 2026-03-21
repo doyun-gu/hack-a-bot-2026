@@ -758,12 +758,202 @@ stateDiagram-v2
 
 ---
 
+## Evolution: NeuroSync Multi-Test Diagnostic
+
+The flat tray is the starting point. The full vision is a **4-test interactive diagnostic station:**
+
+```mermaid
+graph TD
+    DEVICE["NeuroSync Device"] --> T1["TEST 1: Stability Hold<br/>Hold level for 30s<br/>IMU measures resting tremor<br/>Ball shows stability visually"]
+    DEVICE --> T2["TEST 2: Target Tracking<br/>Servo pointer moves<br/>Patient follows with joystick<br/>Measures intention tremor"]
+    DEVICE --> T3["TEST 3: Reaction Challenge<br/>Servo suddenly tilts device<br/>Patient corrects<br/>Measures reaction time + recovery"]
+    DEVICE --> T4["TEST 4: Pattern Reproduction<br/>OLED shows joystick sequence<br/>Patient reproduces it<br/>Measures motor planning"]
+
+    T1 --> REPORT["Combined Diagnostic Report"]
+    T2 --> REPORT
+    T3 --> REPORT
+    T4 --> REPORT
+
+    REPORT --> CLASS["Condition Classification:<br/>Different conditions produce<br/>different patterns across 4 tests"]
+
+    style DEVICE fill:#f39c12,color:#fff,stroke-width:3px
+    style T1 fill:#e74c3c,color:#fff
+    style T2 fill:#3498db,color:#fff
+    style T3 fill:#27ae60,color:#fff
+    style T4 fill:#9b59b6,color:#fff
+    style REPORT fill:#1a1a2e,color:#0f8
+    style CLASS fill:#e67e22,color:#fff
+```
+
+### Condition Differentiation Matrix
+
+| Condition | Test 1 (Stability) | Test 2 (Tracking) | Test 3 (Reaction) | Test 4 (Pattern) |
+|---|---|---|---|---|
+| **Healthy** | >85% | >80% | <250ms | >85% |
+| **Parkinson's** | Low (40-70%) | OK (70-80%) | Slow (>400ms) | Low (50-70%) |
+| **Essential tremor** | OK at rest (80%+) | Low (50-65%) | Normal (<300ms) | OK (75%+) |
+| **Cerebellar** | Variable | Very low (<50%) | Slow + overshoot | Low (40-60%) |
+| **Stress/caffeine** | Mild drop (75-85%) | OK (75%+) | Fast (<200ms) | OK (80%+) |
+| **Fatigue** | Drops over time | Drops over time | Slow (>350ms) | Low at end |
+| **Intoxicated** | Very low (<50%) | Very low (<40%) | Very slow (>500ms) | Very low (<40%) |
+
+---
+
+## Platform Applications (Beyond Medical)
+
+Same core technology, different software modes:
+
+```mermaid
+graph TD
+    CORE["Core Technology<br/>IMU + Servos + Wireless + Display<br/>Measures hand micro-movements"] --> MED["MEDICAL<br/>Tremor diagnosis<br/>Condition classification<br/>Rehab tracking<br/>Treatment monitoring"]
+    CORE --> SEC["SECURITY<br/>Biometric hand-signature<br/>Unique tremor = identity<br/>Can't fake neurological pattern<br/>Duress detection"]
+    CORE --> SAFETY["WORKPLACE SAFETY<br/>Pre-shift fitness test<br/>Fatigue screening<br/>Impairment detection<br/>Aviation, mining, surgery"]
+    CORE --> EDU["EDUCATION<br/>Motor skills assessment<br/>Child development tracking<br/>Neuroscience teaching<br/>Sports performance"]
+
+    style CORE fill:#f39c12,color:#fff,stroke-width:3px
+    style MED fill:#e74c3c,color:#fff
+    style SEC fill:#3498db,color:#fff
+    style SAFETY fill:#27ae60,color:#fff
+    style EDU fill:#9b59b6,color:#fff
+```
+
+### Security: Biometric Hand-Signature
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant D as NeuroSync
+    participant B as Base Station
+
+    Note over U,B: ENROLLMENT
+    U->>D: Holds device 10 seconds
+    D->>D: Captures tremor fingerprint
+    D->>B: Stores as "User A" profile
+
+    Note over U,B: AUTHENTICATION
+    U->>D: Holds device 5 seconds
+    D->>B: Sends new pattern
+    B->>B: Correlation > 85%?
+    B-->>U: MATCH — Access granted
+
+    Note over U,B: IMPOSTER
+    U->>D: Different person holds device
+    D->>B: Pattern doesn't match
+    B-->>U: DENIED — Wrong hand signature
+```
+
+---
+
+## Reaction Wheel Evolution (If Motors Available)
+
+If DC motors are available, the device evolves from servo-based to **reaction wheel stabilisation** — spacecraft-grade technology:
+
+```mermaid
+graph TD
+    subgraph REACTION["Reaction Wheel Concept"]
+        MOTOR["DC Motor spins<br/>heavy flywheel disc"]
+        MOMENTUM["Flywheel stores<br/>angular momentum"]
+        CONTROL["Speed up → platform tilts one way<br/>Slow down → platform tilts other way<br/>IMU feedback → PID controls speed"]
+        RESULT["Platform SELF-BALANCES<br/>using angular momentum<br/>No servos needed for stabilisation"]
+
+        MOTOR --> MOMENTUM --> CONTROL --> RESULT
+    end
+
+    style REACTION fill:#f8f9fa,stroke:#333,stroke-width:2px
+    style MOTOR fill:#e67e22,color:#fff
+    style MOMENTUM fill:#3498db,color:#fff
+    style CONTROL fill:#9b59b6,color:#fff
+    style RESULT fill:#27ae60,color:#fff
+```
+
+### Three Operating Modes with Motor
+
+```mermaid
+graph LR
+    subgraph M1["MODE 1: Self-Balance Demo"]
+        M1D["Place device on table tilted<br/>Flywheel spins up<br/>Device levels itself<br/>Push it — it returns<br/><br/>Same tech as ISS attitude control"]
+    end
+
+    subgraph M2["MODE 2: Diagnostic Tests"]
+        M2D["All 4 NeuroSync tests<br/>Motor adds resistance test<br/>(turn dial against force)<br/>Flywheel adds perturbation<br/>(gyroscopic challenges)"]
+    end
+
+    subgraph M3["MODE 3: Active Assist"]
+        M3D["Patient holds device<br/>Flywheel assists stability<br/>Assist level adapts to need<br/><br/>ASSIST AMOUNT = TREMOR SEVERITY<br/>5% assist = steady hands<br/>60% assist = moderate tremor<br/>90% assist = severe tremor"]
+    end
+
+    style M1 fill:#e74c3c,color:#fff
+    style M2 fill:#3498db,color:#fff
+    style M3 fill:#27ae60,color:#fff
+```
+
+### Motor Components Needed
+
+| Component | Purpose | Notes |
+|---|---|---|
+| DC motor (6-12V) | Spins flywheel | Any small motor with decent RPM |
+| L298N or L293D motor driver | Speed + direction control from Pico PWM | Standard motor driver board |
+| Heavy disc/wheel | Flywheel mass for angular momentum | Stack washers, coins, or cut metal disc |
+| Motor mount | Attach motor to platform | M3 screws from kit |
+
+### Demo Impact with Reaction Wheel
+
+| Step | What Judges See |
+|---|---|
+| 1 | Device on table, tilted. Press button. Flywheel spins up. **Device levels itself** |
+| 2 | "This is reaction wheel stabilisation — same technology as the International Space Station" |
+| 3 | Push the device — it **resists and returns to level** |
+| 4 | Judge holds device. It self-balances while measuring their tremor |
+| 5 | OLED: "Assist level: 12% — your hands are steady" |
+| 6 | Run full diagnostic tests. Complete report |
+| 7 | "Spacecraft engineering meets healthcare. One device, two industries, £15" |
+
+### Scoring with Reaction Wheel
+
+| Category | Without Motor | With Reaction Wheel |
+|---|---|---|
+| Problem Fit (30) | 29 | **29** (same) |
+| Live Demo (25) | 25 | **25** (even more dramatic) |
+| Technical (20) | 19 | **20** (maximum — reaction wheel PID is graduate-level) |
+| Innovation (15) | 15 | **15** (spacecraft tech at hackathon = unforgettable) |
+| Docs (10) | 9 | **9** |
+| **Total** | **97** | **98** |
+
+---
+
+## Build Priority (Final)
+
+| Priority | Feature | Hours | Status |
+|---|---|---|---|
+| **P0 — Must** | nRF24L01+ wireless link | 1h | Core |
+| **P0 — Must** | BMI160 IMU + complementary filter | 1h | Core |
+| **P0 — Must** | PCA9685 servo control + auto-calibration | 1h | Core |
+| **P0 — Must** | Test 1: Stability hold + basic scoring | 1h | Core |
+| **P1 — Core** | Frequency detection (zero-crossing) | 1h | Diagnostic |
+| **P1 — Core** | Adaptive servo difficulty (real-time) | 1h | Autonomy |
+| **P1 — Core** | Gamified scoring (points, streaks, stars) | 1h | Unique |
+| **P2 — Wow** | Tremor fingerprint polar plot on OLED | 1h | Unique |
+| **P2 — Wow** | Test 3: Reaction challenge (servo perturbation) | 1h | Diagnostic |
+| **P2 — Wow** | Condition classification | 30min | Clinical |
+| **P2 — Wow** | Test 2: Target tracking (servo pointer + joystick) | 1h | Diagnostic |
+| **P3 — Stretch** | Biometric authentication mode | 1h | Platform |
+| **P3 — Stretch** | Biofeedback therapy mode | 1h | Therapeutic |
+| **P3 — Stretch** | Reaction wheel (if motor available) | 2h | Engineering |
+| **Always** | Physical assembly | 1.5h | Parallel |
+| **Always** | Documentation + diagrams | 1h | End |
+
+---
+
 ## Future Vision (Tell Judges)
 
 > "Today it's a hackathon prototype on a perfboard. Tomorrow it's a £20 device in every GP clinic, care home, and physiotherapy practice.
 >
 > Patients take a 30-second test at every visit. Their tremor fingerprint is stored. Doctors see a graph: 'Your tremor has improved 15% since starting medication.' For the first time, treatment effectiveness is measured objectively — not guessed at.
 >
+> The same technology secures facilities with biometric hand-signatures that can't be faked. It screens pilots for fatigue before flights. It teaches patients to control their own tremor through biofeedback.
+>
 > There are 10 million people with Parkinson's. There are 7 million with essential tremor. Today, their doctor watches them hold a cup and says 'looks about the same.' We replace that with a number, a frequency, a pattern, and a trend.
 >
-> And it all started with a perfboard, two servos, and an IMU."
+> And if we add a motor and a flywheel — the same physics that controls the International Space Station stabilises a patient's hand.
+>
+> All from a perfboard, two servos, and an IMU."

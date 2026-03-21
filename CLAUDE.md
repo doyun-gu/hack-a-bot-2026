@@ -53,17 +53,18 @@ hack-a-bot-2026/
 
 ## Current State
 
-- **Phase:** Idea development — two lead proposals with full Mermaid diagrams
-- **Lead idea: TremorTray** (96pts) — hand tremor diagnostic tool
+- **Phase:** Idea development — lead proposal evolving into NeuroSync
+- **Lead idea: NeuroSync** (97-98pts) — multi-test neurological diagnostic platform
   - Full proposal: `docs/tremortray-proposal.md`
-  - Dual-sensor: IMU (on tray) + joystick (under tray as position sensor)
-  - Servo-controlled difficulty levels (flat → tilt → dynamic rocking)
-  - Clinical severity scoring (replaces subjective UPDRS scale)
-  - Judge holds tray and gets their own tremor score = best possible demo
-- **Alternative: SteadyHand** (95pts) — tremor stabiliser
-  - Full proposal: `docs/steadyhand-proposal.md`
+  - 4 diagnostic tests: stability, target tracking, reaction, pattern reproduction
+  - 6 uniqueness layers: dual sensor, frequency analysis, adaptive difficulty, gamification, tremor fingerprint, biofeedback
+  - Platform technology: medical + security (biometric) + workplace safety
+  - Condition classification matrix (7 conditions from test patterns)
+  - Reaction wheel evolution if motors available (spacecraft-grade stabilisation)
+  - Waiting for user's full extra components list to finalise form factor
+- **Alternative: SteadyHand** (95pts) — `docs/steadyhand-proposal.md`
 - **Other ideas:** `docs/idea-shortlist.md` (10 ideas scored)
-- **Next:** Develop TremorTray further, scaffold firmware, wireless link first
+- **Next:** Get extra components list, finalise form factor, begin firmware
 
 ## Dev Commands
 
