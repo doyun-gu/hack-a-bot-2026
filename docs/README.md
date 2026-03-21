@@ -2,13 +2,19 @@
 
 Quick guide to what's in this folder.
 
-## Lead Ideas
+## Main Design Document
+
+| File | What It Contains |
+|---|---|
+| [`gridbox-design.md`](gridbox-design.md) | **GridBox — Main Design Document (96/100).** Complete architecture, pin mapping, wiring diagrams, software structure, energy recycling logic, fault detection, demo scenario, EEE theory, build timeline, BOM. **Start here.** |
+
+## Proposals (Idea Development)
 
 | File | Score | What It Contains |
 |---|---|---|
-| [`tremortray-proposal.md`](tremortray-proposal.md) | **98/100** | **NeuroSync** — multi-test neurological diagnostic platform. Tremor fingerprint, gamification, adaptive difficulty, condition classification, reaction wheel. Full Mermaid diagrams |
-| [`gridbox-proposal.md`](gridbox-proposal.md) | **96/100** | **GridBox** — smart energy recycling microgrid. DC motors as generators, servo circuit breakers, IMU fault detection, SCADA dashboard, autonomous load shedding. Full Mermaid diagrams |
-| [`steadyhand-proposal.md`](steadyhand-proposal.md) | **95/100** | **SteadyHand** — tremor-stabilising assistive device. Dual-mode (stabiliser + rehab), household applications, PID control |
+| [`gridbox-proposal.md`](gridbox-proposal.md) | **96** | GridBox detailed proposal — factory problems, cost comparison, creativity defense, IMU applications, EEE theory deep dive |
+| [`tremortray-proposal.md`](tremortray-proposal.md) | **98** | NeuroSync — neurological diagnostic (alternative idea) |
+| [`steadyhand-proposal.md`](steadyhand-proposal.md) | **95** | SteadyHand — tremor stabiliser (alternative idea) |
 
 ## Reference
 
