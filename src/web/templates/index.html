@@ -43,18 +43,6 @@
         .health-dot.fault { background: #f85149; }
         .health-dot.off { background: #484f58; border: 1px dashed #484f58; background: transparent; }
 
-        /* ─── System Overview Row ─── */
-        .overview-row {
-            display: flex; align-items: center; gap: 16px; padding: 12px 20px;
-            background: #161b22; border-bottom: 1px solid #21262d; flex-wrap: wrap;
-        }
-        .ov-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .ov-item-gauge { display: flex; align-items: center; gap: 8px; }
-        .ov-label { font-size: 10px; font-weight: 500; color: #484f58; text-transform: uppercase; letter-spacing: 0.5px; }
-        .ov-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: #c9d1d9; }
-        .ov-unit { font-size: 11px; font-weight: 400; color: #8b949e; }
-        .ov-sep { width: 1px; height: 36px; background: #21262d; }
-
         /* ─── State Badge ─── */
         .state { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 4px; letter-spacing: 0.5px; }
         .state-NORMAL { background: rgba(63,185,80,0.1); color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
@@ -162,66 +150,6 @@
         </div>
     </div>
 
-    <!-- System Overview Row -->
-    <div class="overview-row">
-        <div class="ov-item">
-            <span class="state state-UNKNOWN" id="state-badge">UNKNOWN</span>
-        </div>
-        <div class="ov-sep"></div>
-        <div class="ov-item">
-            <span class="ov-label">Bus Voltage</span>
-            <div class="ov-item-gauge">
-                <svg width="40" height="40" viewBox="0 0 40 40">
-                    <circle cx="20" cy="20" r="16" fill="none" stroke="#21262d" stroke-width="3"/>
-                    <circle cx="20" cy="20" r="16" fill="none" stroke="#3fb950" stroke-width="3"
-                        stroke-dasharray="100.53" stroke-dashoffset="100.53"
-                        transform="rotate(-90 20 20)" id="bus-gauge-fill"/>
-                </svg>
-                <div>
-                    <span class="ov-val" id="bus-v">--</span>
-                    <span class="ov-unit">V</span>
-                    <span class="badge badge-green" id="bus-badge" style="margin-left:4px">OK</span>
-                </div>
-            </div>
-        </div>
-        <div class="ov-sep"></div>
-        <div class="ov-item">
-            <span class="ov-label">Total Power</span>
-            <div class="ov-item-gauge">
-                <svg width="40" height="40" viewBox="0 0 40 40">
-                    <circle cx="20" cy="20" r="16" fill="none" stroke="#21262d" stroke-width="3"/>
-                    <circle cx="20" cy="20" r="16" fill="none" stroke="#3fb950" stroke-width="3"
-                        stroke-dasharray="100.53" stroke-dashoffset="100.53"
-                        transform="rotate(-90 20 20)" id="power-gauge-fill"/>
-                </svg>
-                <div>
-                    <span class="ov-val" id="total-w">--</span>
-                    <span class="ov-unit">W</span>
-                </div>
-            </div>
-        </div>
-        <div class="ov-sep"></div>
-        <div class="ov-item">
-            <span class="ov-label">Efficiency</span>
-            <div><span class="ov-val" id="efficiency">--</span><span class="ov-unit">%</span></div>
-        </div>
-        <div class="ov-sep"></div>
-        <div class="ov-item">
-            <span class="ov-label">IMU</span>
-            <span class="badge badge-green" id="imu-badge">HEALTHY</span>
-        </div>
-        <div class="ov-sep"></div>
-        <div class="ov-item">
-            <span class="ov-label">Energy Sig</span>
-            <span class="badge badge-green" id="es-badge">HEALTHY</span>
-        </div>
-        <div class="ov-sep"></div>
-        <div class="ov-item">
-            <span class="ov-label">Uptime</span>
-            <div><span class="ov-val" id="uptime" style="font-size:16px">0</span><span class="ov-unit">sec</span></div>
-        </div>
-    </div>
-
     <!-- Main Two-Column Layout -->
     <div class="main-content">
         <!-- Left Column: Motors & Actuators -->
@@ -278,9 +206,9 @@
             <div class="card">
                 <div class="card-header"><h3>Faults &amp; Diagnostics</h3><span class="badge badge-green" id="fault-badge">CLEAR</span></div>
                 <div style="display:flex;gap:20px;margin-bottom:8px">
-                    <div><span class="ov-label">Faults Today</span><div class="metric"><span class="val c-green" id="faults" style="font-size:20px">0</span></div></div>
-                    <div><span class="ov-label">IMU RMS</span><div class="metric"><span class="val c-green" id="imu-rms" style="font-size:20px">--</span><span class="unit">g</span></div></div>
-                    <div><span class="ov-label">ES Divergence</span><div class="metric"><span class="val c-green" id="es-score" style="font-size:20px">--</span></div></div>
+                    <div><span style="font-size:10px;font-weight:500;color:#484f58;text-transform:uppercase;letter-spacing:0.5px">Faults Today</span><div class="metric"><span class="val c-green" id="faults" style="font-size:20px">0</span></div></div>
+                    <div><span style="font-size:10px;font-weight:500;color:#484f58;text-transform:uppercase;letter-spacing:0.5px">IMU RMS</span><div class="metric"><span class="val c-green" id="imu-rms" style="font-size:20px">--</span><span class="unit">g</span></div></div>
+                    <div><span style="font-size:10px;font-weight:500;color:#484f58;text-transform:uppercase;letter-spacing:0.5px">ES Divergence</span><div class="metric"><span class="val c-green" id="es-score" style="font-size:20px">--</span></div></div>
                 </div>
                 <div id="fault-log"><div class="no-faults">No fault events recorded</div></div>
             </div>
@@ -318,6 +246,14 @@
         <div id="power-bar"></div>
         <div id="imu-bar"></div>
         <div id="es-bar"></div>
+        <span id="bus-v"></span>
+        <span id="bus-badge" class="badge"></span>
+        <span id="total-w"></span>
+        <span id="efficiency"></span>
+        <span id="imu-badge" class="badge"></span>
+        <span id="es-badge" class="badge"></span>
+        <span id="uptime"></span>
+        <span id="mode"></span>
     </div>
 
     <script>
@@ -618,11 +554,9 @@
                 const bb = document.getElementById('bus-badge');
                 bb.textContent = bv > 4.2 ? 'OK' : bv > 3.8 ? 'LOW' : 'CRITICAL';
                 bb.className = 'badge ' + badgeClass(6 - bv, 1.5, 2.5);
-                // SVG gauge
-                const busP = Math.min(bv / 6 * 100, 100);
+                // SVG gauge (hidden — overview row removed)
                 const busFill = document.getElementById('bus-gauge-fill');
-                busFill.setAttribute('stroke-dashoffset', CIRC * (1 - busP / 100));
-                busFill.setAttribute('stroke', rawColor(6 - bv, 1.5, 2.5));
+                if (busFill) { busFill.setAttribute('stroke-dashoffset', CIRC * (1 - Math.min(bv / 6, 1))); busFill.setAttribute('stroke', rawColor(6 - bv, 1.5, 2.5)); }
 
                 // Efficiency — smoothed
                 const ef = smoothVal('eff', d.efficiency || 0, 0.1);
@@ -659,11 +593,9 @@
                 document.getElementById('total-w').className = 'ov-val ' + cClass(tw, 6, 10);
                 document.getElementById('power-bar').style.width = Math.min(tw / 12 * 100, 100) + '%';
                 document.getElementById('power-bar').className = 'progress-fill ' + bgClass(tw, 6, 10);
-                // SVG gauge
-                const pwP = Math.min(tw / 12 * 100, 100);
+                // SVG gauge (hidden — overview row removed)
                 const pwFill = document.getElementById('power-gauge-fill');
-                pwFill.setAttribute('stroke-dashoffset', CIRC * (1 - pwP / 100));
-                pwFill.setAttribute('stroke', rawColor(tw, 6, 10));
+                if (pwFill) { pwFill.setAttribute('stroke-dashoffset', CIRC * (1 - Math.min(tw / 12, 1))); pwFill.setAttribute('stroke', rawColor(tw, 6, 10)); }
 
                 // IMU — smoothed
                 const ir = smoothVal('imu', d.imu_rms || 0, 0.1);
