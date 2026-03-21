@@ -390,22 +390,358 @@ graph LR
     style D6 fill:#e67e22,color:#fff
 ```
 
-**Key moment:** Judge holds the tray and gets **their own tremor score.** They become the patient. They'll never forget that.
+**Key demo moments:**
+1. Judge holds tray, gets **personal tremor score** — they become the patient
+2. Two judges compete — social, memorable
+3. Servo adapts difficulty in real-time — judges SEE the autonomy
+4. Tremor fingerprint appears on OLED — personal, unique, beautiful
+5. Condition classification — "Pattern suggests: Physiological tremor (stress)"
 
 **Drop line:** *"A clinical tremor assessment costs £10,000. We built one for £15."*
 
 ---
 
-## Scoring Breakdown
+## What Makes TremorTray Uncopyable
+
+Other teams may use the same IMU. Here's why we're six layers deeper:
+
+```mermaid
+graph TD
+    subgraph OTHER["What other teams build"]
+        O1["IMU reads shaking → shows numbers"]
+    end
+
+    subgraph OURS["Our six layers of depth"]
+        L1["Layer 1: Dual-sensor measurement<br/>IMU (tilt/frequency) + ball (visual proof)"]
+        L2["Layer 2: Frequency analysis<br/>Tremor type classification via zero-crossing"]
+        L3["Layer 3: Adaptive servo difficulty<br/>Real-time autonomous adjustment during test"]
+        L4["Layer 4: Gamified scoring<br/>Points, streaks, stars, competition mode"]
+        L5["Layer 5: Tremor fingerprint<br/>Polar pattern unique to each person"]
+        L6["Layer 6: Biofeedback therapy<br/>Servo nudges teach patient self-correction"]
+
+        L1 --> L2 --> L3 --> L4 --> L5 --> L6
+    end
+
+    OTHER -.->|"They stop here"| L1
+
+    style OTHER fill:#ffcccc,stroke:#e74c3c,stroke-width:2px
+    style OURS fill:#d4edda,stroke:#27ae60,stroke-width:2px
+    style L1 fill:#3498db,color:#fff
+    style L2 fill:#2980b9,color:#fff
+    style L3 fill:#9b59b6,color:#fff
+    style L4 fill:#e67e22,color:#fff
+    style L5 fill:#e74c3c,color:#fff
+    style L6 fill:#c0392b,color:#fff
+```
+
+---
+
+## Feature 1: Tremor Fingerprint (Visual Signature)
+
+Every person's tremor produces a unique pattern — like a fingerprint. We plot roll (X) vs pitch (Y) over time on the OLED as a **polar/Lissajous pattern:**
+
+```mermaid
+graph LR
+    subgraph HEALTHY["Healthy Hands"]
+        H["Tight central dot<br/>Minimal movement<br/>No visible pattern"]
+    end
+
+    subgraph PARK["Parkinson's (4-6Hz)"]
+        P["Slow wide loops<br/>Circular/elliptical<br/>Consistent rhythm"]
+    end
+
+    subgraph ESSENTIAL["Essential Tremor (8-12Hz)"]
+        E["Tight fast oscillation<br/>Linear back-and-forth<br/>Along one axis mainly"]
+    end
+
+    subgraph STRESS["Stress/Caffeine"]
+        S["Small jittery cloud<br/>No clear pattern<br/>Random directions"]
+    end
+
+    style HEALTHY fill:#27ae60,color:#fff
+    style PARK fill:#e74c3c,color:#fff
+    style ESSENTIAL fill:#e67e22,color:#fff
+    style STRESS fill:#3498db,color:#fff
+```
+
+**Implementation:** Store last 200 IMU readings. Plot roll on X-axis, pitch on Y-axis. Each dot is one reading. The shape that forms IS the fingerprint.
+
+**Why judges love it:** They see THEIR OWN pattern on screen. Personal. Visual. They'll talk about it after.
+
+---
+
+## Feature 2: Gamified Scoring
+
+Instead of a boring clinical test, the patient plays a **game:**
+
+```mermaid
+flowchart TD
+    START["TEST BEGINS<br/>OLED: 'Hold steady...'"] --> STABLE{"Tray within ±2°?"}
+
+    STABLE -->|"Yes — stable"| POINTS["Award points<br/>+10 pts/second<br/>Streak counter: +1s<br/>LED: GREEN"]
+    STABLE -->|"No — shaking"| PENALTY["Deduct points<br/>-5 pts/second<br/>Streak resets to 0<br/>LED: RED"]
+
+    POINTS --> COMBO{"Streak > 5s?"}
+    COMBO -->|"Yes"| BONUS["COMBO BONUS<br/>Points × 2 multiplier<br/>OLED: 'COMBO!'"]
+    COMBO -->|"No"| CONTINUE["Continue test"]
+    BONUS --> CONTINUE
+    PENALTY --> CONTINUE
+
+    CONTINUE --> TIME{"30 seconds done?"}
+    TIME -->|"No"| STABLE
+    TIME -->|"Yes"| RESULTS["FINAL RESULTS<br/>Total points: 1,247<br/>Longest streak: 8.1s<br/>Stars: ★★★☆☆<br/>Frequency: 4.8Hz"]
+
+    RESULTS --> COMPARE["COMPARE MODE<br/>'Challenge a friend!'<br/>Second person takes test<br/>Side-by-side scores"]
+
+    style START fill:#ffc107,color:#333
+    style POINTS fill:#27ae60,color:#fff
+    style PENALTY fill:#e74c3c,color:#fff
+    style BONUS fill:#f39c12,color:#fff
+    style RESULTS fill:#3498db,color:#fff
+    style COMPARE fill:#9b59b6,color:#fff
+```
+
+**Star Rating System:**
+
+| Stars | Score Range | Meaning |
+|---|---|---|
+| ★★★★★ | 90-100% | Excellent stability |
+| ★★★★☆ | 75-89% | Good — minor tremor |
+| ★★★☆☆ | 60-74% | Moderate — noticeable tremor |
+| ★★☆☆☆ | 40-59% | Significant tremor |
+| ★☆☆☆☆ | <40% | Severe — seek consultation |
+
+---
+
+## Feature 3: Adaptive Real-Time Difficulty
+
+Servos don't just set a fixed difficulty — they **continuously adapt during the test:**
+
+```mermaid
+flowchart TD
+    BEGIN["Test begins — tray flat (0°)"] --> SAMPLE["Measure stability<br/>for 3-second window"]
+
+    SAMPLE --> EVAL{"Average stability<br/>in last 3 seconds?"}
+
+    EVAL -->|"> 85% stable"| HARDER["INCREASE DIFFICULTY<br/>Servo tilts +1° more<br/>OLED: 'Getting harder...'"]
+    EVAL -->|"60-85% stable"| HOLD["HOLD CURRENT LEVEL<br/>Patient at their limit<br/>OLED: 'Hold steady...'"]
+    EVAL -->|"< 60% stable"| EASIER["DECREASE DIFFICULTY<br/>Servo eases back 1°<br/>OLED: 'Take it easy...'"]
+
+    HARDER --> SAMPLE
+    HOLD --> SAMPLE
+    EASIER --> SAMPLE
+
+    HARDER --> MAX{"Max tilt 8°?"}
+    MAX -->|"Yes"| CAP["Stay at max<br/>Record: 'Patient stable<br/>up to 8° tilt'"]
+    MAX -->|"No"| SAMPLE
+
+    style BEGIN fill:#27ae60,color:#fff
+    style EVAL fill:#f39c12,color:#fff
+    style HARDER fill:#e74c3c,color:#fff
+    style HOLD fill:#3498db,color:#fff
+    style EASIER fill:#27ae60,color:#fff
+    style CAP fill:#9b59b6,color:#fff
+```
+
+**Clinical value:** The device automatically finds the patient's **breaking point** — the exact difficulty level where their stability drops below 60%. This number IS the diagnosis.
+
+- Breaking point at 6°: mild tremor
+- Breaking point at 3°: moderate tremor
+- Breaking point at 0° (can't even hold flat): severe tremor
+
+**Why judges are impressed:** They SEE the servos adjusting during the test. The device is making autonomous decisions. That's real autonomy, not scripted behaviour.
+
+---
+
+## Feature 4: Condition Classification
+
+Frequency analysis identifies tremor TYPE, not just severity:
+
+```mermaid
+flowchart LR
+    FREQ["Measure tremor<br/>frequency via<br/>zero-crossing method"] --> CLASSIFY{"Dominant<br/>frequency?"}
+
+    CLASSIFY -->|"3-5 Hz"| PARK["Parkinson's Pattern<br/>Slow, rhythmic<br/>Present at rest<br/>Reduces with movement"]
+    CLASSIFY -->|"5-8 Hz"| ESSENTIAL["Essential Tremor<br/>Medium frequency<br/>Appears during action<br/>Worsens with intention"]
+    CLASSIFY -->|"8-12 Hz"| PHYSIO["Physiological Tremor<br/>Fast, fine<br/>Normal / stress / caffeine<br/>Not pathological"]
+    CLASSIFY -->|"Irregular"| CEREBELLAR["Cerebellar Pattern<br/>No consistent frequency<br/>Irregular, jerky<br/>Possible neurological issue"]
+
+    PARK --> DISPLAY["OLED displays:<br/>'Pattern suggests:<br/>[condition name]<br/>Frequency: X.X Hz<br/>Consult neurologist'"]
+    ESSENTIAL --> DISPLAY
+    PHYSIO --> DISPLAY
+    CEREBELLAR --> DISPLAY
+
+    style FREQ fill:#3498db,color:#fff
+    style CLASSIFY fill:#f39c12,color:#fff
+    style PARK fill:#e74c3c,color:#fff
+    style ESSENTIAL fill:#e67e22,color:#fff
+    style PHYSIO fill:#27ae60,color:#fff
+    style CEREBELLAR fill:#9b59b6,color:#fff
+    style DISPLAY fill:#1a1a2e,color:#0f8
+```
+
+**Implementation:** Count zero-crossings per second on the roll axis. Dominant frequency = crossings ÷ 2. Simple, no FFT needed, runs on Pico easily.
+
+**Disclaimer on OLED:** "This is a screening tool, not a diagnosis. Consult a healthcare professional."
+
+---
+
+## Feature 5: Biofeedback Therapy Mode (Stretch Goal)
+
+The servos don't just test — they **teach the patient to control their tremor:**
+
+```mermaid
+sequenceDiagram
+    participant P as Patient's Hand
+    participant IMU as BMI160 IMU
+    participant PID as PID Controller
+    participant S as Servos
+
+    Note over P,S: Biofeedback Loop (every 10ms)
+
+    P->>IMU: Hand trembles RIGHT (+4°)
+    IMU->>PID: Roll = +4°
+    PID->>S: Counter-nudge LEFT (-2°)
+    Note over S: Gentle nudge — only 50% compensation
+    S->>P: Patient FEELS the nudge
+    P->>P: Unconsciously corrects toward centre
+
+    Note over P,S: Over 30 seconds, nudge strength decreases
+
+    P->>IMU: Hand trembles RIGHT (+4°)
+    IMU->>PID: Roll = +4°
+    PID->>S: Counter-nudge LEFT (-1°)
+    Note over S: Weaker nudge — patient learns to self-correct
+    S->>P: Subtler feedback
+    P->>P: Self-corrects faster
+
+    Note over P,S: Eventually nudges reach 0% — patient is self-stabilising
+```
+
+**Key insight:** The servo provides PARTIAL compensation (not full). The patient's brain learns to provide the rest. Over time, nudge strength decreases — the patient is training their own motor control.
+
+**Clinical basis:** This is how real biofeedback therapy works. Providing partial feedback that fades over time is a proven rehabilitation technique.
+
+**Build priority:** Stretch goal — only if core features are done by hour 10.
+
+---
+
+## Ball on Tray — Visual Aid Design
+
+The ball is **visual proof**, not an electronic sensor target:
+
+```mermaid
+graph TD
+    subgraph DESIGN["Ball + Tray Design"]
+        TRAY_SURFACE["Perfboard 7×9cm<br/>Full size — no cutting"]
+        BUMPER["Wire bumper around edge<br/>Bent 22AWG wire<br/>Prevents ball rolling off<br/>~5mm height"]
+        BALL_CHOICE["Ball choice:<br/>• Glass marble (~5g) — best visual<br/>• Steel ball bearing (~30g) — most movement<br/>• Rubber ball (~15g) — won't roll off table if dropped"]
+        IMU_REAL["IMU measures the TRAY tilt<br/>Ball movement = visual confirmation<br/>Both show the same thing:<br/>physics guarantees it"]
+    end
+
+    style DESIGN fill:#f8f9fa,stroke:#dee2e6,stroke-width:2px
+    style BUMPER fill:#f39c12,color:#fff
+    style BALL_CHOICE fill:#3498db,color:#fff
+    style IMU_REAL fill:#9b59b6,color:#fff
+```
+
+**Recommendation:** Glass marble — visually clear, judges can see it rolling from across the room.
+
+---
+
+## Complete OLED Screen Flow
+
+```mermaid
+stateDiagram-v2
+    [*] --> IDLE: Power on
+
+    IDLE: IDLE SCREEN
+    IDLE: "TremorTray v1.0"
+    IDLE: "Press to start"
+    IDLE: Wireless: Connected
+
+    IDLE --> CALIBRATING: Joystick button press
+
+    CALIBRATING: CALIBRATING
+    CALIBRATING: "Hold still..."
+    CALIBRATING: Servos auto-level
+    CALIBRATING: Sets zero reference
+
+    CALIBRATING --> READY: 3 seconds
+
+    READY: READY
+    READY: "Place ball on tray"
+    READY: "Hold tray level"
+    READY: "Press to begin test"
+
+    READY --> TESTING: Joystick button press
+
+    TESTING: LIVE TEST
+    TESTING: Score, streak, points
+    TESTING: Star rating building
+    TESTING: Servo adapting difficulty
+    TESTING: 30 second countdown
+
+    TESTING --> RESULTS: Timer ends
+
+    RESULTS: RESULTS SCREEN
+    RESULTS: Total score + stars
+    RESULTS: Frequency + amplitude
+    RESULTS: Condition suggestion
+    RESULTS: Breaking point level
+    RESULTS: "Press for fingerprint"
+
+    RESULTS --> FINGERPRINT: Joystick button press
+
+    FINGERPRINT: TREMOR FINGERPRINT
+    FINGERPRINT: Polar plot of tremor
+    FINGERPRINT: Unique visual pattern
+    FINGERPRINT: "Press to restart"
+
+    FINGERPRINT --> READY: Joystick button press
+
+    RESULTS --> COMPARE: Joystick left/right
+
+    COMPARE: COMPARE MODE
+    COMPARE: "Challenge a friend!"
+    COMPARE: Side-by-side scores
+    COMPARE: Who has steadier hands?
+```
+
+---
+
+## Build Priority Table
+
+| Priority | Feature | Hours | Builds On |
+|---|---|---|---|
+| **P0 — Must** | nRF24L01+ wireless link | 1h | Nothing |
+| **P0 — Must** | BMI160 IMU read + complementary filter | 1h | Wireless |
+| **P0 — Must** | PCA9685 servo control + auto-calibration | 1h | IMU |
+| **P0 — Must** | Basic stability score on OLED | 1h | IMU + Servo |
+| **P1 — Core** | Frequency detection (zero-crossing) | 1h | IMU |
+| **P1 — Core** | Adaptive servo difficulty | 1h | Servo + Score |
+| **P1 — Core** | Gamified scoring (points, streaks, stars) | 1h | Score |
+| **P2 — Wow** | Tremor fingerprint polar plot | 1h | IMU data |
+| **P2 — Wow** | Condition classification | 30min | Frequency |
+| **P2 — Wow** | Compare / competition mode | 30min | Scoring |
+| **P3 — Stretch** | Biofeedback therapy mode | 1h | Servo + IMU |
+| **Always** | Physical assembly | 1.5h | Parallel |
+| **Always** | Documentation + diagrams | 1h | End |
+
+**Critical path: P0 features done by hour 4.** Everything after is additive — each feature makes it better, but the core works without them.
+
+---
+
+## Scoring Breakdown (Updated)
 
 | Category | Score | Why |
 |---|---|---|
-| **Problem Fit (30)** | **29** | UPDRS is subjective. 10M+ need objective measurement. No cheap tool exists. Real clinical gap |
-| **Live Demo (25)** | **25** | Judge holds tray, gets personal score. Best possible demo — interactive, personal, memorable |
-| **Technical (20)** | **18** | Dual sensor fusion, frequency analysis, 100Hz IMU, servo difficulty levels, wireless streaming, severity classification |
-| **Innovation (15)** | **15** | No consumer tremor diagnostic exists. Joystick-as-position-sensor is novel. Multi-level assessment is new |
-| **Docs (10)** | **9** | Mermaid diagrams, clinical comparison, UPDRS replacement narrative |
-| **Total** | **96** | |
+| **Problem Fit (30)** | **29** | UPDRS is subjective. 10M+ need objective measurement. No cheap tool exists. Bridges clinical gap between £0 (subjective) and £10K (lab equipment) |
+| **Live Demo (25)** | **25** | Judge holds tray, gets personal score AND tremor fingerprint. Two judges compete. Servo adapts in real-time. Most interactive demo possible |
+| **Technical (20)** | **19** | 6-layer depth: dual sensor, frequency analysis, adaptive PID, gamification engine, polar plot rendering, biofeedback loop. Dual-core Pico (measurement + wireless) |
+| **Innovation (15)** | **15** | Tremor fingerprinting: new. Gamified clinical tool: new. Adaptive servo difficulty: new. Condition classification on a Pico: new. No other team builds this |
+| **Docs (10)** | **9** | Mermaid architecture, clinical comparison, algorithm docs, state machine, build timeline |
+| **Total** | **97** | |
 
 ---
 
@@ -413,14 +749,21 @@ graph LR
 
 | Risk | Mitigation |
 |---|---|
-| Joystick sensitivity too low for small ball movements | Use a heavier ball (marble). Calibrate ADC range at startup |
-| Frequency detection is complex (FFT) | Use zero-crossing method instead — count how many times tilt crosses 0° per second. Much simpler, accurate enough |
-| "How is this different from just a phone app?" | Phone lies flat — can't measure ball control. Our dual-sensor approach (IMU + joystick) gives position AND tilt. Plus servo difficulty levels — phone can't tilt itself |
-| Judges don't understand clinical value | Lead with the demo (they try it). The score makes it personal. THEN explain UPDRS replacement |
-| Ball rolls off tray | Add small wire bumper around edge (bent 22AWG). Or use a lip made from perfboard strips |
+| Frequency detection inaccurate | Zero-crossing is simple but works for 3-12Hz range. Validate against known frequency (tap tray at 4Hz, check reading) |
+| Ball rolls off during demo | Wire bumper around edge. Practice the demo. Use a marble that fits snugly |
+| Judges say "just a phone app" | Phone can't tilt itself (no servos for difficulty levels). Phone can't do biofeedback. Phone doesn't have a ball. Our dual-sensor gives richer data |
+| Too many features, nothing works | P0 features are standalone — basic score works without gamification, fingerprint, etc. Each layer is additive |
+| Condition classification is "not medical" | Disclaimer: "Screening tool — consult healthcare professional." Frame as awareness, not diagnosis |
+| Servo adaptation looks random | Explain the logic clearly in demo. Show the OLED feedback: "Difficulty: increasing..." so judges understand it's intentional |
 
 ---
 
 ## Future Vision (Tell Judges)
 
-> "Today it's a hackathon prototype. Tomorrow it's a £20 device that every GP clinic and care home has in their drawer. Patients do a 30-second test at every visit. Doctors track tremor progression over months on a graph. Medication effectiveness is measured objectively for the first time. And it all started with a perfboard, two servos, and an IMU."
+> "Today it's a hackathon prototype on a perfboard. Tomorrow it's a £20 device in every GP clinic, care home, and physiotherapy practice.
+>
+> Patients take a 30-second test at every visit. Their tremor fingerprint is stored. Doctors see a graph: 'Your tremor has improved 15% since starting medication.' For the first time, treatment effectiveness is measured objectively — not guessed at.
+>
+> There are 10 million people with Parkinson's. There are 7 million with essential tremor. Today, their doctor watches them hold a cup and says 'looks about the same.' We replace that with a number, a frequency, a pattern, and a trend.
+>
+> And it all started with a perfboard, two servos, and an IMU."

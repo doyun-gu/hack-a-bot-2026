@@ -14,13 +14,9 @@
 ## Supported By
 
 <p align="center">
-  <img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="50"/>&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="50"/>&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/images/uom_black.png" alt="The University of Manchester" height="50"/>
-</p>
-
-<p align="center">
-  <a href="https://www.arm.com">ARM</a> · <a href="#">EEESoc</a> · <a href="https://www.manchester.ac.uk">University of Manchester</a>
+  <a href="https://www.arm.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://www.eeesoc.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="The University of Manchester" height="50"/></a>
 </p>
 
 ---
