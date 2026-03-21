@@ -1,7 +1,7 @@
 # Hack-A-Bot 2026 — Project 6: Creative
 
 <p align="center">
-  <img src="docs/images/logo.png" alt="Project 6 Creative Badge + University of Manchester" width="250"/>
+  <img src="docs/images/logo.png" alt="Project 6 Creative Badge + University of Manchester" width="500"/>
 </p>
 
 <p align="center">
