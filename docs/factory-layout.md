@@ -176,32 +176,22 @@ graph TB
 
 ---
 
+## Side View
+
+![Factory Side View — Height Profile](images/factory_side_view.png)
+
+---
+
 ## Demo Table Setup
 
-```
-JUDGE VIEWING DIRECTION →
-
-┌──────────────────────────────────────────────────────────────┐
-│                                                              │
-│   FACTORY                   LAPTOP              SCADA        │
-│   (base plate)              (web dashboard)      (control)   │
-│                                                              │
-│   [Zone A] [Zone B]         [live graphs]        [OLED]      │
-│   [fan]    [turntable]      [energy data]        [joystick]  │
-│   [LEDs]   [bins]                                [pot dial]  │
-│                                                              │
-│                        USB cable                             │
-│                     (Pico A → laptop)                        │
-│                                                              │
-└──────────────────────────────────────────────────────────────┘
-```
+![Demo Table Layout](images/demo_table_setup.png)
 
 | Position | Item | Why |
 |---|---|---|
-| Left | Factory base plate | Main physical demo — judges see motors + servos |
-| Centre | Laptop showing web dashboard | Live graphs — the "manager's view" |
-| Right | SCADA control room (Pico B) | Joystick + potentiometer — judges interact here |
-| Front edge | LED tower + load LEDs | Visible status from standing position |
+| **Left** | Factory base plate | Main physical demo — judges see motors + servos + LEDs |
+| **Centre** | Laptop showing web dashboard | Live graphs — the "manager's view" |
+| **Right** | SCADA control room (Pico B) | Joystick + potentiometer — judges interact here |
+| **Front edge** | LED tower + load LEDs | Visible status from standing position |
 
 ---
 
