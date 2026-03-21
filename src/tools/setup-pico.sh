@@ -21,10 +21,10 @@ case "$1" in
         read -p "Press Enter when RPI-RP2 drive appears..."
 
         # Check if drive mounted
-        if [ -d "/Volumes/RPI-RP2" ]; then
+        if [ -d "/Volumes/RP2350" ]; then
             echo "Found RPI-RP2 drive!"
         else
-            echo "ERROR: /Volumes/RPI-RP2 not found."
+            echo "ERROR: /Volumes/RP2350 not found."
             echo "Make sure you held BOOTSEL while plugging in."
             exit 1
         fi
@@ -39,7 +39,7 @@ case "$1" in
 
         # Copy to Pico
         echo "Flashing MicroPython..."
-        cp "$UF2_FILE" /Volumes/RPI-RP2/
+        cp "$UF2_FILE" /Volumes/RP2350/
         echo "Done! Pico will reboot with MicroPython."
         echo "Wait 5 seconds for reboot..."
         sleep 5
