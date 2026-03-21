@@ -789,9 +789,142 @@ graph LR
 
 ---
 
+## What Makes This Creative (Innovation Score: 15/15)
+
+### Why Other Teams Score Low on Creativity
+
+| What Other Teams Build | Why It's Not Creative |
+|---|---|
+| "IMU reads tilt → shows on OLED" | Everyone does this. No decisions, no autonomy |
+| "Joystick controls servo" | It's a TV remote. No intelligence |
+| "Wireless remote control car" | Fun but done a thousand times |
+| "LED turns on when sensor detects X" | If/else statement with a light. Not a system |
+
+### 7 Things That Make GridBox Creative
+
+**1. It's a SYSTEM, Not a Gadget**
+
+Other teams build one device. We build an **interconnected infrastructure** — generation, distribution, monitoring, control, and SCADA. It's a complete industrial system on a breadboard.
+
+```mermaid
+graph LR
+    subgraph OTHER["Other Teams"]
+        O[One input] --> P[One process] --> Q[One output]
+    end
+
+    subgraph OURS["GridBox"]
+        A[Energy input] --> B[Smart distribution]
+        B --> C[Multiple actuators]
+        C --> D[Sensor feedback]
+        D --> E[Autonomous decisions]
+        E --> B
+        E -->|wireless| F[Remote SCADA]
+        F -->|override| E
+    end
+```
+
+Other teams have a **chain.** We have a **closed loop with remote monitoring.** That's the difference between a toy and a system.
+
+**2. Dumb vs Smart A/B Comparison**
+
+During the demo, we run the system in two modes back-to-back:
+
+| Mode | What Happens | Energy Used |
+|---|---|---|
+| **DUMB mode** (no GridBox intelligence) | Motors run at 100% constantly, no fault detection, no speed adjustment | 100% = wasteful |
+| **SMART mode** (GridBox active) | Motors at optimal speed, auto-adjustment, fault detection, load shedding | 40-60% = efficient |
+
+OLED shows the energy savings in real-time: **"SMART mode saved 52% energy vs DUMB mode."**
+
+Judges can SEE the difference. That's not just a demo — it's a **proof of concept with measured results.**
+
+**3. Physical Factory Model (Not Just Breadboards)**
+
+Use cardboard, paper labels, and coloured wire to make it LOOK like a factory:
+
+```
+┌─────────────────────────────────────────────────┐
+│  ╔═══════╗     ╔═══════╗     ╔═══════╗         │
+│  ║ PUMP  ║────>║ FILL  ║────>║  QC   ║───> OUT │
+│  ║ [M1]  ║     ║ [S1]  ║     ║ [S2]  ║         │
+│  ╚═══════╝     ╚═══════╝     ╚═══════╝         │
+│       │             │             │              │
+│  ╔════╧════════════╧═════════════╧═══╗          │
+│  ║          CONVEYOR BELT [M2]        ║          │
+│  ╚════════════════════════════════════╝          │
+│                                                  │
+│  [Pico A]  [IMU]  [PCA9685]  [nRF]   [LEDs]    │
+│  ─────────── FACTORY FLOOR ──────────────       │
+├──────────────────────────────────────────────────┤
+│        CONTROL ROOM (separate table)             │
+│  [Pico B]  [OLED]  [Joystick]  [Pot]            │
+└──────────────────────────────────────────────────┘
+```
+
+Labels on each station: "PUMP STATION", "FILLING", "QUALITY CHECK", "CONVEYOR". LEDs as "factory stack lights" (green/yellow/red). This transforms breadboards into a **miniature world** that judges can walk around and explore.
+
+**4. Sustainability Scoring on OLED**
+
+The system calculates and displays a real-time **sustainability score:**
+
+$$\text{Sustainability Score} = \frac{\text{Useful output}}{\text{Total energy input}} \times \left(1 - \frac{\text{Waste events}}{\text{Total cycles}}\right) \times 100\%$$
+
+OLED shows: **"SUSTAINABILITY: 87% — GRADE A"**
+
+This makes "sustainability" a MEASURABLE outcome, not just a buzzword. Judges from ARM who care about ESG metrics will appreciate quantified sustainability.
+
+**5. Web Dashboard (Laptop Monitoring)**
+
+While the OLED shows factory floor data, a laptop next to it shows the **web dashboard** (from `src/web/app.py`) with:
+- Live graphs of motor speed, vibration, power consumption
+- Historical data over the demo session
+- Fault timeline
+- Energy savings comparison
+
+Two screens: OLED for operator, laptop for manager. This demonstrates **multi-tier monitoring** — the same data presented differently for different users.
+
+**6. The Two-Pico Split is GENUINE**
+
+Other teams put everything on one Pico and use the second for something trivial. Our split is **architecturally meaningful:**
+
+| Pico A (Factory Floor) | Pico B (Control Room) |
+|---|---|
+| Noisy environment | Clean office |
+| Needs fast real-time control (100Hz) | Needs good UI (OLED, joystick) |
+| Handles motors + sensors | Handles display + operator input |
+| Could be in a hazardous area | Safe for humans |
+| Wireless TX — pushes data out | Wireless RX — receives + displays |
+
+In a real factory, the controller IS on the floor and the SCADA IS in the control room. We model this correctly. Judges who've worked in industry will recognise this immediately.
+
+**7. Swappable Scenarios = Platform Thinking**
+
+We demo ONE factory (water bottling). But we show the OLED with different labels for:
+- Water plant → Greenhouse → Recycling → HVAC
+
+Same firmware, different `config.py`. Tell judges: *"This isn't one product. It's a platform. The £15 controller is the same. Only the labels change."*
+
+Platform thinking > product thinking. That's startup-level innovation at a hackathon.
+
+### The Creative Pitch (30 Seconds)
+
+> "Every team built a gadget. We built a system.
+>
+> This is a miniature smart factory — a water bottling plant powered by recycled energy. The pump fills bottles. The conveyor moves them. The quality gate sorts good from bad. All running autonomously.
+>
+> But here's the creative part: shake the pump — it detects the fault and shuts down before damage. Turn the dial — it adjusts speed and saves 50% energy. Look at the OLED — it calculates sustainability in real-time.
+>
+> Same £15 system runs a greenhouse tomorrow, a recycling plant next week, or a building's HVAC next month. It's not a product, it's a platform.
+>
+> We didn't build a project. We built an infrastructure company in a box."
+
+---
+
 ## Why ARM Judges Love This
 
 ARM makes chips for: smart meters, industrial IoT, grid infrastructure, edge computing. GridBox demonstrates ALL of these on their Cortex-M33 chip.
+
+You're building a demo of ARM's own target market. On their chips. At their hackathon. Their engineers will recognise every design pattern: PWM motor control, wireless telemetry, edge computing decisions, condition monitoring. This is what ARM sells billions of chips for — and you built it for £15.
 
 ---
 
