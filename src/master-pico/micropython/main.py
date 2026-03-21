@@ -25,14 +25,29 @@ from calibration import Calibration
 
 # Import protocol (copied to micropython dir from src/shared/)
 try:
-    from protocol import (pack_data, pack_heartbeat, unpack,
-                          PKT_COMMAND, CMD_SET_MOTOR_SPEED, CMD_SET_THRESHOLD,
-                          CMD_RESET_FAULT, CMD_SET_MODE, CMD_EMERGENCY_STOP,
-                          MODE_NORMAL, MODE_DUMB, MODE_MANUAL, MODE_CALIBRATE,
-                          MODE_IDLE, FLAG_CALIBRATED)
+    from protocol import (
+        pack_power, pack_status, pack_production, pack_heartbeat,
+        pack_alert, unpack, ROTATION,
+        PKT_POWER, PKT_STATUS, PKT_PRODUCTION, PKT_HEARTBEAT, PKT_COMMAND,
+        CMD_SET_SPEED, CMD_SET_SERVO, CMD_SET_THRESHOLD,
+        CMD_RESET_FAULT, CMD_SET_MODE, CMD_EMERGENCY_STOP,
+        MODE_NORMAL, MODE_DUMB, MODE_MANUAL, MODE_CALIBRATE,
+        MODE_IDLE, MODE_EMERGENCY, FLAG_CALIBRATED,
+        SYS_NORMAL, SYS_DRIFT, SYS_WARNING, SYS_FAULT, SYS_EMERGENCY,
+        IMU_HEALTHY, IMU_WARNING, IMU_FAULT,
+        ES_HEALTHY, ES_DRIFT, ES_PREFAULT, ES_FAULT,
+        FAULT_NONE, FAULT_VIBRATION, FAULT_OVERCURRENT, FAULT_UNDERVOLTAGE,
+        ALERT_FAULT, ALERT_EMERGENCY,
+        ACT_MOTOR_STOPPED, ACT_LOAD_SHED, ACT_REROUTED,
+    )
 except ImportError:
     print("[MASTER] WARNING: protocol.py not found, wireless disabled")
-    pack_data = None
+    pack_power = None
+
+# State string -> enum mappings
+_STATE_MAP = {"NORMAL": 0, "DRIFT": 1, "WARNING": 2, "FAULT": 3, "EMERGENCY": 4}
+_IMU_MAP = {"HEALTHY": 0, "WARNING": 1, "FAULT": 2}
+_RESULT_MAP = {"PASS": 0, "REJECT_HEAVY": 1, "REJECT_LIGHT": 2, "JAM": 3, "NONE": 0}
 
 
 def init_hardware():
@@ -107,15 +122,20 @@ def handle_command(pkt, motor_ctrl, fault_mgr, sorter_inst, mode):
 
     Returns new mode if changed, else current mode.
     """
-    cmd_type = pkt.get('test_level', 0)
+    cmd_type = pkt.get('cmd_type', 0)
 
-    if cmd_type == CMD_SET_MOTOR_SPEED:
-        motor_id = pkt.get('joy_x', 1)
-        speed = pkt.get('joy_y', 0)
+    if cmd_type == CMD_SET_SPEED:
+        motor_id = pkt.get('target', 1)
+        speed = pkt.get('value', 0)
         if motor_ctrl:
             motor_ctrl.set_speed(motor_id, speed)
+    elif cmd_type == CMD_SET_SERVO:
+        servo_id = pkt.get('target', 1)
+        angle = pkt.get('value', 90)
+        if motor_ctrl:
+            motor_ctrl.set_servo_angle(servo_id, angle)
     elif cmd_type == CMD_SET_THRESHOLD:
-        value = pkt.get('joy_x', 50)
+        value = pkt.get('value', 50)
         if sorter_inst:
             sorter_inst.set_threshold(value)
     elif cmd_type == CMD_RESET_FAULT:
@@ -187,10 +207,11 @@ def main():
     calibrated = cal.is_calibrated()
 
     # Timing
+    boot_ms = time.ticks_ms()
     last_wireless_ms = 0
-    last_heartbeat_ms = 0
     last_serial_ms = 0
     loop_count = 0
+    cycle_index = 0
 
     print("\n[MASTER] Entering main loop (100Hz)")
     print("=" * 40)
@@ -247,27 +268,111 @@ def main():
                 hw['led_red'].value(0)
                 hw['led_green'].value(1)
 
-            # === 9. Send telemetry via wireless ===
-            if (hw['nrf'] and pack_data and
+            # === 9. Send telemetry via wireless (rotation schedule) ===
+            if (hw['nrf'] and pack_power and
                     time.ticks_diff(now, last_wireless_ms) >= config.WIRELESS_SEND_MS):
                 last_wireless_ms = now
 
-                roll = imu_data.get('ax', 0.0)
-                pitch = imu_data.get('ay', 0.0)
-                gyro = imu_data.get('rms', 0.0)
+                # Determine fault source for status/alert packets
+                fault_src = FAULT_NONE
+                if imu_status == "FAULT":
+                    fault_src = FAULT_VIBRATION
+                elif (power_data.get('m1_mA', 0) > config.MOTOR_CURRENT_MAX_MA or
+                      power_data.get('m2_mA', 0) > config.MOTOR_CURRENT_MAX_MA):
+                    fault_src = FAULT_OVERCURRENT
+                elif power_data.get('bus_v', 5.0) < config.BUS_VOLTAGE_LOW:
+                    fault_src = FAULT_UNDERVOLTAGE
 
-                flags = 0
-                if state in ("FAULT", "EMERGENCY"):
-                    flags |= 0x01
-                if calibrated:
-                    flags |= FLAG_CALIBRATED
+                # ALERT breaks rotation — send immediately on fault
+                if "alert" in actions:
+                    alert_lvl = ALERT_EMERGENCY if state == "EMERGENCY" else ALERT_FAULT
+                    act_bits = 0
+                    for a in actions:
+                        if a.startswith("stop_motor"):
+                            act_bits |= ACT_MOTOR_STOPPED
+                        elif a.startswith("shed_"):
+                            act_bits |= ACT_LOAD_SHED
+                        elif a == "reroute":
+                            act_bits |= ACT_REROUTED
+                    pkt = pack_alert(
+                        alert_lvl, fault_src, now,
+                        int(imu_data.get('rms', 0) * 1000),
+                        int(max(power_data.get('m1_mA', 0), power_data.get('m2_mA', 0))),
+                        int(power_data.get('bus_v', 0) * 1000),
+                        act_bits)
+                else:
+                    # Normal rotation
+                    pkt_type = ROTATION[cycle_index % len(ROTATION)]
+                    cycle_index += 1
 
-                m1_speed = motor_ctrl.get_speed(1) if motor_ctrl else 0
-                m2_speed = motor_ctrl.get_speed(2) if motor_ctrl else 0
+                    if pkt_type == PKT_POWER:
+                        mc_st = motor_ctrl.get_state() if motor_ctrl else {}
+                        mosfet_bits = 0
+                        if mc_st.get('m1_enabled'):
+                            mosfet_bits |= 0x01
+                        if mc_st.get('m2_enabled'):
+                            mosfet_bits |= 0x02
+                        if mc_st.get('leds_on'):
+                            mosfet_bits |= 0x04
+                        if mc_st.get('recycle_on'):
+                            mosfet_bits |= 0x08
+                        pkt = pack_power(
+                            int(power_data.get('bus_v', 0) * 1000),
+                            int(power_data.get('m1_mA', 0)),
+                            int(power_data.get('m2_mA', 0)),
+                            int(power_data.get('m1_W', 0) * 1000),
+                            int(power_data.get('m2_W', 0) * 1000),
+                            int(power_data.get('total_W', 0) * 1000),
+                            int(power_data.get('excess_W', 0) * 1000),
+                            motor_ctrl.get_speed(1) if motor_ctrl else 0,
+                            motor_ctrl.get_speed(2) if motor_ctrl else 0,
+                            motor_ctrl.get_servo_angle(1) if motor_ctrl else 90,
+                            motor_ctrl.get_servo_angle(2) if motor_ctrl else 90,
+                            int(power_data.get('efficiency', 0)),
+                            0, mosfet_bits)
 
-                pkt = pack_data(roll, pitch, gyro,
-                                m1_speed, m2_speed,
-                                mode, 0, flags, now)
+                    elif pkt_type == PKT_STATUS:
+                        es_score_val = es_monitor.get_score()
+                        es_sig = es_monitor.get_signature()
+                        if es_monitor.is_anomaly():
+                            es_cls = ES_FAULT
+                        elif es_score_val > 0.3:
+                            es_cls = ES_PREFAULT
+                        elif es_score_val > 0.1:
+                            es_cls = ES_DRIFT
+                        else:
+                            es_cls = ES_HEALTHY
+                        fault_stats = fault_mgr.get_stats()
+                        shed_lvl = len(fault_stats.get('shed_loads', []))
+                        reroute = 1 if "reroute" in actions else 0
+                        pkt = pack_status(
+                            _STATE_MAP.get(state, 0), fault_src,
+                            int(imu_data.get('rms', 0) * 1000),
+                            _IMU_MAP.get(imu_status, 0),
+                            int(es_score_val * 100), es_cls,
+                            int(es_sig.mean_current), int(es_sig.std_current),
+                            shed_lvl, mode,
+                            time.ticks_diff(now, boot_ms) // 1000,
+                            fault_stats.get('faults_today', 0), reroute)
+
+                    elif pkt_type == PKT_PRODUCTION:
+                        sort_stats = sorter_inst.get_stats() if sorter_inst else {}
+                        pkt = pack_production(
+                            sort_stats.get('total_items', 0),
+                            sort_stats.get('passed', 0),
+                            sort_stats.get('rejected', 0),
+                            int(sort_stats.get('reject_rate', 0)),
+                            0,  # last_weight_mg
+                            _RESULT_MAP.get(sort_stats.get('last_weight_class', 'NONE'), 0),
+                            motor_ctrl.get_speed(2) if motor_ctrl else 0,
+                            int(config.WEIGHT_THRESHOLD_LIGHT * 1000),
+                            int(config.WEIGHT_THRESHOLD_HEAVY * 1000),
+                            0,  # station_active
+                            1 if led_stations.is_active() else 0)
+
+                    elif pkt_type == PKT_HEARTBEAT:
+                        uptime = time.ticks_diff(now, boot_ms) // 1000
+                        pkt = pack_heartbeat(now, uptime)
 
                 hw['nrf'].stop_listening()
                 hw['nrf'].send(pkt)

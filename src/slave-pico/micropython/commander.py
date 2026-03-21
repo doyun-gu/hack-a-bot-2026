@@ -9,15 +9,15 @@ import time
 # Import protocol constants — protocol.py is in src/shared/
 # On Pico, copy protocol.py to /micropython/ alongside this file
 try:
-    from protocol import (pack_command, CMD_SET_MOTOR_SPEED, CMD_SET_THRESHOLD,
+    from protocol import (pack_command, CMD_SET_SPEED, CMD_SET_THRESHOLD,
                           CMD_RESET_FAULT, CMD_SET_MODE, CMD_EMERGENCY_STOP)
 except ImportError:
     # Fallback: define locally if protocol.py not available
-    CMD_SET_MOTOR_SPEED = 0x10
-    CMD_SET_THRESHOLD = 0x11
-    CMD_RESET_FAULT = 0x12
-    CMD_SET_MODE = 0x13
-    CMD_EMERGENCY_STOP = 0x14
+    CMD_SET_SPEED = 0x01
+    CMD_SET_THRESHOLD = 0x03
+    CMD_RESET_FAULT = 0x04
+    CMD_SET_MODE = 0x05
+    CMD_EMERGENCY_STOP = 0x06
 
 
 class Commander:
@@ -39,7 +39,7 @@ class Commander:
             return False
         return True
 
-    def _send_command(self, cmd_type, mode=0, param1=0, param2=0):
+    def _send_command(self, cmd_type, target=0, value=0, mode=0):
         """Send a command packet to Pico A.
 
         Returns True if ACK received.
@@ -48,17 +48,14 @@ class Commander:
             return False
 
         try:
-            pkt = pack_command(cmd_type, mode=mode, param1=param1,
-                               param2=param2, timestamp_ms=time.ticks_ms())
+            pkt = pack_command(cmd_type, target=target, value=value, mode=mode)
         except NameError:
             # pack_command not available, build manually
             import struct
-            pkt = struct.pack('<BfffHHBBBI8s',
-                              0x05,  # PKT_COMMAND
-                              0.0, 0.0, 0.0,
-                              param1, param2,
-                              mode, cmd_type, 0,
-                              time.ticks_ms(), b'\x00' * 8)
+            pkt = struct.pack('<BBBBHB25s',
+                              0x10, 0,  # type, seq
+                              cmd_type, target, value, mode,
+                              b'\x00' * 25)
 
         # Switch to TX, send, switch back to RX
         self.nrf.stop_listening()
@@ -75,8 +72,8 @@ class Commander:
             motor_id: 1 or 2
             speed: 0-100%
         """
-        return self._send_command(CMD_SET_MOTOR_SPEED,
-                                  param1=motor_id, param2=speed)
+        return self._send_command(CMD_SET_SPEED,
+                                  target=motor_id, value=speed)
 
     def send_threshold(self, value):
         """Send new weight threshold to Pico A.
@@ -84,7 +81,7 @@ class Commander:
         Args:
             value: threshold value (0-100, mapped from potentiometer)
         """
-        return self._send_command(CMD_SET_THRESHOLD, param1=value)
+        return self._send_command(CMD_SET_THRESHOLD, value=value)
 
     def send_reset(self):
         """Command fault reset on Pico A."""

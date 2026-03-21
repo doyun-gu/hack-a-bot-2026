@@ -18,12 +18,22 @@ from commander import Commander
 
 # Import protocol (copied to micropython dir from src/shared/)
 try:
-    from protocol import (unpack, pack_command, PKT_DATA, PKT_HEARTBEAT, PKT_ALERT,
-                          MODE_NORMAL, MODE_MANUAL, MODE_IDLE,
-                          CMD_SET_MOTOR_SPEED, CMD_EMERGENCY_STOP)
+    from protocol import (unpack, PKT_POWER, PKT_STATUS, PKT_PRODUCTION,
+                          PKT_HEARTBEAT, PKT_ALERT,
+                          MODE_NORMAL, MODE_MANUAL, MODE_IDLE)
 except ImportError:
     print("[SLAVE] WARNING: protocol.py not found")
     unpack = None
+    PKT_POWER = 0x01
+    PKT_STATUS = 0x02
+    PKT_PRODUCTION = 0x03
+    PKT_HEARTBEAT = 0x04
+    PKT_ALERT = 0x05
+
+# Enum -> string mappings for display
+_STATE_NAMES = {0: "NORMAL", 1: "DRIFT", 2: "WARNING", 3: "FAULT", 4: "EMERGENCY"}
+_IMU_NAMES = {0: "HEALTHY", 1: "WARNING", 2: "FAULT"}
+_RESULT_NAMES = {0: "PASS", 1: "REJECT_HEAVY", 2: "REJECT_LIGHT", 3: "JAM"}
 
 
 def init_hardware():
@@ -124,6 +134,8 @@ def main():
         'belt_speed': 5, 'threshold': 50,
         'joy_x': 50, 'joy_y': 50, 'button': False, 'pot_value': 50,
         'mode': 0,
+        # Comparison results (populated by PKT_STATUS when comparison runs)
+        'dumb_avg_W': 0, 'smart_avg_W': 0, 'savings_pct': 0,
     }
 
     # Timing
@@ -149,16 +161,41 @@ def main():
                     if pkt:
                         last_packet_ms = now
                         link_alive = True
+                        pkt_type = pkt['type']
 
-                        if pkt['type'] in (PKT_DATA, PKT_HEARTBEAT):
-                            # Update telemetry from packet
-                            telemetry['m1_speed'] = pkt.get('joy_x', 0)
-                            telemetry['m2_speed'] = pkt.get('joy_y', 0)
-                            telemetry['mode'] = pkt.get('mode', 0)
-                            telemetry['state'] = 'FAULT' if pkt.get('fault_alert') else 'NORMAL'
-                            telemetry['imu_status'] = 'WARNING' if pkt.get('gyro_rate', 0) > 1.5 else 'HEALTHY'
+                        if pkt_type == PKT_POWER:
+                            telemetry['bus_v'] = pkt['bus_voltage_mv'] / 1000
+                            telemetry['m1_mA'] = pkt['motor1_current_ma']
+                            telemetry['m2_mA'] = pkt['motor2_current_ma']
+                            telemetry['m1_W'] = pkt['motor1_power_mw'] / 1000
+                            telemetry['m2_W'] = pkt['motor2_power_mw'] / 1000
+                            telemetry['total_W'] = pkt['total_power_mw'] / 1000
+                            telemetry['excess_W'] = pkt['excess_power_mw'] / 1000
+                            telemetry['m1_speed'] = pkt['motor1_speed_pct']
+                            telemetry['m2_speed'] = pkt['motor2_speed_pct']
+                            telemetry['servo1_angle'] = pkt['servo1_angle']
+                            telemetry['servo2_angle'] = pkt['servo2_angle']
+                            telemetry['efficiency'] = pkt['efficiency_pct']
 
-                        elif pkt['type'] == PKT_ALERT:
+                        elif pkt_type == PKT_STATUS:
+                            telemetry['state'] = _STATE_NAMES.get(pkt['system_state'], 'UNKNOWN')
+                            telemetry['imu_status'] = _IMU_NAMES.get(pkt['imu_state'], 'UNKNOWN')
+                            telemetry['es_score'] = pkt['es_score_x100'] / 100
+                            telemetry['faults_today'] = pkt['faults_today']
+                            telemetry['mode'] = pkt['mode']
+
+                        elif pkt_type == PKT_PRODUCTION:
+                            telemetry['total_items'] = pkt['total_items']
+                            telemetry['passed'] = pkt['passed_items']
+                            telemetry['rejected'] = pkt['rejected_items']
+                            telemetry['reject_rate'] = pkt['reject_rate_pct']
+                            telemetry['last_weight_class'] = _RESULT_NAMES.get(pkt['last_result'], 'NONE')
+                            telemetry['belt_speed'] = pkt['belt_speed_pct']
+
+                        elif pkt_type == PKT_HEARTBEAT:
+                            pass  # link alive confirmed above
+
+                        elif pkt_type == PKT_ALERT:
                             telemetry['state'] = 'EMERGENCY'
 
             # === 2. Check heartbeat timeout ===
