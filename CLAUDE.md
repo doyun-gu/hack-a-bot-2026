@@ -61,9 +61,11 @@ A £15 smart infrastructure controller powered by recycled energy. Senses power 
 - **Development:** MicroPython (fast iteration, REPL debugging)
 - **Production:** C/C++ Pico SDK (demo day — rock-solid timing)
 - **Both versions** in `src/master-pico/` and `src/slave-pico/`
-- **Web dashboard:** `src/web/app.py` (Flask, reads USB serial, localhost:5000)
-- **Flash tool:** `src/tools/flash.sh master|slave`
-- **Shared protocol:** `src/shared/protocol.py` (32-byte wireless packets)
+- **Web dashboard:** `src/web/app.py` (Flask + SQLite, reads USB serial, localhost:5000)
+- **Flash tool:** `src/tools/flash.sh master|slave` + `src/tools/setup-pico.sh`
+- **Shared protocol:** `src/shared/protocol.py` (32-byte wireless packets, 6 datagram types)
+- **Mock data:** `src/tools/mock-data.py` (dashboard testing without hardware)
+- **Firmware snapshots:** `firmware/01-v1/` and `firmware/02-v2/` (frozen releases)
 
 ## Core Innovation
 
@@ -104,7 +106,26 @@ The Pico IS the power grid's switching fabric:
 
 ## Current State
 
-- **Phase:** Design complete, ready for firmware development
-- **Done:** Full architecture, pin mapping, wiring plan, demo scenario, all docs
-- **Next:** Update firmware config files to match design, implement core features
+- **Phase:** Firmware complete, hardware testing + integration
+- **Commits:** 110+ on main
+- **Team PRs merged:** Wooseong (4 PRs — electronics circuits, wiring, testing), Billy (1 PR — chassis)
+- **Done:**
+  - Full architecture, pin mapping, wiring plan, demo scenario
+  - All 21 MicroPython modules (13 master + 7 slave + 1 shared)
+  - Firmware v1 snapshot (basic) and v2 snapshot (datagram protocol + self-test)
+  - Protocol v2: 6 datagram types (DATA, HEARTBEAT, ALERT, ACK, COMMAND, STATUS)
+  - Debug system with LED blink codes + OLED error messages
+  - Failure handling protocol (F1-F6) + fault simulator for demo
+  - Startup self-test with error reporting
+  - Dumb vs Smart A/B comparison mode
+  - Web dashboard with SQLite database + mock data generator
+  - Documentation organised in numbered folders (01-overview through 05-archive)
+  - Pico hardware tested (LED + ADC confirmed working on partial-solder board)
+  - C SDK stubs created (CMakeLists.txt + main.c for both Picos)
+- **Next:**
+  - Complete hardware wiring (81 wires per wiring-connections.md)
+  - Integration test: wireless link between both Picos
+  - C SDK production firmware for demo day
+  - Factory chassis assembly (Billy)
+  - Full system demo rehearsal
 - **Hackathon date:** TBD
