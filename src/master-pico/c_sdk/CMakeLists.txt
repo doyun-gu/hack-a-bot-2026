@@ -26,8 +26,12 @@ target_link_libraries(gridbox_master
     hardware_adc
     hardware_pwm
     hardware_timer
+    hardware_gpio
     pico_multicore
 )
+
+# Link math library for sqrtf in bmi160
+target_link_libraries(gridbox_master m)
 
 # Enable USB serial output (not UART)
 pico_enable_stdio_usb(gridbox_master 1)
