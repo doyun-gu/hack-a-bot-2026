@@ -36,6 +36,58 @@ _IMU_NAMES = {0: "HEALTHY", 1: "WARNING", 2: "FAULT"}
 _RESULT_NAMES = {0: "PASS", 1: "REJECT_HEAVY", 2: "REJECT_LIGHT", 3: "JAM"}
 
 
+def blink_error(led_pin, code, repeat=3):
+    """Blink error code on LED. N blinks = error type."""
+    for _ in range(repeat):
+        for _ in range(code):
+            led_pin.value(1)
+            time.sleep_ms(150)
+            led_pin.value(0)
+            time.sleep_ms(150)
+        time.sleep_ms(800)
+
+
+def startup_selftest(hw):
+    """Run self-test on Pico B hardware. Returns list of (name, code, msg) failures.
+
+    Blink codes:
+        1 = I2C bus fail
+        2 = SPI bus fail
+        5 = nRF24L01+ fail
+        8 = OLED not found
+    """
+    failures = []
+
+    # Test I2C bus
+    if hw['i2c'] is None:
+        failures.append(('I2C', 1, 'No I2C bus'))
+    else:
+        devices = hw['i2c'].scan()
+        if config.SSD1306_ADDR not in devices:
+            failures.append(('OLED', 8, f'SSD1306 not at 0x{config.SSD1306_ADDR:02X}. Found: {[hex(d) for d in devices]}'))
+
+    # Test SPI / nRF
+    if hw.get('spi') is None:
+        failures.append(('SPI', 2, 'SPI bus init failed'))
+    if hw['nrf'] is None:
+        failures.append(('NRF', 5, 'nRF24L01+ init failed'))
+
+    if failures:
+        print(f"[SLAVE] SELFTEST FAILED: {len(failures)} issue(s)")
+        for name, code, msg in failures:
+            print(f"  [{name}] Blink {code}: {msg}")
+            blink_error(hw['led_red'], code, repeat=3)
+    else:
+        print("[SLAVE] SELFTEST PASSED — all hardware OK")
+        for _ in range(3):
+            hw['led_green'].value(1)
+            time.sleep_ms(100)
+            hw['led_green'].value(0)
+            time.sleep_ms(100)
+
+    return failures
+
+
 def init_hardware():
     """Initialise all hardware peripherals."""
     print("[SLAVE] Initialising hardware...")
@@ -101,6 +153,11 @@ def main():
 
     # Init hardware
     hw = init_hardware()
+
+    # Run self-test
+    selftest_failures = startup_selftest(hw)
+    if selftest_failures:
+        print(f"[SLAVE] Continuing with {len(selftest_failures)} degraded component(s)")
 
     # Init subsystems
     op_input = OperatorInput()

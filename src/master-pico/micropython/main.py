@@ -50,6 +50,74 @@ _IMU_MAP = {"HEALTHY": 0, "WARNING": 1, "FAULT": 2}
 _RESULT_MAP = {"PASS": 0, "REJECT_HEAVY": 1, "REJECT_LIGHT": 2, "JAM": 3, "NONE": 0}
 
 
+def blink_error(led_pin, code, repeat=3):
+    """Blink error code on LED. N blinks = error type.
+
+    Pattern: [N fast blinks] — [pause] — [repeat]
+    """
+    for _ in range(repeat):
+        for _ in range(code):
+            led_pin.value(1)
+            time.sleep_ms(150)
+            led_pin.value(0)
+            time.sleep_ms(150)
+        time.sleep_ms(800)
+
+
+def startup_selftest(hw):
+    """Run self-test on all hardware. Returns list of (name, code, msg) failures.
+
+    Blink codes:
+        1 = I2C bus fail
+        2 = SPI bus fail
+        3 = IMU not found
+        4 = PCA9685 not found
+        5 = nRF24L01+ fail
+        6 = ADC readings invalid
+    """
+    failures = []
+
+    # Test I2C bus
+    if hw['i2c'] is None:
+        failures.append(('I2C', 1, 'No I2C bus'))
+    else:
+        devices = hw['i2c'].scan()
+        if config.BMI160_ADDR not in devices:
+            failures.append(('IMU', 3, f'BMI160 not at 0x{config.BMI160_ADDR:02X}. Found: {[hex(d) for d in devices]}'))
+        if config.PCA9685_ADDR not in devices:
+            failures.append(('PCA', 4, f'PCA9685 not at 0x{config.PCA9685_ADDR:02X}. Found: {[hex(d) for d in devices]}'))
+
+    # Test SPI / nRF
+    if hw.get('spi') is None:
+        failures.append(('SPI', 2, 'SPI bus init failed'))
+    if hw['nrf'] is None:
+        failures.append(('NRF', 5, 'nRF24L01+ init failed'))
+
+    # Test ADC
+    try:
+        adc_val = ADC(Pin(config.ADC_BUS_VOLTAGE)).read_u16()
+        if adc_val < 100:
+            failures.append(('ADC', 6, f'Bus voltage ADC reads {adc_val} — check divider'))
+    except Exception as e:
+        failures.append(('ADC', 6, f'ADC read error: {e}'))
+
+    if failures:
+        print(f"[MASTER] SELFTEST FAILED: {len(failures)} issue(s)")
+        for name, code, msg in failures:
+            print(f"  [{name}] Blink {code}: {msg}")
+            blink_error(hw['led_red'], code, repeat=3)
+    else:
+        print("[MASTER] SELFTEST PASSED — all hardware OK")
+        # Green LED flash to confirm
+        for _ in range(3):
+            hw['led_green'].value(1)
+            time.sleep_ms(100)
+            hw['led_green'].value(0)
+            time.sleep_ms(100)
+
+    return failures
+
+
 def init_hardware():
     """Initialise all hardware peripherals."""
     print("[MASTER] Initialising hardware...")
@@ -159,6 +227,11 @@ def main():
 
     # Init hardware
     hw = init_hardware()
+
+    # Run self-test before anything else
+    selftest_failures = startup_selftest(hw)
+    if selftest_failures:
+        print(f"[MASTER] Continuing with {len(selftest_failures)} degraded component(s)")
 
     # Init subsystems
     power_mgr = PowerManager()
