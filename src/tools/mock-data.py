@@ -4,11 +4,12 @@ Generates fake sensor data and feeds it to the web dashboard.
 Use this to test/demo the dashboard without a real Pico.
 
 Usage:
-    # Terminal 1: Start dashboard
-    python src/web/app.py --no-serial
+    # Option A: All-in-one (recommended)
+    python src/web/app.py --no-serial --mock
 
-    # Terminal 2: Feed mock data
-    python src/tools/mock-data.py
+    # Option B: Separate terminals
+    python src/web/app.py --no-serial          # Terminal 1
+    python src/tools/mock-data.py              # Terminal 2
 
     # Open http://localhost:8080 — live data appears!
 
@@ -25,18 +26,22 @@ import random
 import argparse
 import urllib.request
 
-DASHBOARD_URL = "http://localhost:8080/api/latest"
 INJECT_URL = "http://localhost:8080/api/inject"
 
 
 def inject_data(data):
-    """Send mock data to dashboard via a direct function call approach.
-    Since we can't POST easily, we'll write to a shared file that app.py reads."""
-    # Write to a mock data file that app.py can pick up
-    with open("src/web/mock_latest.json", "w") as f:
-        json.dump(data, f)
-    # Also print as if it were serial output
-    print(json.dumps(data))
+    """POST mock data to the dashboard /api/inject endpoint."""
+    payload = json.dumps(data).encode('utf-8')
+    req = urllib.request.Request(
+        INJECT_URL,
+        data=payload,
+        headers={'Content-Type': 'application/json'},
+        method='POST',
+    )
+    try:
+        urllib.request.urlopen(req, timeout=2)
+    except Exception as e:
+        print(f"[MOCK] POST failed: {e}")
 
 
 def generate_normal(t):

@@ -7,6 +7,7 @@ Reads JSON serial from Pico, stores in SQLite, serves web UI.
 Usage:
     python app.py --port /dev/tty.usbmodem*    (with Pico)
     python app.py --no-serial                  (test mode)
+    python app.py --no-serial --mock           (auto mock data)
 
 Then open http://localhost:8080
 """
@@ -29,6 +30,85 @@ data_buffer = deque(maxlen=1000)
 latest_data = {}
 current_session_id = None
 prev_state = 'UNKNOWN'
+_mock_thread = None
+_mock_running = False
+
+
+def _ingest_data(data):
+    """Store a data dict into the buffer and database."""
+    global latest_data, prev_state
+    if 'timestamp' not in data:
+        data['timestamp'] = datetime.now().isoformat()
+    latest_data = data
+    data_buffer.append(data)
+    insert_reading(data)
+
+    state = data.get('state', 'UNKNOWN')
+    if state in ('FAULT', 'EMERGENCY') and prev_state not in ('FAULT', 'EMERGENCY'):
+        insert_fault(
+            fault_type=state,
+            source=data.get('imu_status', 'unknown'),
+            imu_rms=data.get('imu_rms'),
+            motor_current=data.get('m1_mA'),
+            bus_voltage=data.get('bus_v'),
+            action_taken='auto_logged'
+        )
+    prev_state = state
+
+
+def _mock_generator():
+    """Background thread that generates mock data at 5Hz."""
+    import math
+    import random
+    global _mock_running
+    t = 0.0
+    while _mock_running:
+        data = {
+            "bus_v": 4.9 + random.gauss(0, 0.05),
+            "m1_mA": 350 + random.gauss(0, 15) + 50 * math.sin(t * 0.1),
+            "m2_mA": 280 + random.gauss(0, 10) + 30 * math.sin(t * 0.15),
+            "m1_W": 0, "m2_W": 0, "total_W": 0,
+            "efficiency": 82 + random.gauss(0, 3),
+            "state": "NORMAL",
+            "imu_rms": 0.3 + random.gauss(0, 0.05),
+            "imu_status": "HEALTHY",
+            "es_score": 0.05 + random.gauss(0, 0.02),
+            "m1_speed": 65 + int(10 * math.sin(t * 0.1)),
+            "m2_speed": 45 + int(5 * math.sin(t * 0.15)),
+            "mode": 1,
+            "total_items": int(t / 5),
+            "passed": int(t / 5 * 0.87),
+            "rejected": int(t / 5 * 0.13),
+            "reject_rate": 13.0 + random.gauss(0, 2),
+            "faults_today": 0,
+        }
+        bus_v = data["bus_v"]
+        data["m1_W"] = round(bus_v * data["m1_mA"] / 1000, 2)
+        data["m2_W"] = round(bus_v * data["m2_mA"] / 1000, 2)
+        data["total_W"] = round(data["m1_W"] + data["m2_W"] + 0.5, 2)
+        _ingest_data(data)
+        t += 0.2
+        time.sleep(0.2)
+
+
+def _start_mock():
+    """Start mock data generation in a background thread."""
+    global _mock_thread, _mock_running
+    if _mock_running:
+        return False
+    _mock_running = True
+    _mock_thread = threading.Thread(target=_mock_generator, daemon=True)
+    _mock_thread.start()
+    return True
+
+
+def _stop_mock():
+    """Stop mock data generation."""
+    global _mock_running
+    if not _mock_running:
+        return False
+    _mock_running = False
+    return True
 
 
 def serial_reader(port, baud=115200):
@@ -46,26 +126,7 @@ def serial_reader(port, baud=115200):
                 if line.startswith('{'):
                     try:
                         data = json.loads(line)
-                        data['timestamp'] = datetime.now().isoformat()
-                        latest_data = data
-                        data_buffer.append(data)
-
-                        # Store in database
-                        insert_reading(data)
-
-                        # Detect fault transitions → log fault event
-                        state = data.get('state', 'UNKNOWN')
-                        if state in ('FAULT', 'EMERGENCY') and prev_state not in ('FAULT', 'EMERGENCY'):
-                            insert_fault(
-                                fault_type=state,
-                                source=data.get('imu_status', 'unknown'),
-                                imu_rms=data.get('imu_rms'),
-                                motor_current=data.get('m1_mA'),
-                                bus_voltage=data.get('bus_v'),
-                                action_taken='auto_logged'
-                            )
-                        prev_state = state
-
+                        _ingest_data(data)
                     except json.JSONDecodeError:
                         pass
                 else:
@@ -111,6 +172,38 @@ def api_status():
     return jsonify({'connected': False, 'readings': 0, 'state': 'DISCONNECTED'})
 
 
+# ============ MOCK DATA API ============
+
+@app.route('/api/inject', methods=['POST'])
+def api_inject():
+    """Accept JSON data and store as latest reading."""
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({'error': 'invalid JSON'}), 400
+    _ingest_data(data)
+    return jsonify({'ok': True})
+
+
+@app.route('/api/mock/start', methods=['POST'])
+def api_mock_start():
+    """Start internal mock data generation."""
+    started = _start_mock()
+    if started:
+        print("[MOCK] Mock data generation started")
+        return jsonify({'ok': True, 'status': 'started'})
+    return jsonify({'ok': False, 'status': 'already_running'})
+
+
+@app.route('/api/mock/stop', methods=['POST'])
+def api_mock_stop():
+    """Stop internal mock data generation."""
+    stopped = _stop_mock()
+    if stopped:
+        print("[MOCK] Mock data generation stopped")
+        return jsonify({'ok': True, 'status': 'stopped'})
+    return jsonify({'ok': False, 'status': 'not_running'})
+
+
 # ============ DATABASE API ============
 
 @app.route('/api/db/stats')
@@ -154,6 +247,8 @@ def main():
                         help='Web server port')
     parser.add_argument('--no-serial', action='store_true',
                         help='Run web server without serial connection')
+    parser.add_argument('--mock', action='store_true',
+                        help='Auto-start mock data generation (use with --no-serial)')
     args = parser.parse_args()
 
     # Initialise database
@@ -176,6 +271,10 @@ def main():
             print("[WEB] Running without serial — use --no-serial to suppress this")
     else:
         print("[WEB] Running without serial (test mode)")
+
+    if args.mock:
+        _start_mock()
+        print("[MOCK] Auto-started mock data generation (5Hz)")
 
     print(f"[WEB] GridBox Dashboard at http://localhost:{args.web_port}")
     print(f"[WEB] Database API at http://localhost:{args.web_port}/api/db/stats")
