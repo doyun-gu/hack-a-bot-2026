@@ -100,6 +100,116 @@ PSU capacity: 12V × 6A = **72W** — we never exceed 30% of capacity.
 
 ---
 
+## Fault & Waste Targets — What We Detect and What We Do About It
+
+### Waste Targets
+
+Every type of waste has a **detection method**, a **measured signal**, and an **autonomous response:**
+
+```mermaid
+graph LR
+    subgraph DETECT["DETECT (sensors)"]
+        W1["ADC: motor current"]
+        W2["ADC: bus voltage"]
+        W3["IMU: vibration"]
+        W4["Timer: idle duration"]
+    end
+
+    subgraph WASTE_TYPE["WASTE TYPE"]
+        WT1["Over-speed"]
+        WT2["Idle running"]
+        WT3["Fault running"]
+        WT4["Over-voltage"]
+    end
+
+    subgraph RESPONSE["RESPONSE (actuators)"]
+        R1["Reduce PWM"]
+        R2["Enter sleep mode"]
+        R3["Stop motor"]
+        R4["Shed loads"]
+    end
+
+    W1 --> WT1 --> R1
+    W4 --> WT2 --> R2
+    W3 --> WT3 --> R3
+    W2 --> WT4 --> R4
+```
+
+| # | Waste / Fault Type | What Causes It | How We Detect It | ADC/IMU Signal | Autonomous Response | Power Saved |
+|---|---|---|---|---|---|---|
+| **W1** | **Over-speed** | Motor running faster than production needs | ADC: current higher than demand requires. Potentiometer setpoint < current speed | $I_{measured} > I_{target} \times 1.1$ | Reduce PWM duty cycle to match setpoint. $P \propto n^3$ savings | 50-80% |
+| **W2** | **Idle conveyor** | No items on belt — motor running for nothing | ADC: motor current at baseline (no weight-induced spike for >10s) | $I_{current} \approx I_{empty}$ for $t > 10s$ | Reduce to 20% idle speed. Resume full speed when item detected | 80-94% |
+| **W3** | **Idle servo** | Servo holding position with nothing to sort | Timer: no sorting action for >15s | No trigger event for $t > 15s$ | Relax servo (disable PWM channel on PCA9685). Re-engage on demand | 90% |
+| **W4** | **Bearing wear** | Motor vibrating due to worn bearings — wasting energy as heat and noise | IMU: $a_{rms}$ between 1g-2g (WARNING zone) | $1g < a_{rms} < 2g$ | Alert operator. Log degradation trend. Schedule maintenance before failure | Prevents 100% loss (catastrophic failure) |
+| **W5** | **Motor jam** | Belt stuck — motor stalling, drawing max current as heat | ADC: current spike >150% of normal + IMU: vibration drops (motor stopped) | $I > 1.5 \times I_{normal}$ AND $a_{rms} \approx 0$ | Stop motor immediately. Prevent burnout. Alert on OLED | Prevents motor destruction |
+| **W6** | **Loose connection** | Intermittent contact — erratic current, unpredictable waste | ADC: current std spikes >200% (Wooseong's energy signature system) | $\sigma_{current} > 3 \times \sigma_{baseline}$ | Alert: "INTERMITTENT FAULT". Log for maintenance | Prevents fire risk |
+| **W7** | **Overloaded bus** | Too many loads for available power — voltage sags | ADC: bus voltage drops below 4.5V (from 5V nominal) | $V_{bus} < 4.5V$ | Shed lowest-priority loads (P4 → P3 → P2). Protect P1 critical load | Prevents brownout damage |
+| **W8** | **Over-generation** | More power available than loads need (in real renewable system) | ADC: bus voltage rises above 5.5V | $V_{bus} > 5.5V$ | Route excess to capacitor (GPIO 13 MOSFET). Enable extra LEDs as visible proof | 0% waste — energy stored |
+
+### Fault Escalation Ladder
+
+Not all faults are equal. The system responds proportionally:
+
+```mermaid
+graph TB
+    NORMAL["NORMAL<br/>All systems green<br/>ADC readings within range"] -->|"current drift +10%"| DRIFT["DRIFT<br/>Yellow LED<br/>Log to OLED history<br/>Continue operating"]
+    DRIFT -->|"current drift +25%"| WARNING["WARNING<br/>Yellow LED flashing<br/>Alert on OLED<br/>Reduce motor speed 20%"]
+    WARNING -->|"IMU > 2g OR current +50%"| FAULT["FAULT<br/>Red LED<br/>Stop affected motor<br/>Reroute power<br/>Wireless alert to SCADA"]
+    FAULT -->|"bus voltage < 3V OR stall > 5s"| EMERGENCY["EMERGENCY<br/>Red LED flashing<br/>Stop ALL motors<br/>Close ALL servo gates<br/>Only Pico + wireless active"]
+
+    DRIFT -->|"returns to normal"| NORMAL
+    WARNING -->|"returns to normal"| NORMAL
+    FAULT -->|"joystick reset"| NORMAL
+    EMERGENCY -->|"joystick reset + confirm"| NORMAL
+```
+
+| Level | Trigger | Action | Auto-Recovery? |
+|---|---|---|---|
+| **NORMAL** | All readings within ±10% of baseline | Full operation | — |
+| **DRIFT** | Current ±10-25% from baseline | Log only. Continue. OLED shows trend | Yes — if readings return |
+| **WARNING** | Current ±25-50% OR IMU 1-2g | Reduce speed 20%. Alert OLED. Yellow LED | Yes — if readings return |
+| **FAULT** | Current >50% OR IMU >2g for 3s | Stop motor. Reroute power. Red LED. Wireless alert | Manual reset (joystick) |
+| **EMERGENCY** | Bus <3V OR stall >5s OR multiple faults | Stop everything. Close all gates. Pico only | Manual reset + confirm |
+
+### What Gets Rerouted When a Motor Stops
+
+```mermaid
+flowchart LR
+    FAULT_M2["Motor 2 FAULT<br/>Stopped — drawing 0W"] --> EXCESS["2.4W now available"]
+    EXCESS --> P1["Priority 1: Speed up Motor 1<br/>(if below target)"]
+    P1 --> P2["Priority 2: Charge capacitor<br/>(GPIO 13 MOSFET)"]
+    P2 --> P3["Priority 3: Light extra LEDs<br/>(visible proof of rerouting)"]
+    P3 --> P4["Priority 4: Log savings<br/>OLED: 'Rerouted 2.4W'"]
+```
+
+| Priority | Where Excess Goes | Why | Visible to Judges? |
+|---|---|---|---|
+| 1 | Motor 1 speed increase | Maintain production rate with one motor down | Yes — motor visibly speeds up |
+| 2 | Capacitor charging | Store energy for later use | OLED shows "CHARGING" |
+| 3 | Extra LED bank | Visual proof that power went somewhere useful | Yes — LEDs light up |
+| 4 | Log to OLED | Record the savings | OLED shows "Rerouted 2.4W" |
+
+### OLED Fault Dashboard
+
+```
+FAULT & WASTE MONITOR    [LIVE]
+
+W1 Over-speed:    OK  (65% PWM)
+W2 Idle conveyor: OK  (items detected)
+W3 Idle servo:    OK  (sorted 2s ago)
+W4 Bearing wear:  OK  (0.3g)
+W5 Motor jam:     OK  (340mA normal)
+W6 Loose connect: OK  (std 30mA)
+W7 Bus overload:  OK  (4.9V)
+W8 Over-gen:      --  (n/a)
+
+Faults today:     0
+Rerouted:         0 mWh
+Saved vs dumb:    69%
+```
+
+---
+
 ## System States — What's On and What's Off
 
 ```mermaid
