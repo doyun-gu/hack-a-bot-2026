@@ -24,6 +24,12 @@
 |---|---|
 | [`team-plan.md`](team-plan.md) | Task lists for Doyun, Wooseong, Billy with timeline and milestones |
 
+### Power & Electrical
+
+| File | Contents |
+|---|---|
+| [`power-system.md`](power-system.md) | **Power flow design** — what happens when actuators on/off, rerouting logic, power budget, firmware algorithm |
+
 ### Reference
 
 | Folder | Contents |
