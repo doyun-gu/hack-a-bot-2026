@@ -1,26 +1,16 @@
 # Documentation
 
-Quick guide to what's in this folder.
+## GridBox — Smart Infrastructure Control System
 
-## Main Design Document
-
-| File | What It Contains |
+| File | Contents |
 |---|---|
-| [`gridbox-design.md`](gridbox-design.md) | **GridBox — Main Design Document (96/100).** Complete architecture, pin mapping, wiring diagrams, software structure, energy recycling logic, fault detection, demo scenario, EEE theory, build timeline, BOM. **Start here.** |
+| [`gridbox-design.md`](gridbox-design.md) | **Main design document** — architecture, pin mapping, wiring, software, algorithms, demo script, BOM. Start here |
+| [`gridbox-proposal.md`](gridbox-proposal.md) | Full proposal — factory problems, cost comparison, creativity defense, IMU applications, EEE theory |
+| [`hardware-reference.md`](hardware-reference.md) | Kit component table + pinout interfaces |
 
-## Proposals (Idea Development)
+## Archive
 
-| File | Score | What It Contains |
-|---|---|---|
-| [`gridbox-proposal.md`](gridbox-proposal.md) | **96** | GridBox detailed proposal — factory problems, cost comparison, creativity defense, IMU applications, EEE theory deep dive |
-| [`tremortray-proposal.md`](tremortray-proposal.md) | **98** | NeuroSync — neurological diagnostic (alternative idea) |
-| [`steadyhand-proposal.md`](steadyhand-proposal.md) | **95** | SteadyHand — tremor stabiliser (alternative idea) |
-
-## Reference
-
-| File / Folder | What It Contains |
+| Folder | Contents |
 |---|---|
-| [`idea-shortlist-v2.md`](idea-shortlist-v2.md) | **LATEST — 14 ideas** scored with full component set (DC motor, pot, ESP32-CAM, wheels). Mermaid diagrams, architecture, decision guide |
-| [`idea-shortlist.md`](idea-shortlist.md) | Original 10 ideas (base kit only) — kept for reference |
-| [`hardware-reference.md`](hardware-reference.md) | Component table + pinout interfaces |
-| [`images/`](images/) | Project logos and visual assets |
+| [`ideas/`](ideas/) | All brainstorming ideas explored before choosing GridBox (NeuroSync, SteadyHand, 14 ranked ideas) |
+| [`images/`](images/) | Logos and visual assets |
