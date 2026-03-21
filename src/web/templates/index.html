@@ -543,35 +543,35 @@
             // ═══ WIRES — all orthogonal, using corridors ═══
             const pMid = midY(psuY), bkMid = midY(buckY), btMid = midY(boostY);
 
-            // PSU → Buck: right to corrA, up to buckMidY, right to col2
+            // PSU → Buck: right to x=220, up to y=65, right to x=280
             const wPsuBuck = [[psuR, pMid], [corrA, pMid], [corrA, bkMid], [col2x, bkMid]];
             wire(wPsuBuck, true, '#58a6ff');
             animDot(wPsuBuck, true, '#58a6ff', 0);
 
-            // PSU → Boost: right to corrA-5, down to boostMidY, right to col2
-            const wPsuBoost = [[psuR, pMid + 4], [corrA - 5, pMid + 4], [corrA - 5, btMid], [col2x, btMid]];
+            // PSU → Boost: right to x=220, down to y=225, right to x=280
+            const wPsuBoost = [[psuR, pMid], [corrA, pMid], [corrA, btMid], [col2x, btMid]];
             wire(wPsuBoost, true, '#d29922');
             animDot(wPsuBoost, true, '#d29922', 60);
 
-            // Buck → Motor 1: right to corrB, up to m1MidY, right to col3
-            const wBkM1 = [[buckR, bkMid - 4], [corrB, bkMid - 4], [corrB, midY(m1Y)], [col3x, midY(m1Y)]];
+            // Buck → Motor 1: right to x=500, up to y=45, right to x=560
+            const wBkM1 = [[buckR, bkMid], [corrB, bkMid], [corrB, midY(m1Y)], [col3x, midY(m1Y)]];
             wire(wBkM1, m1On, '#3fb950');
             animDot(wBkM1, m1On, '#3fb950', 120);
 
-            // Buck → Motor 2: right to corrB-6, down to m2MidY, right to col3
-            const wBkM2 = [[buckR, bkMid], [corrB - 6, bkMid], [corrB - 6, midY(m2Y)], [col3x, midY(m2Y)]];
+            // Buck → Motor 2: right to x=500, down to y=125, right to x=560
+            const wBkM2 = [[buckR, bkMid], [corrB, bkMid], [corrB, midY(m2Y)], [col3x, midY(m2Y)]];
             wire(wBkM2, m2On, '#58a6ff');
             animDot(wBkM2, m2On, '#58a6ff', 180);
 
-            // Buck → Servos: right to corrB-12, down to servoMidY, right to col3
-            const wBkServo = [[buckR, bkMid + 4], [corrB - 12, bkMid + 4], [corrB - 12, midY(servoY)], [col3x, midY(servoY)]];
+            // Buck → Servos: right to x=500, down to y=205, right to x=560
+            const wBkServo = [[buckR, bkMid], [corrB, bkMid], [corrB, midY(servoY)], [col3x, midY(servoY)]];
             wire(wBkServo, true, '#a371f7');
             animDot(wBkServo, true, '#a371f7', 240);
 
-            // Buck → LEDs: right to corrB-18, down to ledMidY, right to col3
+            // Buck → LEDs: right to x=500, down to y=285, right to x=560
             const ledActive = state !== 'FAULT';
             const ledColor = state === 'FAULT' ? '#f85149' : '#3fb950';
-            const wBkLed = [[buckR, bkMid + 8], [corrB - 18, bkMid + 8], [corrB - 18, midY(ledY)], [col3x, midY(ledY)]];
+            const wBkLed = [[buckR, bkMid], [corrB, bkMid], [corrB, midY(ledY)], [col3x, midY(ledY)]];
             wire(wBkLed, ledActive, ledColor);
             animDot(wBkLed, ledActive, ledColor, 300);
 
