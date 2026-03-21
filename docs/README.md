@@ -1,39 +1,52 @@
 # Documentation
 
-## GridBox — Smart Infrastructure Control System
+## Quick Links
 
-### Core Design
-
-| File | Contents |
+| I want to... | Read this |
 |---|---|
-| [`context.md`](context.md) | AI context file — copy-paste for team AI agents |
-| [`gridbox-design.md`](gridbox-design.md) | **Main design document** — architecture, pin mapping, software, algorithms, BOM |
-| [`wiring-connections.md`](wiring-connections.md) | **81 wires numbered** — colour-coded, test-after-each-group order |
-| [`gridbox-proposal.md`](gridbox-proposal.md) | Detailed proposal — factory problems, cost comparison, creativity defense, EEE theory |
+| **Understand the project** | [`01-overview/context.md`](01-overview/context.md) |
+| **See the full design** | [`01-overview/gridbox-design.md`](01-overview/gridbox-design.md) |
+| **Wire the circuits** | [`02-electrical/wiring-connections.md`](02-electrical/wiring-connections.md) |
+| **Build the factory** | [`03-factory/factory-design/`](03-factory/factory-design/) |
+| **See my task list** | [`04-team/team-plan.md`](04-team/team-plan.md) |
+| **Start firmware dev** | [`src/firmware-dev-plan.md`](../src/firmware-dev-plan.md) |
 
-### Subsystem Docs
+---
 
-| Folder | Author | Contents |
-|---|---|---|
-| [`factory-design/`](factory-design/) | Doyun + Billy | Physical factory layout, weight sensing/sorting, build plans, factory options |
-| [`energy-signature/`](energy-signature/) | Wooseong | Current-based fault detection — 4 fault models, divergence scoring, demo script |
+## Folder Structure
 
-### Team
-
-| File | Contents |
-|---|---|
-| [`team-plan.md`](team-plan.md) | Task lists for Doyun, Wooseong, Billy with timeline and milestones |
-
-### Power & Electrical
-
-| File | Contents |
-|---|---|
-| [`power-system.md`](power-system.md) | **Power flow design** — what happens when actuators on/off, rerouting logic, power budget, firmware algorithm |
-
-### Reference
-
-| Folder | Contents |
-|---|---|
-| [`hardware-reference.md`](hardware-reference.md) | Kit component table + pinout interfaces |
-| [`ideas/`](ideas/) | Archived brainstorming (14 ideas explored before choosing GridBox) |
-| [`images/`](images/) | Rendered diagrams and logos |
+```
+docs/
+├── 01-overview/              ← START HERE
+│   ├── context.md            ← AI paste file (full project summary)
+│   ├── gridbox-design.md     ← Main design doc (architecture, pins, BOM)
+│   ├── gridbox-proposal.md   ← Why GridBox (problems, cost, creativity)
+│   └── hardware-reference.md ← Kit component table
+│
+├── 02-electrical/            ← WOOSEONG + DOYUN
+│   ├── wiring-connections.md ← 81 wires numbered + test order
+│   ├── power-system.md       ← Power flow, waste targets, fault ladder
+│   └── energy-signature/     ← Current-based fault detection (Wooseong)
+│       ├── energy-signature-proposal.md
+│       ├── fault-models.md
+│       ├── model-a-mechanical-load.md
+│       └── smart-sorting.md
+│
+├── 03-factory/               ← BILLY + DOYUN
+│   ├── dev-priority.md       ← What's locked vs flexible
+│   └── factory-design/       ← Physical build
+│       ├── weight-sensing-sorting.md
+│       ├── factory-layout.md
+│       ├── factory-build-plan.md
+│       └── factory-deep-dive.md
+│
+├── 04-team/                  ← EVERYONE
+│   └── team-plan.md          ← Task lists, timeline, milestones
+│
+├── 05-archive/               ← Past ideas (reference only)
+│   └── ideas/
+│       ├── idea-shortlist-v2.md
+│       └── tremortray-proposal.md
+│
+└── images/                   ← Rendered diagrams
+```
