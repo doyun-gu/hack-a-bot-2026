@@ -5,91 +5,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GridBox — SCADA Dashboard</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, sans-serif; background: #0b0e11; color: #e0e0e0; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #0d1117; color: #c9d1d9; }
 
-        /* Header */
-        .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #0f1318; border-bottom: 1px solid #1a1f26; }
+        /* ─── Header ─── */
+        .header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px 20px; background: #161b22; border-bottom: 1px solid #21262d;
+        }
         .header-left { display: flex; align-items: center; gap: 12px; }
-        .header-left h1 { font-size: 16px; font-weight: 600; color: #fff; }
-        .header-left .tag { font-size: 10px; padding: 2px 8px; border-radius: 3px; background: #1a2332; color: #4dabf7; border: 1px solid #1e3a5f; }
-        .header-right { display: flex; align-items: center; gap: 16px; font-size: 11px; }
-        .conn-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
-        .conn-dot.ok { background: #40c057; box-shadow: 0 0 6px #40c057; }
-        .conn-dot.lost { background: #fa5252; box-shadow: 0 0 6px #fa5252; }
+        .header-left h1 { font-size: 15px; font-weight: 600; color: #c9d1d9; }
+        .header-left .tag {
+            font-size: 9px; font-weight: 600; padding: 2px 8px; border-radius: 3px;
+            background: #161b22; color: #58a6ff; border: 1px solid #21262d;
+        }
+        .header-right { display: flex; align-items: center; gap: 16px; font-size: 11px; color: #8b949e; }
+        .conn-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        .conn-dot.ok { background: #3fb950; }
+        .conn-dot.lost { background: #f85149; }
 
-        /* Grid */
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px; }
+        /* ─── Health Summary Bar ─── */
+        .health-bar {
+            display: flex; align-items: center; gap: 6px; padding: 4px 20px;
+            height: 24px; background: #0d1117; border-bottom: 1px solid #21262d; overflow-x: auto;
+        }
+        .health-pill {
+            display: flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px;
+            font-size: 9px; font-weight: 600; color: #8b949e; background: #161b22;
+            border: 1px solid #21262d; white-space: nowrap;
+        }
+        .health-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: #3fb950; flex-shrink: 0;
+        }
+        .health-dot.warn { background: #d29922; }
+        .health-dot.fault { background: #f85149; }
+        .health-dot.off { background: #484f58; border: 1px dashed #484f58; background: transparent; }
 
-        /* Cards */
-        .card { background: #0f1318; border: 1px solid #1a1f26; border-radius: 6px; padding: 14px; }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .card-header h3 { font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.8px; }
-        .card-header .badge { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 500; }
+        /* ─── System Overview Row ─── */
+        .overview-row {
+            display: flex; align-items: center; gap: 16px; padding: 12px 20px;
+            background: #161b22; border-bottom: 1px solid #21262d; flex-wrap: wrap;
+        }
+        .ov-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .ov-item-gauge { display: flex; align-items: center; gap: 8px; }
+        .ov-label { font-size: 10px; font-weight: 500; color: #484f58; text-transform: uppercase; letter-spacing: 0.5px; }
+        .ov-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; color: #c9d1d9; }
+        .ov-unit { font-size: 11px; font-weight: 400; color: #8b949e; }
+        .ov-sep { width: 1px; height: 36px; background: #21262d; }
 
-        .metric { display: flex; align-items: baseline; gap: 6px; }
-        .metric .val { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 600; line-height: 1; }
-        .metric .unit { font-size: 12px; color: #6b7280; }
-
-        .sub-metrics { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: #6b7280; }
-        .sub-metrics span { font-family: 'JetBrains Mono', monospace; }
-
-        /* Progress bar — thin, clean, label separate */
-        .progress { margin-top: 10px; }
-        .progress-bar { height: 4px; background: #1a1f26; border-radius: 2px; overflow: hidden; }
-        .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
-
-        /* Colours */
-        .c-green { color: #40c057; }
-        .c-yellow { color: #fab005; }
-        .c-red { color: #fa5252; }
-        .c-blue { color: #4dabf7; }
-        .c-white { color: #fff; }
-
-        .bg-green { background: #40c057; }
-        .bg-yellow { background: #fab005; }
-        .bg-red { background: #fa5252; }
-        .bg-blue { background: #4dabf7; }
-
-        .badge-green { background: #0d2818; color: #40c057; border: 1px solid #1a4d2e; }
-        .badge-yellow { background: #2d2305; color: #fab005; border: 1px solid #4d3b0a; }
-        .badge-red { background: #2d0a0a; color: #fa5252; border: 1px solid #4d1515; }
-
-        .wide { grid-column: span 2; }
-        .full { grid-column: 1 / -1; }
-
-        /* State badge */
-        .state { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 4px; letter-spacing: 0.5px; }
-        .state-NORMAL { background: #0d2818; color: #40c057; border: 1px solid #1a4d2e; }
-        .state-DRIFT { background: #2d2305; color: #fab005; border: 1px solid #4d3b0a; }
-        .state-WARNING { background: #2d1a05; color: #fd7e14; border: 1px solid #4d2e0a; }
-        .state-FAULT { background: #2d0a0a; color: #fa5252; border: 1px solid #4d1515; }
-        .state-EMERGENCY { background: #2d0a0a; color: #ff0000; border: 1px solid #660000; animation: pulse 0.5s infinite; }
-        .state-UNKNOWN { background: #1a1f26; color: #6b7280; border: 1px solid #2d333b; }
+        /* ─── State Badge ─── */
+        .state { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 4px; letter-spacing: 0.5px; }
+        .state-NORMAL { background: rgba(63,185,80,0.1); color: #3fb950; border: 1px solid rgba(63,185,80,0.3); }
+        .state-DRIFT { background: rgba(210,153,34,0.1); color: #d29922; border: 1px solid rgba(210,153,34,0.3); }
+        .state-WARNING { background: rgba(210,153,34,0.15); color: #d29922; border: 1px solid rgba(210,153,34,0.4); }
+        .state-FAULT { background: rgba(248,81,73,0.1); color: #f85149; border: 1px solid rgba(248,81,73,0.3); }
+        .state-EMERGENCY { background: rgba(248,81,73,0.15); color: #f85149; border: 1px solid rgba(248,81,73,0.4); animation: pulse 0.5s infinite; }
+        .state-UNKNOWN { background: rgba(139,148,158,0.1); color: #8b949e; border: 1px solid rgba(139,148,158,0.2); }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
-        /* Production stats */
-        .prod-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
-        .prod-item { text-align: center; padding: 8px; background: #141920; border-radius: 4px; }
-        .prod-item .num { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600; }
-        .prod-item .lbl { font-size: 9px; color: #6b7280; text-transform: uppercase; margin-top: 2px; }
+        /* ─── Badges ─── */
+        .badge { font-size: 9px; font-weight: 600; padding: 1px 6px; border-radius: 3px; }
+        .badge-green { background: rgba(63,185,80,0.1); color: #3fb950; border: 1px solid rgba(63,185,80,0.25); }
+        .badge-yellow { background: rgba(210,153,34,0.1); color: #d29922; border: 1px solid rgba(210,153,34,0.25); }
+        .badge-red { background: rgba(248,81,73,0.1); color: #f85149; border: 1px solid rgba(248,81,73,0.25); }
 
-        /* Power flow canvas */
-        .flow-canvas { width: 100%; height: 280px; display: block; }
+        /* ─── Colors ─── */
+        .c-green { color: #3fb950; }
+        .c-yellow { color: #d29922; }
+        .c-red { color: #f85149; }
+        .c-blue { color: #58a6ff; }
+        .c-purple { color: #a371f7; }
+        .c-white { color: #c9d1d9; }
+        .bg-green { background: #3fb950; }
+        .bg-yellow { background: #d29922; }
+        .bg-red { background: #f85149; }
+        .bg-blue { background: #58a6ff; }
+        .bg-purple { background: #a371f7; }
 
-        /* Charts */
-        .chart-wrap { grid-column: span 2; background: #0f1318; border: 1px solid #1a1f26; border-radius: 6px; padding: 14px; }
-        .chart-wrap h3 { font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
-        .chart-legend { font-size: 10px; color: #6b7280; margin-bottom: 6px; display: flex; gap: 16px; }
+        /* ─── Main Content ─── */
+        .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 20px; }
+
+        /* ─── Cards ─── */
+        .card { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 14px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card-header h3 {
+            font-size: 10px; font-weight: 500; color: #484f58;
+            text-transform: uppercase; letter-spacing: 0.8px;
+        }
+        .metric { display: flex; align-items: baseline; gap: 4px; }
+        .metric .val { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; line-height: 1; }
+        .metric .unit { font-size: 11px; font-weight: 400; color: #8b949e; }
+        .sub-metrics { display: flex; gap: 8px; margin-top: 4px; font-size: 11px; color: #8b949e; }
+        .sub-metrics .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* ─── Progress Bar ─── */
+        .progress { margin-top: 8px; }
+        .progress-bar { height: 4px; background: #21262d; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+
+        /* ─── Servo Row ─── */
+        .servo-row { display: flex; gap: 8px; }
+        .servo-item {
+            flex: 1; display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 12px; background: #0d1117; border: 1px solid #21262d; border-radius: 4px;
+        }
+        .servo-name { font-size: 11px; font-weight: 500; color: #c9d1d9; }
+        .servo-status { display: flex; align-items: center; gap: 6px; }
+        .servo-angle { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: #a371f7; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .status-dot.green { background: #3fb950; }
+        .status-dot.off { background: transparent; border: 1px dashed #484f58; }
+
+        /* ─── Production ─── */
+        .prod-stats { display: flex; gap: 12px; align-items: center; }
+        .prod-numbers { display: flex; gap: 8px; flex: 1; }
+        .prod-item { text-align: center; padding: 8px 12px; background: #0d1117; border-radius: 4px; flex: 1; }
+        .prod-item .num { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600; }
+        .prod-item .lbl { font-size: 9px; color: #484f58; text-transform: uppercase; margin-top: 2px; }
+        .donut-wrap { width: 64px; height: 64px; flex-shrink: 0; }
+
+        /* ─── Fault Log ─── */
+        .fault-entry {
+            display: flex; align-items: center; gap: 8px; padding: 5px 0;
+            border-bottom: 1px solid #21262d; font-size: 11px;
+        }
+        .fault-entry:last-child { border-bottom: none; }
+        .fault-time { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #484f58; white-space: nowrap; }
+        .fault-msg { color: #8b949e; }
+        .no-faults { font-size: 11px; color: #484f58; padding: 6px 0; }
+
+        /* ─── Power Flow ─── */
+        .power-flow-section { padding: 0 20px 8px; }
+        .flow-canvas { width: 100%; height: 240px; display: block; }
+
+        /* ─── Charts ─── */
+        .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0 20px 16px; }
+        .chart-wrap { background: #161b22; border: 1px solid #21262d; border-radius: 6px; padding: 14px; }
+        .chart-wrap h3 {
+            font-size: 10px; font-weight: 500; color: #484f58;
+            text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px;
+        }
+        .chart-legend { font-size: 10px; color: #8b949e; margin-bottom: 6px; display: flex; gap: 16px; }
         .chart-legend .dot { width: 8px; height: 3px; border-radius: 1px; display: inline-block; margin-right: 4px; vertical-align: middle; }
-        .chart-canvas { width: 100%; height: 180px; display: block; }
+        .chart-canvas { width: 100%; height: 200px; display: block; }
 
-        @media (max-width: 1000px) {
-            .grid { grid-template-columns: 1fr 1fr; }
-            .wide { grid-column: span 1; }
-            .chart-wrap { grid-column: 1 / -1; }
+        /* ─── Responsive ─── */
+        @media (max-width: 900px) {
+            .main-content { grid-template-columns: 1fr; }
+            .charts-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -104,86 +169,159 @@
         </div>
         <div class="header-right">
             <span><span class="conn-dot lost" id="conn-dot"></span><span id="conn-text">Offline</span></span>
-            <span style="color: #6b7280;">Mode: <span id="mode" class="c-blue">--</span></span>
+            <span style="color:#484f58">Mode: <span id="mode" class="c-blue">--</span></span>
         </div>
     </div>
 
-    <div class="grid">
-        <!-- Row 1: System State + Bus + Efficiency -->
-        <div class="card wide">
-            <div class="card-header"><h3>System State</h3></div>
+    <!-- Health Summary Bar -->
+    <div class="health-bar">
+        <div class="health-pill" id="hp-psu"><span class="health-dot" id="hd-psu"></span><span id="hp-psu-txt">PSU OK</span></div>
+        <div class="health-pill" id="hp-buck"><span class="health-dot" id="hd-buck"></span><span id="hp-buck-txt">Buck OK</span></div>
+        <div class="health-pill" id="hp-m1"><span class="health-dot" id="hd-m1"></span><span id="hp-m1-txt">M1 --</span></div>
+        <div class="health-pill" id="hp-m2"><span class="health-dot" id="hd-m2"></span><span id="hp-m2-txt">M2 --</span></div>
+        <div class="health-pill" id="hp-s1"><span class="health-dot" id="hd-s1"></span><span id="hp-s1-txt">S1 OK</span></div>
+        <div class="health-pill" id="hp-s2"><span class="health-dot" id="hd-s2"></span><span id="hp-s2-txt">S2 OK</span></div>
+        <div class="health-pill" id="hp-imu"><span class="health-dot" id="hd-imu"></span><span id="hp-imu-txt">IMU OK</span></div>
+        <div class="health-pill" id="hp-es"><span class="health-dot" id="hd-es"></span><span id="hp-es-txt">ES OK</span></div>
+        <div class="health-pill" id="hp-nrf"><span class="health-dot" id="hd-nrf"></span><span id="hp-nrf-txt">nRF OK</span></div>
+        <div class="health-pill" id="hp-db"><span class="health-dot" id="hd-db"></span><span id="hp-db-txt">DB OK</span></div>
+    </div>
+
+    <!-- System Overview Row -->
+    <div class="overview-row">
+        <div class="ov-item">
             <span class="state state-UNKNOWN" id="state-badge">UNKNOWN</span>
         </div>
-        <div class="card">
-            <div class="card-header"><h3>Bus Voltage</h3><span class="badge badge-green" id="bus-badge">OK</span></div>
-            <div class="metric"><span class="val c-green" id="bus-v">--</span><span class="unit">V</span></div>
-            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="bus-bar" style="width:0%"></div></div></div>
+        <div class="ov-sep"></div>
+        <div class="ov-item">
+            <span class="ov-label">Bus Voltage</span>
+            <div class="ov-item-gauge">
+                <svg width="40" height="40" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="#21262d" stroke-width="3"/>
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="#3fb950" stroke-width="3"
+                        stroke-dasharray="100.53" stroke-dashoffset="100.53"
+                        transform="rotate(-90 20 20)" id="bus-gauge-fill"/>
+                </svg>
+                <div>
+                    <span class="ov-val" id="bus-v">--</span>
+                    <span class="ov-unit">V</span>
+                    <span class="badge badge-green" id="bus-badge" style="margin-left:4px">OK</span>
+                </div>
+            </div>
         </div>
-        <div class="card">
-            <div class="card-header"><h3>Efficiency</h3></div>
-            <div class="metric"><span class="val c-green" id="efficiency">--</span><span class="unit">%</span></div>
-            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="eff-bar" style="width:0%"></div></div></div>
+        <div class="ov-sep"></div>
+        <div class="ov-item">
+            <span class="ov-label">Total Power</span>
+            <div class="ov-item-gauge">
+                <svg width="40" height="40" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="#21262d" stroke-width="3"/>
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="#3fb950" stroke-width="3"
+                        stroke-dasharray="100.53" stroke-dashoffset="100.53"
+                        transform="rotate(-90 20 20)" id="power-gauge-fill"/>
+                </svg>
+                <div>
+                    <span class="ov-val" id="total-w">--</span>
+                    <span class="ov-unit">W</span>
+                </div>
+            </div>
         </div>
+        <div class="ov-sep"></div>
+        <div class="ov-item">
+            <span class="ov-label">Efficiency</span>
+            <div><span class="ov-val" id="efficiency">--</span><span class="ov-unit">%</span></div>
+        </div>
+        <div class="ov-sep"></div>
+        <div class="ov-item">
+            <span class="ov-label">IMU</span>
+            <span class="badge badge-green" id="imu-badge">HEALTHY</span>
+        </div>
+        <div class="ov-sep"></div>
+        <div class="ov-item">
+            <span class="ov-label">Energy Sig</span>
+            <span class="badge badge-green" id="es-badge">HEALTHY</span>
+        </div>
+        <div class="ov-sep"></div>
+        <div class="ov-item">
+            <span class="ov-label">Uptime</span>
+            <div><span class="ov-val" id="uptime" style="font-size:16px">0</span><span class="ov-unit">sec</span></div>
+        </div>
+    </div>
 
-        <!-- Row 2: Motors + Power + IMU -->
-        <div class="card">
-            <div class="card-header"><h3>Motor 1 — Fan</h3><span class="badge badge-green" id="m1-badge">ON</span></div>
-            <div class="metric"><span class="val c-green" id="m1-current">--</span><span class="unit">mA</span></div>
-            <div class="sub-metrics"><span id="m1-power">--</span><span>W</span><span style="margin-left:8px">Speed:</span><span id="m1-speed" class="c-blue">--</span><span>%</span></div>
-            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-blue" id="m1-bar" style="width:0%"></div></div></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>Motor 2 — Conveyor</h3><span class="badge badge-green" id="m2-badge">ON</span></div>
-            <div class="metric"><span class="val c-green" id="m2-current">--</span><span class="unit">mA</span></div>
-            <div class="sub-metrics"><span id="m2-power">--</span><span>W</span><span style="margin-left:8px">Speed:</span><span id="m2-speed" class="c-blue">--</span><span>%</span></div>
-            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-blue" id="m2-bar" style="width:0%"></div></div></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>Total Power</h3></div>
-            <div class="metric"><span class="val c-green" id="total-w">--</span><span class="unit">W</span></div>
-            <div class="sub-metrics"><span style="color:#6b7280">Budget: 12W</span></div>
-            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="power-bar" style="width:0%"></div></div></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>IMU Vibration</h3><span class="badge badge-green" id="imu-badge">HEALTHY</span></div>
-            <div class="metric"><span class="val c-green" id="imu-rms">--</span><span class="unit">g</span></div>
-            <div class="sub-metrics"><span id="imu-status">--</span></div>
-            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="imu-bar" style="width:0%"></div></div></div>
-        </div>
-
-        <!-- Row 3: Production -->
-        <div class="card full">
-            <div class="card-header"><h3>Production Line</h3><span class="badge badge-green" id="prod-badge">RUNNING</span></div>
-            <div class="prod-row">
-                <div class="prod-item"><div class="num c-white" id="total-items">0</div><div class="lbl">Total Sorted</div></div>
-                <div class="prod-item"><div class="num c-green" id="passed">0</div><div class="lbl">Passed</div></div>
-                <div class="prod-item"><div class="num c-red" id="rejected">0</div><div class="lbl">Rejected</div></div>
-                <div class="prod-item"><div class="num c-yellow" id="reject-rate">0</div><div class="lbl">Reject Rate %</div></div>
+    <!-- Main Two-Column Layout -->
+    <div class="main-content">
+        <!-- Left Column: Motors & Actuators -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="card">
+                <div class="card-header"><h3>Motor 1 — Fan</h3><span class="badge badge-green" id="m1-badge">ON</span></div>
+                <div class="metric"><span class="val c-green" id="m1-current">--</span><span class="unit">mA</span></div>
+                <div class="sub-metrics">
+                    <span>Power:</span><span class="mono" id="m1-power">--</span><span>W</span>
+                    <span style="margin-left:4px">Speed:</span><span class="mono c-blue" id="m1-speed">--</span><span>%</span>
+                </div>
+                <div class="progress"><div class="progress-bar"><div class="progress-fill bg-blue" id="m1-bar" style="width:0%"></div></div></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Motor 2 — Conveyor</h3><span class="badge badge-green" id="m2-badge">ON</span></div>
+                <div class="metric"><span class="val c-green" id="m2-current">--</span><span class="unit">mA</span></div>
+                <div class="sub-metrics">
+                    <span>Power:</span><span class="mono" id="m2-power">--</span><span>W</span>
+                    <span style="margin-left:4px">Speed:</span><span class="mono c-blue" id="m2-speed">--</span><span>%</span>
+                </div>
+                <div class="progress"><div class="progress-bar"><div class="progress-fill bg-blue" id="m2-bar" style="width:0%"></div></div></div>
+            </div>
+            <div class="servo-row">
+                <div class="servo-item">
+                    <span class="servo-name">Servo 1: Valve</span>
+                    <div class="servo-status">
+                        <span class="servo-angle" id="s1-angle">--°</span>
+                        <span class="status-dot green" id="s1-dot"></span>
+                    </div>
+                </div>
+                <div class="servo-item">
+                    <span class="servo-name">Servo 2: Gate</span>
+                    <div class="servo-status">
+                        <span class="servo-angle" id="s2-angle">--°</span>
+                        <span class="status-dot green" id="s2-dot"></span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Row 4: ES + Faults -->
-        <div class="card wide">
-            <div class="card-header"><h3>Energy Signature</h3><span class="badge badge-green" id="es-badge">HEALTHY</span></div>
-            <div class="metric"><span class="val c-green" id="es-score">--</span><span class="unit">divergence</span></div>
-            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="es-bar" style="width:0%"></div></div></div>
+        <!-- Right Column: Production & Faults -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="card">
+                <div class="card-header"><h3>Production Line</h3><span class="badge badge-green" id="prod-badge">RUNNING</span></div>
+                <div class="prod-stats">
+                    <div class="prod-numbers">
+                        <div class="prod-item"><div class="num c-white" id="total-items">0</div><div class="lbl">Total</div></div>
+                        <div class="prod-item"><div class="num c-green" id="passed">0</div><div class="lbl">Pass</div></div>
+                        <div class="prod-item"><div class="num c-red" id="rejected">0</div><div class="lbl">Reject</div></div>
+                    </div>
+                    <div class="donut-wrap"><canvas id="reject-donut" width="64" height="64"></canvas></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header"><h3>Faults &amp; Diagnostics</h3><span class="badge badge-green" id="fault-badge">CLEAR</span></div>
+                <div style="display:flex;gap:20px;margin-bottom:8px">
+                    <div><span class="ov-label">Faults Today</span><div class="metric"><span class="val c-green" id="faults" style="font-size:20px">0</span></div></div>
+                    <div><span class="ov-label">IMU RMS</span><div class="metric"><span class="val c-green" id="imu-rms" style="font-size:20px">--</span><span class="unit">g</span></div></div>
+                    <div><span class="ov-label">ES Divergence</span><div class="metric"><span class="val c-green" id="es-score" style="font-size:20px">--</span></div></div>
+                </div>
+                <div id="fault-log"><div class="no-faults">No fault events recorded</div></div>
+            </div>
         </div>
-        <div class="card">
-            <div class="card-header"><h3>Faults Today</h3></div>
-            <div class="metric"><span class="val c-green" id="faults">0</span><span class="unit">events</span></div>
-        </div>
-        <div class="card">
-            <div class="card-header"><h3>Uptime</h3></div>
-            <div class="metric"><span class="val c-blue" id="uptime">0</span><span class="unit">sec</span></div>
-        </div>
+    </div>
 
-        <!-- Power Flow Diagram -->
-        <div class="card full">
-            <div class="card-header"><h3>Power Flow Diagram</h3><span class="tag">LIVE</span></div>
-            <canvas class="flow-canvas" id="power-flow" style="height: 400px;"></canvas>
+    <!-- Power Flow Diagram -->
+    <div class="power-flow-section">
+        <div class="card" style="padding:10px 14px">
+            <div class="card-header" style="margin-bottom:4px"><h3>Power Flow</h3><span class="tag" style="font-size:8px">LIVE</span></div>
+            <canvas class="flow-canvas" id="power-flow"></canvas>
         </div>
+    </div>
 
-        <!-- Charts -->
+    <!-- Charts -->
+    <div class="charts-row">
         <div class="chart-wrap">
             <h3>Power Consumption</h3>
             <div class="chart-legend"><span><span class="dot bg-green"></span>Total (W)</span></div>
@@ -196,11 +334,23 @@
         </div>
     </div>
 
+    <!-- Hidden elements for backward-compatible update() DOM references -->
+    <div style="display:none">
+        <span id="imu-status"></span>
+        <span id="reject-rate"></span>
+        <div id="bus-bar"></div>
+        <div id="eff-bar"></div>
+        <div id="power-bar"></div>
+        <div id="imu-bar"></div>
+        <div id="es-bar"></div>
+    </div>
+
     <script>
         const MODES = ['IDLE','NORMAL','DUMB','MANUAL','CALIBRATE','LEARNING','EMERGENCY'];
         const MAX_PTS = 300;
         const pH = [], m1H = [], m2H = [];
         let startTime = Date.now();
+        const CIRC = 2 * Math.PI * 16; // 100.53 — SVG gauge circumference
 
         // Smoothing — values animate toward target instead of jumping
         const smooth = {};
@@ -213,265 +363,401 @@
         function cClass(v, w, c) { return v >= c ? 'c-red' : v >= w ? 'c-yellow' : 'c-green'; }
         function bgClass(v, w, c) { return v >= c ? 'bg-red' : v >= w ? 'bg-yellow' : 'bg-green'; }
         function badgeClass(v, w, c) { return v >= c ? 'badge-red' : v >= w ? 'badge-yellow' : 'badge-green'; }
+        function rawColor(v, w, c) { return v >= c ? '#f85149' : v >= w ? '#d29922' : '#3fb950'; }
 
+        // ─── Fault log tracking ───
+        const faultEvents = [];
+        let lastState = null;
+
+        function logFault(level, msg) {
+            const now = new Date();
+            const ts = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            faultEvents.unshift({ time: ts, msg, level });
+            if (faultEvents.length > 3) faultEvents.pop();
+            renderFaultLog();
+        }
+
+        function renderFaultLog() {
+            const el = document.getElementById('fault-log');
+            if (faultEvents.length === 0) { el.innerHTML = '<div class="no-faults">No fault events recorded</div>'; return; }
+            el.innerHTML = faultEvents.map(f => {
+                const cls = f.level === 'FAULT' || f.level === 'EMERGENCY' ? 'badge-red' : 'badge-yellow';
+                return `<div class="fault-entry"><span class="fault-time">${f.time}</span><span class="badge ${cls}">${f.level}</span><span class="fault-msg">${f.msg}</span></div>`;
+            }).join('');
+        }
+
+        // ─── Donut chart ───
+        function drawDonut(canvas, passRate, rejectRate) {
+            const ctx = canvas.getContext('2d');
+            const cx = 32, cy = 32, r = 22, lw = 7;
+            ctx.clearRect(0, 0, 64, 64);
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.strokeStyle = '#21262d'; ctx.lineWidth = lw; ctx.stroke();
+            if (passRate > 0) {
+                ctx.beginPath(); ctx.arc(cx, cy, r, -Math.PI / 2, -Math.PI / 2 + passRate / 100 * Math.PI * 2);
+                ctx.strokeStyle = '#3fb950'; ctx.lineWidth = lw; ctx.lineCap = 'butt'; ctx.stroke();
+            }
+            if (rejectRate > 0) {
+                const startAngle = -Math.PI / 2 + passRate / 100 * Math.PI * 2;
+                ctx.beginPath(); ctx.arc(cx, cy, r, startAngle, startAngle + rejectRate / 100 * Math.PI * 2);
+                ctx.strokeStyle = '#f85149'; ctx.lineWidth = lw; ctx.lineCap = 'butt'; ctx.stroke();
+            }
+            ctx.fillStyle = '#c9d1d9'; ctx.font = '600 10px "JetBrains Mono"';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(rejectRate.toFixed(1) + '%', cx, cy);
+        }
+
+        // ─── Health bar update ───
+        function updateHealthBar(d) {
+            const bv = d.bus_v || 0, m1s = d.m1_speed || 0, m2s = d.m2_speed || 0;
+            const ir = d.imu_rms || 0, es = d.es_score || 0, ft = d.faults_today || 0;
+
+            setHealthPill('psu', bv > 3.5, bv > 3.5 ? 'ok' : 'fault', 'PSU ' + (bv > 3.5 ? 'OK' : 'LOW'));
+            setHealthPill('buck', bv > 3.5, 'ok', 'Buck OK');
+            setHealthPill('m1', true, m1s > 0 ? 'ok' : 'off', 'M1 ' + (m1s > 0 ? Math.round(m1s) + '%' : 'OFF'));
+            setHealthPill('m2', true, m2s > 0 ? 'ok' : 'off', 'M2 ' + (m2s > 0 ? Math.round(m2s) + '%' : 'OFF'));
+            setHealthPill('s1', true, 'ok', 'S1 OK');
+            setHealthPill('s2', true, 'ok', 'S2 OK');
+            setHealthPill('imu', true, ir < 1 ? 'ok' : ir < 2 ? 'warn' : 'fault', 'IMU ' + (ir < 1 ? 'OK' : ir < 2 ? 'WARN' : 'FAULT'));
+            setHealthPill('es', true, es < 0.15 ? 'ok' : es < 0.5 ? 'warn' : 'fault', 'ES ' + (es < 0.15 ? 'OK' : es < 0.5 ? 'DRIFT' : 'FAULT'));
+            setHealthPill('nrf', true, 'ok', 'nRF OK');
+            setHealthPill('db', true, 'ok', 'DB OK');
+        }
+
+        function setHealthPill(key, active, status, text) {
+            const dot = document.getElementById('hd-' + key);
+            const txt = document.getElementById('hp-' + key + '-txt');
+            if (!dot || !txt) return;
+            dot.className = 'health-dot' + (status === 'warn' ? ' warn' : status === 'fault' ? ' fault' : status === 'off' ? ' off' : '');
+            txt.textContent = text;
+        }
+
+        // ─── Charts (preserved) ───
         function drawChart(canvas, datasets, maxY, colors) {
             const ctx = canvas.getContext('2d');
             const w = canvas.width, h = canvas.height;
-            ctx.clearRect(0,0,w,h);
-            ctx.strokeStyle='#1a1f26'; ctx.lineWidth=0.5;
-            for(let i=0;i<=4;i++){const y=h*i/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
-                ctx.fillStyle='#333';ctx.font='9px Inter';ctx.fillText((maxY*(4-i)/4).toFixed(0),4,y+10);}
-            datasets.forEach((data,di)=>{if(data.length<2)return;
-                ctx.strokeStyle=colors[di];ctx.lineWidth=1.5;ctx.beginPath();
-                data.forEach((v,i)=>{const x=i/(MAX_PTS-1)*w,y=h-Math.min(v,maxY)/maxY*h;
-                    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
-                ctx.globalAlpha=0.03;ctx.fillStyle=colors[di];ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();ctx.fill();ctx.globalAlpha=1;});
+            ctx.clearRect(0, 0, w, h);
+            ctx.strokeStyle = '#21262d'; ctx.lineWidth = 0.5;
+            for (let i = 0; i <= 4; i++) {
+                const y = h * i / 4;
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                ctx.fillStyle = '#484f58'; ctx.font = '400 9px Inter';
+                ctx.fillText((maxY * (4 - i) / 4).toFixed(0), 4, y + 10);
+            }
+            datasets.forEach((data, di) => {
+                if (data.length < 2) return;
+                ctx.strokeStyle = colors[di]; ctx.lineWidth = 1.5; ctx.beginPath();
+                data.forEach((v, i) => {
+                    const x = i / (MAX_PTS - 1) * w, y = h - Math.min(v, maxY) / maxY * h;
+                    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                });
+                ctx.stroke();
+                ctx.globalAlpha = 0.03; ctx.fillStyle = colors[di];
+                ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+                ctx.globalAlpha = 1;
+            });
         }
 
+        // ─── Power Flow (simplified — no animation, no glow) ───
         function drawPowerFlow(canvas, d) {
             const ctx = canvas.getContext('2d');
-            const w = canvas.width, h = canvas.height;
-            ctx.clearRect(0,0,w,h);
+            const cw = canvas.width, ch = canvas.height;
+            ctx.clearRect(0, 0, cw, ch);
 
-            const m1On = (d.m1_speed||0) > 0, m2On = (d.m2_speed||0) > 0;
+            const m1On = (d.m1_speed || 0) > 0, m2On = (d.m2_speed || 0) > 0;
+            const busV = (d.bus_v || 0).toFixed(1);
+            const m1mA = (d.m1_mA || 0).toFixed(0);
+            const m2mA = (d.m2_mA || 0).toFixed(0);
+            const imuG = (d.imu_rms || 0).toFixed(2);
+            const totalW = (d.total_W || 0).toFixed(1);
             const state = d.state || 'UNKNOWN';
-            const busV = (d.bus_v||0).toFixed(1);
-            const m1mA = (d.m1_mA||0).toFixed(0);
-            const m2mA = (d.m2_mA||0).toFixed(0);
-            const m1spd = d.m1_speed||0;
-            const m2spd = d.m2_speed||0;
-            const imuG = (d.imu_rms||0).toFixed(2);
-            const totalW = (d.total_W||0).toFixed(1);
 
-            // Layout: 5 columns, 5 rows
-            const bw = 130, bh = 48;
-            const cols = [30, w*0.22, w*0.44, w*0.66, w-bw-30];
-            const rows = [20, 90, 175, 260, 330];
+            // Box dimensions per spec: 140x50, border-radius 6
+            const bw = 140, bh = 50, br = 6;
+            const pad = 12;
 
-            function box(x, y, label, sub, active, color, bwidth) {
-                const boxW = bwidth || bw;
-                // Shadow
-                if (active) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
-                ctx.fillStyle = active ? '#111820' : '#0c0e12';
-                ctx.strokeStyle = active ? color : '#222830';
-                ctx.lineWidth = active ? 1.5 : 1;
-                ctx.beginPath(); ctx.roundRect(x, y, boxW, bh, 5); ctx.fill(); ctx.stroke();
-                ctx.shadowBlur = 0;
-                // Label
-                ctx.fillStyle = active ? '#e8e8e8' : '#555';
-                ctx.font = '600 11px Inter'; ctx.fillText(label, x + 10, y + 19);
-                // Sub text
-                if (sub) { ctx.font = '400 10px "JetBrains Mono"'; ctx.fillStyle = active ? color : '#444'; ctx.fillText(sub, x + 10, y + 35); }
-                // Status dot
-                ctx.fillStyle = active ? color : '#333';
-                ctx.beginPath(); ctx.arc(x + boxW - 14, y + 14, 5, 0, Math.PI*2); ctx.fill();
-                ctx.strokeStyle = active ? color : '#444'; ctx.lineWidth = 1;
-                ctx.beginPath(); ctx.arc(x + boxW - 14, y + 14, 5, 0, Math.PI*2); ctx.stroke();
+            // 3 columns for the power tree
+            const col0x = pad;
+            const col1x = Math.max(pad + bw + 40, cw * 0.28);
+            const col2x = Math.max(col1x + bw + 40, cw * 0.56);
+            // Sensor row: 4 items spaced evenly
+            const sensorGap = (cw - pad * 2 - bw * 4) / 3;
+            const senX = (i) => pad + i * (bw + (sensorGap > 10 ? sensorGap : 14));
+
+            // Vertical positions — power tree outputs
+            const outY = [4, 56, 108, 150];    // Motor1, Motor2, Servos, LEDs
+            const buckY = 52;                   // centered on outputs
+            const psuY = 82;                    // between buck and boost
+            const boostY = 150;                 // bottom of tree
+            const mprY = 150;                   // motor power rail, same row as boost
+            const sensorY = ch - bh - 4;       // sensor bar at bottom
+
+            // ─── Draw box ───
+            function box(x, y, title, sub, active, statusColor) {
+                ctx.fillStyle = '#161b22';
+                ctx.strokeStyle = active ? statusColor : '#21262d';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.roundRect(x, y, bw, bh, br); ctx.fill(); ctx.stroke();
+                // Title: 11px Inter 500
+                ctx.fillStyle = '#c9d1d9'; ctx.font = '500 11px Inter';
+                ctx.fillText(title, x + 10, y + 20);
+                // Subtitle: 10px JetBrains Mono
+                if (sub) {
+                    ctx.fillStyle = active ? statusColor : '#484f58';
+                    ctx.font = '500 10px "JetBrains Mono"';
+                    ctx.fillText(sub, x + 10, y + 36);
+                }
+                // Status dot: 8px circle, top-right
+                ctx.fillStyle = active ? statusColor : '#484f58';
+                ctx.beginPath(); ctx.arc(x + bw - 14, y + 14, 4, 0, Math.PI * 2); ctx.fill();
+                if (!active) {
+                    ctx.strokeStyle = '#484f58'; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+                    ctx.beginPath(); ctx.arc(x + bw - 14, y + 14, 4, 0, Math.PI * 2); ctx.stroke();
+                    ctx.setLineDash([]);
+                }
             }
 
-            function wire(points, active, color) {
-                ctx.strokeStyle = active ? color : '#1a2030';
-                ctx.lineWidth = active ? 2 : 1;
-                ctx.setLineDash(active ? [] : [4, 6]);
+            // ─── Draw connection line (H and V segments, no diagonals) ───
+            function wire(points, active) {
+                ctx.strokeStyle = active ? '#3fb950' : '#21262d';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                ctx.moveTo(points[0][0], points[0][1]);
+                for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0], points[i][1]);
+                ctx.stroke();
+            }
+
+            function dashedWire(points) {
+                ctx.strokeStyle = '#a371f7'; ctx.lineWidth = 1; ctx.setLineDash([4, 6]);
                 ctx.beginPath();
                 ctx.moveTo(points[0][0], points[0][1]);
                 for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0], points[i][1]);
                 ctx.stroke();
                 ctx.setLineDash([]);
-                // Animated dot
-                if (active) {
-                    const speed = 1500;
-                    const t = (Date.now() % speed) / speed;
-                    let totalLen = 0;
-                    const segs = [];
-                    for (let i = 1; i < points.length; i++) {
-                        const dx = points[i][0]-points[i-1][0], dy = points[i][1]-points[i-1][1];
-                        const len = Math.sqrt(dx*dx+dy*dy);
-                        segs.push({len, i}); totalLen += len;
-                    }
-                    let target = t * totalLen, accum = 0;
-                    for (const seg of segs) {
-                        if (accum + seg.len >= target) {
-                            const frac = (target - accum) / seg.len;
-                            const px = points[seg.i-1][0] + (points[seg.i][0]-points[seg.i-1][0])*frac;
-                            const py = points[seg.i-1][1] + (points[seg.i][1]-points[seg.i-1][1])*frac;
-                            ctx.fillStyle = color;
-                            ctx.shadowColor = color; ctx.shadowBlur = 6;
-                            ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
-                            ctx.shadowBlur = 0;
-                            break;
-                        }
-                        accum += seg.len;
-                    }
-                }
             }
 
-            // Column 1: PSU
-            box(cols[0], rows[2], '12V PSU', busV + 'V  ' + totalW + 'W', true, '#4dabf7');
+            const midY = (y) => y + bh / 2;
+            const jx = col1x + bw + 16; // junction x (vertical trunk from buck)
 
-            // Column 2: Converters
-            box(cols[1], rows[1], 'Buck Converter', '12V → 5V  Logic', true, '#40c057');
-            box(cols[1], rows[3], 'Buck-Boost', '12V → 6-9V  Motors', true, '#fab005');
+            // ═══ WIRES (drawn first, behind boxes) ═══
 
-            // Column 3: Actuators
-            box(cols[2], rows[0], 'Motor 1: Fan', m1mA + 'mA  ' + m1spd + '%', m1On, '#40c057');
-            box(cols[2], rows[1]+5, 'Motor 2: Conveyor', m2mA + 'mA  ' + m2spd + '%', m2On, '#4dabf7');
-            box(cols[2], rows[2]+10, 'Servo 1: Valve', 'PCA9685 ch0', true, '#be4bdb', bw*0.9);
-            box(cols[2], rows[3]+5, 'Servo 2: Sort Gate', 'PCA9685 ch1', true, '#be4bdb', bw*0.9);
+            // PSU → Buck (L-path up)
+            wire([[col0x + bw, midY(psuY)], [col1x - 16, midY(psuY)], [col1x - 16, midY(buckY)], [col1x, midY(buckY)]], true);
+            // PSU → Boost (L-path down)
+            wire([[col0x + bw, midY(psuY) + 6], [col1x - 8, midY(psuY) + 6], [col1x - 8, midY(boostY)], [col1x, midY(boostY)]], true);
 
-            // Column 4: Sensors
-            box(cols[3], rows[0], 'BMI160 IMU', imuG + 'g  ' + (d.imu_status||'--'), d.imu_rms<2, d.imu_rms>=2?'#fa5252':'#40c057');
-            box(cols[3], rows[1]+5, 'ADC Sensing', 'V:GP26 I:GP27,28', true, '#4dabf7');
-            box(cols[3], rows[2]+10, 'LED Tower', state, state!=='FAULT', state==='FAULT'?'#fa5252':'#40c057');
+            // Vertical trunk from Buck right edge
+            wire([[jx, midY(outY[0])], [jx, midY(outY[3])]], true);
+            // Buck → trunk
+            wire([[col1x + bw, midY(buckY)], [jx, midY(buckY)]], true);
+            // Trunk → Motor 1
+            wire([[jx, midY(outY[0])], [col2x, midY(outY[0])]], m1On);
+            // Trunk → Motor 2
+            wire([[jx, midY(outY[1])], [col2x, midY(outY[1])]], m2On);
+            // Trunk → Servos
+            wire([[jx, midY(outY[2])], [col2x, midY(outY[2])]], true);
+            // Trunk → LEDs
+            wire([[jx, midY(outY[3])], [col2x, midY(outY[3])]], state !== 'FAULT');
+            // Boost → Motor Power Rail
+            wire([[col1x + bw, midY(boostY)], [col2x, midY(mprY)]], true);
 
-            // Column 5: Output
-            box(cols[4], rows[1], 'OLED Dashboard', '5 views  128x64', true, '#4dabf7');
-            box(cols[4], rows[2]+10, 'SCADA (Pico B)', 'Wireless RX/TX', true, '#be4bdb');
-
-            // === WIRES ===
-            const midY = (y) => y + bh/2;
-
-            // PSU → Buck (top path)
-            wire([[cols[0]+bw, midY(rows[2])], [cols[1]-15, midY(rows[2])], [cols[1]-15, midY(rows[1])], [cols[1], midY(rows[1])]], true, '#40c057');
-
-            // PSU → Boost (bottom path)
-            wire([[cols[0]+bw, midY(rows[2])+5], [cols[1]-8, midY(rows[2])+5], [cols[1]-8, midY(rows[3])], [cols[1], midY(rows[3])]], true, '#fab005');
-
-            // Buck → Motor 1
-            wire([[cols[1]+bw, midY(rows[1])-8], [cols[2]-10, midY(rows[1])-8], [cols[2]-10, midY(rows[0])], [cols[2], midY(rows[0])]], m1On, '#40c057');
-
-            // Buck → Servos (via PCA9685)
-            wire([[cols[1]+bw, midY(rows[1])+8], [cols[2]-18, midY(rows[1])+8], [cols[2]-18, midY(rows[2]+10)], [cols[2], midY(rows[2]+10)]], true, '#be4bdb');
-
-            // Boost → Motor 2
-            wire([[cols[1]+bw, midY(rows[3])], [cols[2]-10, midY(rows[3])], [cols[2]-10, midY(rows[1]+5)], [cols[2], midY(rows[1]+5)]], m2On, '#4dabf7');
-
-            // Boost → Servo 2
-            wire([[cols[1]+bw, midY(rows[3])+10], [cols[2]-25, midY(rows[3])+10], [cols[2]-25, midY(rows[3]+5)], [cols[2], midY(rows[3]+5)]], true, '#be4bdb');
-
-            // Motor 1 → IMU (vibration sensing)
-            wire([[cols[2]+bw, midY(rows[0])], [cols[3], midY(rows[0])]], d.imu_rms<2, '#40c057');
-
-            // Motors → ADC (current sensing)
-            wire([[cols[2]+bw, midY(rows[1]+5)], [cols[3], midY(rows[1]+5)]], true, '#4dabf7');
-
-            // Buck → LED tower
-            wire([[cols[1]+bw, midY(rows[1])+16], [cols[3]-10, midY(rows[1])+16], [cols[3]-10, midY(rows[2]+10)], [cols[3], midY(rows[2]+10)]], state!=='FAULT', '#40c057');
-
-            // Sensors → OLED (data display)
-            wire([[cols[3]+bw, midY(rows[1]+5)], [cols[4], midY(rows[1])]], true, '#4dabf7');
-
-            // Pico A → Pico B (wireless — dashed)
-            ctx.strokeStyle = '#be4bdb'; ctx.lineWidth = 1; ctx.setLineDash([4, 8]);
-            ctx.beginPath();
-            ctx.moveTo(cols[3]+bw, midY(rows[0])+10);
-            ctx.lineTo(cols[4]+bw/2, midY(rows[0])+10);
-            ctx.lineTo(cols[4]+bw/2, midY(rows[2]+10));
-            ctx.lineTo(cols[4], midY(rows[2]+10));
-            ctx.stroke();
-            ctx.setLineDash([]);
+            // Sensor row: nRF → SCADA (dashed = wireless)
+            dashedWire([[senX(2) + bw, midY(sensorY)], [senX(3), midY(sensorY)]]);
             // Wireless label
-            ctx.fillStyle = '#be4bdb'; ctx.font = '500 9px Inter';
-            ctx.fillText('nRF24L01+', cols[4]+bw/2+5, midY(rows[1])+10);
-            ctx.fillText('wireless', cols[4]+bw/2+5, midY(rows[1])+22);
+            ctx.fillStyle = '#a371f7'; ctx.font = '400 9px Inter';
+            const wlX = (senX(2) + bw + senX(3)) / 2;
+            ctx.textAlign = 'center';
+            ctx.fillText('wireless', wlX, sensorY - 2);
+            ctx.textAlign = 'left';
 
-            // Column labels at top
-            ctx.fillStyle = '#333'; ctx.font = '500 8px Inter';
-            ctx.fillText('POWER INPUT', cols[0], 12);
-            ctx.fillText('CONVERSION', cols[1], 12);
-            ctx.fillText('ACTUATORS', cols[2], 12);
-            ctx.fillText('SENSING', cols[3], 12);
-            ctx.fillText('OUTPUT', cols[4], 12);
+            // ═══ BOXES ═══
+            box(col0x, psuY, '12V PSU', busV + 'V  ' + totalW + 'W', true, '#58a6ff');
+            box(col1x, buckY, 'Buck Converter', '12V → 5V', true, '#3fb950');
+            box(col1x, boostY, 'Buck-Boost', '12V → 6-9V', true, '#d29922');
+            box(col2x, outY[0], 'Motor 1: Fan', m1mA + 'mA', m1On, '#3fb950');
+            box(col2x, outY[1], 'Motor 2: Conveyor', m2mA + 'mA', m2On, '#58a6ff');
+            // Servos: two half-width boxes side by side
+            const halfW = (bw - 6) / 2;
+            const srvH = bh - 4;
+            function smallBox(x, y, title, active, color) {
+                ctx.fillStyle = '#161b22'; ctx.strokeStyle = active ? color : '#21262d'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.roundRect(x, y, halfW, srvH, br); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = '#c9d1d9'; ctx.font = '500 10px Inter'; ctx.fillText(title, x + 6, y + 17);
+                ctx.fillStyle = active ? color : '#484f58';
+                ctx.beginPath(); ctx.arc(x + halfW - 10, y + 12, 3, 0, Math.PI * 2); ctx.fill();
+            }
+            smallBox(col2x, outY[2] + 2, 'Servo 1', true, '#a371f7');
+            smallBox(col2x + halfW + 6, outY[2] + 2, 'Servo 2', true, '#a371f7');
+            box(col2x, outY[3], 'LEDs', state, state !== 'FAULT', state === 'FAULT' ? '#f85149' : '#3fb950');
+
+            // Sensor bar
+            box(senX(0), sensorY, 'BMI160 IMU', imuG + 'g', d.imu_rms < 2, d.imu_rms >= 2 ? '#f85149' : '#3fb950');
+            box(senX(1), sensorY, 'ADC Sensing', 'V:GP26 I:GP27,28', true, '#58a6ff');
+            box(senX(2), sensorY, 'nRF24L01+', 'TX/RX', true, '#a371f7');
+            box(senX(3), sensorY, 'SCADA Pico B', 'Dashboard', true, '#a371f7');
+
+            // Column labels
+            ctx.fillStyle = '#484f58'; ctx.font = '400 8px Inter';
+            ctx.fillText('SUPPLY', col0x, psuY - 4);
+            ctx.fillText('CONVERSION', col1x, buckY - 4);
+            ctx.fillText('OUTPUTS', col2x, outY[0] - 4);
         }
 
+        // ─── Main update loop (data logic preserved) ───
         async function update() {
             try {
                 const res = await fetch('/api/latest');
                 const d = await res.json();
-                if (!d||!d.timestamp){document.getElementById('conn-dot').className='conn-dot lost';document.getElementById('conn-text').textContent='Offline';return;}
+                if (!d || !d.timestamp) {
+                    document.getElementById('conn-dot').className = 'conn-dot lost';
+                    document.getElementById('conn-text').textContent = 'Offline';
+                    return;
+                }
 
-                const age=(Date.now()-new Date(d.timestamp).getTime())/1000;
-                document.getElementById('conn-dot').className='conn-dot '+(age<5?'ok':'lost');
-                document.getElementById('conn-text').textContent=age<5?'Online':'Stale ('+age.toFixed(0)+'s)';
-                document.getElementById('mode').textContent=MODES[d.mode]||'?';
+                const age = (Date.now() - new Date(d.timestamp).getTime()) / 1000;
+                document.getElementById('conn-dot').className = 'conn-dot ' + (age < 5 ? 'ok' : 'lost');
+                document.getElementById('conn-text').textContent = age < 5 ? 'Online' : 'Stale (' + age.toFixed(0) + 's)';
+                document.getElementById('mode').textContent = MODES[d.mode] || '?';
 
                 // State
-                const st=d.state||'UNKNOWN';
-                const sb=document.getElementById('state-badge');sb.textContent=st;sb.className='state state-'+st;
+                const st = d.state || 'UNKNOWN';
+                const sb = document.getElementById('state-badge');
+                sb.textContent = st; sb.className = 'state state-' + st;
+                // Fault log tracking
+                if (st !== lastState && lastState !== null && (st === 'FAULT' || st === 'WARNING' || st === 'EMERGENCY' || st === 'DRIFT')) {
+                    logFault(st, 'State changed to ' + st);
+                }
+                lastState = st;
+                const ft = d.faults_today || 0;
+                const fb = document.getElementById('fault-badge');
+                fb.textContent = ft === 0 ? 'CLEAR' : ft + ' FAULT' + (ft > 1 ? 'S' : '');
+                fb.className = 'badge ' + (ft === 0 ? 'badge-green' : ft < 3 ? 'badge-yellow' : 'badge-red');
 
                 // Bus — smoothed
-                const bv=smoothVal('bus',d.bus_v||0,0.1);
-                document.getElementById('bus-v').textContent=bv.toFixed(2);
-                document.getElementById('bus-v').className='val '+cClass(6-bv,1.5,2.5);
-                document.getElementById('bus-bar').style.width=Math.min(bv/6*100,100)+'%';
-                document.getElementById('bus-bar').className='progress-fill '+bgClass(6-bv,1.5,2.5);
-                const bb=document.getElementById('bus-badge');bb.textContent=bv>4.2?'OK':bv>3.8?'LOW':'CRITICAL';bb.className='badge '+badgeClass(6-bv,1.5,2.5);
+                const bv = smoothVal('bus', d.bus_v || 0, 0.1);
+                document.getElementById('bus-v').textContent = bv.toFixed(2);
+                document.getElementById('bus-v').className = 'ov-val ' + cClass(6 - bv, 1.5, 2.5);
+                document.getElementById('bus-bar').style.width = Math.min(bv / 6 * 100, 100) + '%';
+                document.getElementById('bus-bar').className = 'progress-fill ' + bgClass(6 - bv, 1.5, 2.5);
+                const bb = document.getElementById('bus-badge');
+                bb.textContent = bv > 4.2 ? 'OK' : bv > 3.8 ? 'LOW' : 'CRITICAL';
+                bb.className = 'badge ' + badgeClass(6 - bv, 1.5, 2.5);
+                // SVG gauge
+                const busP = Math.min(bv / 6 * 100, 100);
+                const busFill = document.getElementById('bus-gauge-fill');
+                busFill.setAttribute('stroke-dashoffset', CIRC * (1 - busP / 100));
+                busFill.setAttribute('stroke', rawColor(6 - bv, 1.5, 2.5));
 
                 // Efficiency — smoothed
-                const ef=smoothVal('eff',d.efficiency||0,0.1);
-                document.getElementById('efficiency').textContent=ef.toFixed(0);
-                document.getElementById('eff-bar').style.width=Math.min(ef,100)+'%';
+                const ef = smoothVal('eff', d.efficiency || 0, 0.1);
+                document.getElementById('efficiency').textContent = ef.toFixed(0);
+                document.getElementById('eff-bar').style.width = Math.min(ef, 100) + '%';
 
                 // Motor 1 — smoothed
-                const m1=smoothVal('m1',d.m1_mA||0,0.12);
-                document.getElementById('m1-current').textContent=m1.toFixed(0);document.getElementById('m1-current').className='val '+cClass(m1,600,800);
-                document.getElementById('m1-power').textContent=smoothVal('m1w',d.m1_W||0,0.1).toFixed(2);
-                document.getElementById('m1-speed').textContent=Math.round(smoothVal('m1s',d.m1_speed||0,0.1));
-                document.getElementById('m1-bar').style.width=Math.min(m1/800*100,100)+'%';document.getElementById('m1-bar').className='progress-fill '+bgClass(m1,600,800);
-                const m1b=document.getElementById('m1-badge');m1b.textContent=(d.m1_speed||0)>0?'ON':'OFF';m1b.className='badge '+((d.m1_speed||0)>0?'badge-green':'badge-red');
+                const m1 = smoothVal('m1', d.m1_mA || 0, 0.12);
+                document.getElementById('m1-current').textContent = m1.toFixed(0);
+                document.getElementById('m1-current').className = 'val ' + cClass(m1, 600, 800);
+                document.getElementById('m1-power').textContent = smoothVal('m1w', d.m1_W || 0, 0.1).toFixed(2);
+                document.getElementById('m1-speed').textContent = Math.round(smoothVal('m1s', d.m1_speed || 0, 0.1));
+                document.getElementById('m1-bar').style.width = Math.min(m1 / 800 * 100, 100) + '%';
+                document.getElementById('m1-bar').className = 'progress-fill ' + bgClass(m1, 600, 800);
+                const m1b = document.getElementById('m1-badge');
+                m1b.textContent = (d.m1_speed || 0) > 0 ? 'ON' : 'OFF';
+                m1b.className = 'badge ' + ((d.m1_speed || 0) > 0 ? 'badge-green' : 'badge-red');
 
                 // Motor 2 — smoothed
-                const m2=smoothVal('m2',d.m2_mA||0,0.12);
-                document.getElementById('m2-current').textContent=m2.toFixed(0);document.getElementById('m2-current').className='val '+cClass(m2,600,800);
-                document.getElementById('m2-power').textContent=smoothVal('m2w',d.m2_W||0,0.1).toFixed(2);
-                document.getElementById('m2-speed').textContent=Math.round(smoothVal('m2s',d.m2_speed||0,0.1));
-                document.getElementById('m2-bar').style.width=Math.min(m2/800*100,100)+'%';document.getElementById('m2-bar').className='progress-fill '+bgClass(m2,600,800);
-                const m2b=document.getElementById('m2-badge');m2b.textContent=(d.m2_speed||0)>0?'ON':'OFF';m2b.className='badge '+((d.m2_speed||0)>0?'badge-green':'badge-red');
+                const m2 = smoothVal('m2', d.m2_mA || 0, 0.12);
+                document.getElementById('m2-current').textContent = m2.toFixed(0);
+                document.getElementById('m2-current').className = 'val ' + cClass(m2, 600, 800);
+                document.getElementById('m2-power').textContent = smoothVal('m2w', d.m2_W || 0, 0.1).toFixed(2);
+                document.getElementById('m2-speed').textContent = Math.round(smoothVal('m2s', d.m2_speed || 0, 0.1));
+                document.getElementById('m2-bar').style.width = Math.min(m2 / 800 * 100, 100) + '%';
+                document.getElementById('m2-bar').className = 'progress-fill ' + bgClass(m2, 600, 800);
+                const m2b = document.getElementById('m2-badge');
+                m2b.textContent = (d.m2_speed || 0) > 0 ? 'ON' : 'OFF';
+                m2b.className = 'badge ' + ((d.m2_speed || 0) > 0 ? 'badge-green' : 'badge-red');
 
                 // Total power — smoothed
-                const tw=smoothVal('tw',d.total_W||0,0.1);
-                document.getElementById('total-w').textContent=tw.toFixed(2);document.getElementById('total-w').className='val '+cClass(tw,6,10);
-                document.getElementById('power-bar').style.width=Math.min(tw/12*100,100)+'%';document.getElementById('power-bar').className='progress-fill '+bgClass(tw,6,10);
+                const tw = smoothVal('tw', d.total_W || 0, 0.1);
+                document.getElementById('total-w').textContent = tw.toFixed(2);
+                document.getElementById('total-w').className = 'ov-val ' + cClass(tw, 6, 10);
+                document.getElementById('power-bar').style.width = Math.min(tw / 12 * 100, 100) + '%';
+                document.getElementById('power-bar').className = 'progress-fill ' + bgClass(tw, 6, 10);
+                // SVG gauge
+                const pwP = Math.min(tw / 12 * 100, 100);
+                const pwFill = document.getElementById('power-gauge-fill');
+                pwFill.setAttribute('stroke-dashoffset', CIRC * (1 - pwP / 100));
+                pwFill.setAttribute('stroke', rawColor(tw, 6, 10));
 
                 // IMU — smoothed
-                const ir=smoothVal('imu',d.imu_rms||0,0.1);
-                document.getElementById('imu-rms').textContent=ir.toFixed(2);document.getElementById('imu-rms').className='val '+cClass(ir,1,2);
-                document.getElementById('imu-status').textContent=d.imu_status||'--';
-                document.getElementById('imu-bar').style.width=Math.min(ir/3*100,100)+'%';document.getElementById('imu-bar').className='progress-fill '+bgClass(ir,1,2);
-                const ib=document.getElementById('imu-badge');ib.textContent=ir<1?'HEALTHY':ir<2?'WARNING':'FAULT';ib.className='badge '+badgeClass(ir,1,2);
+                const ir = smoothVal('imu', d.imu_rms || 0, 0.1);
+                document.getElementById('imu-rms').textContent = ir.toFixed(2);
+                document.getElementById('imu-rms').className = 'val ' + cClass(ir, 1, 2);
+                document.getElementById('imu-status').textContent = d.imu_status || '--';
+                document.getElementById('imu-bar').style.width = Math.min(ir / 3 * 100, 100) + '%';
+                document.getElementById('imu-bar').className = 'progress-fill ' + bgClass(ir, 1, 2);
+                const ib = document.getElementById('imu-badge');
+                ib.textContent = ir < 1 ? 'HEALTHY' : ir < 2 ? 'WARNING' : 'FAULT';
+                ib.className = 'badge ' + badgeClass(ir, 1, 2);
 
                 // Production
-                document.getElementById('total-items').textContent=d.total_items||0;
-                document.getElementById('passed').textContent=d.passed||0;
-                document.getElementById('rejected').textContent=d.rejected||0;
-                document.getElementById('reject-rate').textContent=(d.reject_rate||0).toFixed(1);
+                document.getElementById('total-items').textContent = d.total_items || 0;
+                document.getElementById('passed').textContent = d.passed || 0;
+                document.getElementById('rejected').textContent = d.rejected || 0;
+                document.getElementById('reject-rate').textContent = (d.reject_rate || 0).toFixed(1);
+                // Donut
+                const rr = d.reject_rate || 0;
+                const total = d.total_items || 0;
+                drawDonut(document.getElementById('reject-donut'), total > 0 ? 100 - rr : 0, total > 0 ? rr : 0);
 
                 // ES
-                const es=d.es_score||0;
-                document.getElementById('es-score').textContent=es.toFixed(3);document.getElementById('es-score').className='val '+cClass(es,0.3,0.5);
-                document.getElementById('es-bar').style.width=Math.min(es*100,100)+'%';document.getElementById('es-bar').className='progress-fill '+bgClass(es,0.3,0.5);
-                const eb=document.getElementById('es-badge');eb.textContent=es<0.15?'HEALTHY':es<0.5?'DRIFT':'FAULT';eb.className='badge '+badgeClass(es,0.3,0.5);
+                const es = d.es_score || 0;
+                document.getElementById('es-score').textContent = es.toFixed(3);
+                document.getElementById('es-score').className = 'val ' + cClass(es, 0.3, 0.5);
+                document.getElementById('es-bar').style.width = Math.min(es * 100, 100) + '%';
+                document.getElementById('es-bar').className = 'progress-fill ' + bgClass(es, 0.3, 0.5);
+                const eb = document.getElementById('es-badge');
+                eb.textContent = es < 0.15 ? 'HEALTHY' : es < 0.5 ? 'DRIFT' : 'FAULT';
+                eb.className = 'badge ' + badgeClass(es, 0.3, 0.5);
 
                 // Faults
-                const ft=d.faults_today||0;
-                document.getElementById('faults').textContent=ft;document.getElementById('faults').className='val '+cClass(ft,1,3);
+                document.getElementById('faults').textContent = ft;
+                document.getElementById('faults').className = 'val ' + cClass(ft, 1, 3);
 
                 // Uptime
-                document.getElementById('uptime').textContent=Math.floor((Date.now()-startTime)/1000);
+                document.getElementById('uptime').textContent = Math.floor((Date.now() - startTime) / 1000);
+
+                // Health bar
+                updateHealthBar(d);
 
                 // Charts
-                pH.push(tw);m1H.push(m1);m2H.push(m2);
-                if(pH.length>MAX_PTS)pH.shift();if(m1H.length>MAX_PTS)m1H.shift();if(m2H.length>MAX_PTS)m2H.shift();
-                const pc=document.getElementById('power-chart');pc.width=pc.offsetWidth;pc.height=180;drawChart(pc,[pH],12,['#40c057']);
-                const cc=document.getElementById('current-chart');cc.width=cc.offsetWidth;cc.height=180;drawChart(cc,[m1H,m2H],800,['#40c057','#4dabf7']);
+                pH.push(tw); m1H.push(m1); m2H.push(m2);
+                if (pH.length > MAX_PTS) pH.shift();
+                if (m1H.length > MAX_PTS) m1H.shift();
+                if (m2H.length > MAX_PTS) m2H.shift();
+                const pc = document.getElementById('power-chart');
+                pc.width = pc.offsetWidth; pc.height = 200;
+                drawChart(pc, [pH], 12, ['#3fb950']);
+                const cc = document.getElementById('current-chart');
+                cc.width = cc.offsetWidth; cc.height = 200;
+                drawChart(cc, [m1H, m2H], 800, ['#3fb950', '#58a6ff']);
 
                 // Power flow diagram
-                const pf=document.getElementById('power-flow');pf.width=pf.offsetWidth;pf.height=280;drawPowerFlow(pf,d);
+                const pf = document.getElementById('power-flow');
+                pf.width = pf.offsetWidth; pf.height = 240;
+                drawPowerFlow(pf, d);
 
-            } catch(e) { document.getElementById('conn-dot').className='conn-dot lost'; document.getElementById('conn-text').textContent='Error'; }
+            } catch (e) {
+                document.getElementById('conn-dot').className = 'conn-dot lost';
+                document.getElementById('conn-text').textContent = 'Error';
+            }
         }
 
-        setInterval(update,200);
+        // Initial donut
+        drawDonut(document.getElementById('reject-donut'), 0, 0);
+
+        setInterval(update, 200);
         update();
     </script>
 </body>
