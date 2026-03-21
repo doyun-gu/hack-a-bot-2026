@@ -1,8 +1,9 @@
 """
-NeuroSync — Web Dashboard
-Live monitoring of Pico sensor data via USB serial.
+GridBox — Web Dashboard
+Live monitoring of GridBox sensor data via USB serial.
 
-Reads serial data from master Pico, stores in SQLite, serves a web UI.
+Reads JSON serial output from master Pico, serves a web UI
+with real-time graphs and colour-coded status.
 
 Usage:
     python app.py --port /dev/tty.usbmodem*
@@ -15,14 +16,14 @@ import json
 import threading
 import time
 from datetime import datetime
+from collections import deque
 
 from flask import Flask, render_template, jsonify
 
 app = Flask(__name__)
 
-# In-memory data buffer (last 1000 readings)
-data_buffer = []
-MAX_BUFFER = 1000
+# In-memory data buffer (last 1000 readings, ~3 min at 5Hz)
+data_buffer = deque(maxlen=1000)
 latest_data = {}
 
 
@@ -38,19 +39,16 @@ def serial_reader(port, baud=115200):
         while True:
             line = ser.readline().decode('utf-8', errors='ignore').strip()
             if line:
-                # Try to parse JSON data from Pico
                 if line.startswith('{'):
                     try:
                         data = json.loads(line)
                         data['timestamp'] = datetime.now().isoformat()
                         latest_data = data
                         data_buffer.append(data)
-                        if len(data_buffer) > MAX_BUFFER:
-                            data_buffer.pop(0)
                     except json.JSONDecodeError:
                         pass
-                # Also print raw output for debugging
-                print(f"[PICO] {line}")
+                else:
+                    print(f"[PICO] {line}")
 
     except Exception as e:
         print(f"[SERIAL] Error: {e}")
@@ -69,23 +67,26 @@ def api_latest():
 
 @app.route('/api/history')
 def api_history():
-    return jsonify(data_buffer[-100:])  # last 100 readings
+    """Last 60 seconds of data (300 readings at 5Hz)."""
+    return jsonify(list(data_buffer)[-300:])
 
 
 @app.route('/api/status')
 def api_status():
     if latest_data:
-        age = (datetime.now() - datetime.fromisoformat(latest_data.get('timestamp', datetime.now().isoformat()))).total_seconds()
+        ts = latest_data.get('timestamp', datetime.now().isoformat())
+        age = (datetime.now() - datetime.fromisoformat(ts)).total_seconds()
         return jsonify({
             'connected': age < 5,
             'age_seconds': round(age, 1),
-            'readings': len(data_buffer)
+            'readings': len(data_buffer),
+            'state': latest_data.get('state', 'UNKNOWN'),
         })
-    return jsonify({'connected': False, 'readings': 0})
+    return jsonify({'connected': False, 'readings': 0, 'state': 'DISCONNECTED'})
 
 
 def main():
-    parser = argparse.ArgumentParser(description='NeuroSync Web Dashboard')
+    parser = argparse.ArgumentParser(description='GridBox Web Dashboard')
     parser.add_argument('--port', default='/dev/tty.usbmodem*',
                         help='Serial port for Pico USB')
     parser.add_argument('--baud', type=int, default=115200,
@@ -97,7 +98,6 @@ def main():
     args = parser.parse_args()
 
     if not args.no_serial:
-        # Resolve glob pattern for port
         import glob
         ports = glob.glob(args.port)
         if ports:
@@ -111,7 +111,7 @@ def main():
     else:
         print("[WEB] Running without serial connection (test mode)")
 
-    print(f"[WEB] Dashboard at http://localhost:{args.web_port}")
+    print(f"[WEB] GridBox Dashboard at http://localhost:{args.web_port}")
     app.run(host='0.0.0.0', port=args.web_port, debug=False)
 
 
