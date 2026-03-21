@@ -15,6 +15,7 @@ from ssd1306 import SSD1306
 from dashboard import Dashboard
 from operator import OperatorInput
 from commander import Commander
+from packet_tracker import PacketTracker
 
 # Import protocol (copied to micropython dir from src/shared/)
 try:
@@ -173,6 +174,9 @@ def main():
         cmd = Commander(hw['nrf'])
         print("[SLAVE] Commander OK")
 
+    # Packet tracker for wireless reliability
+    tracker = PacketTracker()
+
     # Start listening for telemetry
     if hw['nrf']:
         hw['nrf'].start_listening()
@@ -218,6 +222,9 @@ def main():
                     if pkt:
                         last_packet_ms = now
                         link_alive = True
+                        tracker.track(pkt['seq'])
+                        telemetry['wireless_pct'] = tracker.reliability()
+                        telemetry['wireless_lost'] = tracker.get_stats()['lost']
                         pkt_type = pkt['type']
 
                         if pkt_type == PKT_POWER:
@@ -255,9 +262,15 @@ def main():
                         elif pkt_type == PKT_ALERT:
                             telemetry['state'] = 'EMERGENCY'
 
-            # === 2. Check heartbeat timeout ===
-            if time.ticks_diff(now, last_packet_ms) > config.HEARTBEAT_TIMEOUT_MS:
+            # === 2. Check heartbeat timeout (graceful degradation) ===
+            age_ms = time.ticks_diff(now, last_packet_ms)
+            if age_ms > config.HEARTBEAT_TIMEOUT_MS:
                 link_alive = False
+                link_stale = True
+            elif age_ms > 1000:
+                link_stale = True
+            else:
+                link_stale = False
 
             # === 3. Read operator input ===
             joy_x, joy_y, btn = op_input.read_joystick()
@@ -311,6 +324,7 @@ def main():
                 last_display_ms = now
 
                 if link_alive:
+                    telemetry['link_stale'] = link_stale
                     dash.render(telemetry)
                 else:
                     dash.render_link_lost()
