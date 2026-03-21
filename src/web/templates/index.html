@@ -98,7 +98,8 @@
     <div class="header">
         <div class="header-left">
             <h1>GridBox</h1>
-            <span class="tag">SCADA</span>
+            <span class="tag">Hack-A-Bot 2026</span>
+            <span class="tag">Group 1</span>
             <span class="tag">LIVE</span>
         </div>
         <div class="header-right">
@@ -179,7 +180,7 @@
         <!-- Power Flow Diagram -->
         <div class="card full">
             <div class="card-header"><h3>Power Flow Diagram</h3><span class="tag">LIVE</span></div>
-            <canvas class="flow-canvas" id="power-flow"></canvas>
+            <canvas class="flow-canvas" id="power-flow" style="height: 400px;"></canvas>
         </div>
 
         <!-- Charts -->
@@ -200,6 +201,14 @@
         const MAX_PTS = 300;
         const pH = [], m1H = [], m2H = [];
         let startTime = Date.now();
+
+        // Smoothing — values animate toward target instead of jumping
+        const smooth = {};
+        function smoothVal(key, target, speed) {
+            if (!(key in smooth)) smooth[key] = target;
+            smooth[key] += (target - smooth[key]) * (speed || 0.15);
+            return smooth[key];
+        }
 
         function cClass(v, w, c) { return v >= c ? 'c-red' : v >= w ? 'c-yellow' : 'c-green'; }
         function bgClass(v, w, c) { return v >= c ? 'bg-red' : v >= w ? 'bg-yellow' : 'bg-green'; }
@@ -231,100 +240,148 @@
             const m2mA = (d.m2_mA||0).toFixed(0);
             const m1spd = d.m1_speed||0;
             const m2spd = d.m2_speed||0;
+            const imuG = (d.imu_rms||0).toFixed(2);
+            const totalW = (d.total_W||0).toFixed(1);
 
-            function box(x,y,bw,bh,label,sub,active,color) {
-                ctx.fillStyle = active ? '#141920' : '#0d0f12';
-                ctx.strokeStyle = active ? color : '#2d333b';
-                ctx.lineWidth = active ? 2 : 1;
-                ctx.beginPath(); ctx.roundRect(x,y,bw,bh,6); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = active ? '#e0e0e0' : '#555';
-                ctx.font = '600 11px Inter'; ctx.fillText(label, x+8, y+18);
-                if (sub) { ctx.font = '400 10px "JetBrains Mono"'; ctx.fillStyle = active ? color : '#555'; ctx.fillText(sub, x+8, y+34); }
-                if (active) { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x+bw-12, y+12, 4, 0, Math.PI*2); ctx.fill(); }
+            // Layout: 5 columns, 5 rows
+            const bw = 130, bh = 48;
+            const cols = [30, w*0.22, w*0.44, w*0.66, w-bw-30];
+            const rows = [20, 90, 175, 260, 330];
+
+            function box(x, y, label, sub, active, color, bwidth) {
+                const boxW = bwidth || bw;
+                // Shadow
+                if (active) { ctx.shadowColor = color; ctx.shadowBlur = 8; }
+                ctx.fillStyle = active ? '#111820' : '#0c0e12';
+                ctx.strokeStyle = active ? color : '#222830';
+                ctx.lineWidth = active ? 1.5 : 1;
+                ctx.beginPath(); ctx.roundRect(x, y, boxW, bh, 5); ctx.fill(); ctx.stroke();
+                ctx.shadowBlur = 0;
+                // Label
+                ctx.fillStyle = active ? '#e8e8e8' : '#555';
+                ctx.font = '600 11px Inter'; ctx.fillText(label, x + 10, y + 19);
+                // Sub text
+                if (sub) { ctx.font = '400 10px "JetBrains Mono"'; ctx.fillStyle = active ? color : '#444'; ctx.fillText(sub, x + 10, y + 35); }
+                // Status dot
+                ctx.fillStyle = active ? color : '#333';
+                ctx.beginPath(); ctx.arc(x + boxW - 14, y + 14, 5, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = active ? color : '#444'; ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.arc(x + boxW - 14, y + 14, 5, 0, Math.PI*2); ctx.stroke();
             }
 
-            function wire(x1,y1,x2,y2,active,color) {
-                ctx.strokeStyle = active ? color : '#2d333b';
+            function wire(points, active, color) {
+                ctx.strokeStyle = active ? color : '#1a2030';
                 ctx.lineWidth = active ? 2 : 1;
-                ctx.setLineDash(active ? [] : [4,4]);
-                ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+                ctx.setLineDash(active ? [] : [4, 6]);
+                ctx.beginPath();
+                ctx.moveTo(points[0][0], points[0][1]);
+                for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0], points[i][1]);
+                ctx.stroke();
                 ctx.setLineDash([]);
+                // Animated dot
                 if (active) {
-                    const t = (Date.now() % 2000) / 2000;
-                    const px = x1 + (x2-x1)*t, py = y1 + (y2-y1)*t;
-                    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(px,py,3,0,Math.PI*2); ctx.fill();
-                }
-            }
-
-            function wireL(points, active, color) {
-                ctx.strokeStyle = active ? color : '#2d333b';
-                ctx.lineWidth = active ? 2 : 1;
-                ctx.setLineDash(active ? [] : [4,4]);
-                ctx.beginPath(); ctx.moveTo(points[0][0],points[0][1]);
-                for(let i=1;i<points.length;i++) ctx.lineTo(points[i][0],points[i][1]);
-                ctx.stroke(); ctx.setLineDash([]);
-                if (active) {
-                    const t = (Date.now() % 2000) / 2000;
-                    const seg = Math.floor(t * (points.length-1));
-                    const st = t * (points.length-1) - seg;
-                    if (seg < points.length-1) {
-                        const px = points[seg][0]+(points[seg+1][0]-points[seg][0])*st;
-                        const py = points[seg][1]+(points[seg+1][1]-points[seg][1])*st;
-                        ctx.fillStyle=color; ctx.beginPath(); ctx.arc(px,py,3,0,Math.PI*2); ctx.fill();
+                    const speed = 1500;
+                    const t = (Date.now() % speed) / speed;
+                    let totalLen = 0;
+                    const segs = [];
+                    for (let i = 1; i < points.length; i++) {
+                        const dx = points[i][0]-points[i-1][0], dy = points[i][1]-points[i-1][1];
+                        const len = Math.sqrt(dx*dx+dy*dy);
+                        segs.push({len, i}); totalLen += len;
+                    }
+                    let target = t * totalLen, accum = 0;
+                    for (const seg of segs) {
+                        if (accum + seg.len >= target) {
+                            const frac = (target - accum) / seg.len;
+                            const px = points[seg.i-1][0] + (points[seg.i][0]-points[seg.i-1][0])*frac;
+                            const py = points[seg.i-1][1] + (points[seg.i][1]-points[seg.i-1][1])*frac;
+                            ctx.fillStyle = color;
+                            ctx.shadowColor = color; ctx.shadowBlur = 6;
+                            ctx.beginPath(); ctx.arc(px, py, 3, 0, Math.PI*2); ctx.fill();
+                            ctx.shadowBlur = 0;
+                            break;
+                        }
+                        accum += seg.len;
                     }
                 }
             }
 
-            const cx = w/2, bw = 120, bh = 44, gap = 20;
+            // Column 1: PSU
+            box(cols[0], rows[2], '12V PSU', busV + 'V  ' + totalW + 'W', true, '#4dabf7');
 
-            // PSU
-            box(20, h/2-bh/2, bw, bh, '12V PSU', busV+'V input', true, '#4dabf7');
+            // Column 2: Converters
+            box(cols[1], rows[1], 'Buck Converter', '12V → 5V  Logic', true, '#40c057');
+            box(cols[1], rows[3], 'Buck-Boost', '12V → 6-9V  Motors', true, '#fab005');
 
-            // Buck converter
-            box(20+bw+gap*2, h/2-bh-gap/2, bw, bh, 'Buck → 5V', 'Logic power', true, '#40c057');
+            // Column 3: Actuators
+            box(cols[2], rows[0], 'Motor 1: Fan', m1mA + 'mA  ' + m1spd + '%', m1On, '#40c057');
+            box(cols[2], rows[1]+5, 'Motor 2: Conveyor', m2mA + 'mA  ' + m2spd + '%', m2On, '#4dabf7');
+            box(cols[2], rows[2]+10, 'Servo 1: Valve', 'PCA9685 ch0', true, '#be4bdb', bw*0.9);
+            box(cols[2], rows[3]+5, 'Servo 2: Sort Gate', 'PCA9685 ch1', true, '#be4bdb', bw*0.9);
 
-            // Buck-boost
-            box(20+bw+gap*2, h/2+gap/2, bw, bh, 'Boost → 6-9V', 'Motor power', true, '#fab005');
+            // Column 4: Sensors
+            box(cols[3], rows[0], 'BMI160 IMU', imuG + 'g  ' + (d.imu_status||'--'), d.imu_rms<2, d.imu_rms>=2?'#fa5252':'#40c057');
+            box(cols[3], rows[1]+5, 'ADC Sensing', 'V:GP26 I:GP27,28', true, '#4dabf7');
+            box(cols[3], rows[2]+10, 'LED Tower', state, state!=='FAULT', state==='FAULT'?'#fa5252':'#40c057');
 
-            // Motor 1
-            box(20+(bw+gap*2)*2, h/2-bh*2-gap, bw, bh, 'Motor 1: Fan', m1mA+'mA '+m1spd+'%', m1On, '#40c057');
+            // Column 5: Output
+            box(cols[4], rows[1], 'OLED Dashboard', '5 views  128x64', true, '#4dabf7');
+            box(cols[4], rows[2]+10, 'SCADA (Pico B)', 'Wireless RX/TX', true, '#be4bdb');
 
-            // Motor 2
-            box(20+(bw+gap*2)*2, h/2-bh/2, bw, bh, 'Motor 2: Conv', m2mA+'mA '+m2spd+'%', m2On, '#4dabf7');
+            // === WIRES ===
+            const midY = (y) => y + bh/2;
 
-            // Servo 1
-            box(20+(bw+gap*2)*2, h/2+bh/2+gap, bw/1.2, bh*0.8, 'Servo 1', 'Valve', true, '#be4bdb');
+            // PSU → Buck (top path)
+            wire([[cols[0]+bw, midY(rows[2])], [cols[1]-15, midY(rows[2])], [cols[1]-15, midY(rows[1])], [cols[1], midY(rows[1])]], true, '#40c057');
 
-            // Servo 2
-            box(20+(bw+gap*2)*2+bw/1.2+10, h/2+bh/2+gap, bw/1.2, bh*0.8, 'Servo 2', 'Gate', true, '#be4bdb');
+            // PSU → Boost (bottom path)
+            wire([[cols[0]+bw, midY(rows[2])+5], [cols[1]-8, midY(rows[2])+5], [cols[1]-8, midY(rows[3])], [cols[1], midY(rows[3])]], true, '#fab005');
 
-            // LEDs
-            const ledOn = state !== 'FAULT';
-            box(w-bw-20, h/2-bh-gap/2, bw, bh, 'LED Status', state, true, state==='FAULT'?'#fa5252':'#40c057');
+            // Buck → Motor 1
+            wire([[cols[1]+bw, midY(rows[1])-8], [cols[2]-10, midY(rows[1])-8], [cols[2]-10, midY(rows[0])], [cols[2], midY(rows[0])]], m1On, '#40c057');
 
-            // OLED
-            box(w-bw-20, h/2+gap/2, bw, bh, 'SCADA (Pico B)', 'Wireless', true, '#4dabf7');
+            // Buck → Servos (via PCA9685)
+            wire([[cols[1]+bw, midY(rows[1])+8], [cols[2]-18, midY(rows[1])+8], [cols[2]-18, midY(rows[2]+10)], [cols[2], midY(rows[2]+10)]], true, '#be4bdb');
 
-            // Wires — PSU to converters
-            wire(20+bw, h/2, 20+bw+gap*2, h/2-gap/2-bh/2+bh/2, true, '#4dabf7');
-            wire(20+bw, h/2, 20+bw+gap*2, h/2+gap/2+bh/2, true, '#fab005');
+            // Boost → Motor 2
+            wire([[cols[1]+bw, midY(rows[3])], [cols[2]-10, midY(rows[3])], [cols[2]-10, midY(rows[1]+5)], [cols[2], midY(rows[1]+5)]], m2On, '#4dabf7');
 
-            // Buck to Motor 1
-            wireL([[20+bw*2+gap*2, h/2-bh-gap/2+bh/2], [20+bw*2+gap*3, h/2-bh-gap/2+bh/2], [20+bw*2+gap*3, h/2-bh*2-gap+bh/2], [20+(bw+gap*2)*2, h/2-bh*2-gap+bh/2]], m1On, '#40c057');
+            // Boost → Servo 2
+            wire([[cols[1]+bw, midY(rows[3])+10], [cols[2]-25, midY(rows[3])+10], [cols[2]-25, midY(rows[3]+5)], [cols[2], midY(rows[3]+5)]], true, '#be4bdb');
 
-            // Boost to Motor 2
-            wire(20+bw*2+gap*2, h/2+gap/2+bh/2, 20+(bw+gap*2)*2, h/2, m2On, '#4dabf7');
+            // Motor 1 → IMU (vibration sensing)
+            wire([[cols[2]+bw, midY(rows[0])], [cols[3], midY(rows[0])]], d.imu_rms<2, '#40c057');
 
-            // Buck to LEDs
-            wireL([[20+bw*2+gap*2, h/2-bh-gap/2+bh*0.8], [w-bw-20-gap, h/2-bh-gap/2+bh*0.8], [w-bw-20, h/2-gap/2]], ledOn, '#40c057');
+            // Motors → ADC (current sensing)
+            wire([[cols[2]+bw, midY(rows[1]+5)], [cols[3], midY(rows[1]+5)]], true, '#4dabf7');
 
-            // Wireless link (dashed)
-            ctx.strokeStyle = '#4dabf7'; ctx.lineWidth = 1; ctx.setLineDash([3,6]);
+            // Buck → LED tower
+            wire([[cols[1]+bw, midY(rows[1])+16], [cols[3]-10, midY(rows[1])+16], [cols[3]-10, midY(rows[2]+10)], [cols[3], midY(rows[2]+10)]], state!=='FAULT', '#40c057');
+
+            // Sensors → OLED (data display)
+            wire([[cols[3]+bw, midY(rows[1]+5)], [cols[4], midY(rows[1])]], true, '#4dabf7');
+
+            // Pico A → Pico B (wireless — dashed)
+            ctx.strokeStyle = '#be4bdb'; ctx.lineWidth = 1; ctx.setLineDash([4, 8]);
             ctx.beginPath();
-            const nrfX = 20+(bw+gap*2)*2+bw/2, nrfY = h/2-bh*2-gap-10;
-            ctx.moveTo(nrfX, h/2+bh); ctx.lineTo(w-bw-20, h/2+gap/2+bh/2);
-            ctx.stroke(); ctx.setLineDash([]);
-            ctx.fillStyle='#4dabf7'; ctx.font='9px Inter'; ctx.fillText('nRF24L01+ wireless', (nrfX+w-bw-20)/2-40, h/2+bh+20);
+            ctx.moveTo(cols[3]+bw, midY(rows[0])+10);
+            ctx.lineTo(cols[4]+bw/2, midY(rows[0])+10);
+            ctx.lineTo(cols[4]+bw/2, midY(rows[2]+10));
+            ctx.lineTo(cols[4], midY(rows[2]+10));
+            ctx.stroke();
+            ctx.setLineDash([]);
+            // Wireless label
+            ctx.fillStyle = '#be4bdb'; ctx.font = '500 9px Inter';
+            ctx.fillText('nRF24L01+', cols[4]+bw/2+5, midY(rows[1])+10);
+            ctx.fillText('wireless', cols[4]+bw/2+5, midY(rows[1])+22);
+
+            // Column labels at top
+            ctx.fillStyle = '#333'; ctx.font = '500 8px Inter';
+            ctx.fillText('POWER INPUT', cols[0], 12);
+            ctx.fillText('CONVERSION', cols[1], 12);
+            ctx.fillText('ACTUATORS', cols[2], 12);
+            ctx.fillText('SENSING', cols[3], 12);
+            ctx.fillText('OUTPUT', cols[4], 12);
         }
 
         async function update() {
@@ -342,42 +399,42 @@
                 const st=d.state||'UNKNOWN';
                 const sb=document.getElementById('state-badge');sb.textContent=st;sb.className='state state-'+st;
 
-                // Bus
-                const bv=d.bus_v||0;
+                // Bus — smoothed
+                const bv=smoothVal('bus',d.bus_v||0,0.1);
                 document.getElementById('bus-v').textContent=bv.toFixed(2);
                 document.getElementById('bus-v').className='val '+cClass(6-bv,1.5,2.5);
                 document.getElementById('bus-bar').style.width=Math.min(bv/6*100,100)+'%';
                 document.getElementById('bus-bar').className='progress-fill '+bgClass(6-bv,1.5,2.5);
                 const bb=document.getElementById('bus-badge');bb.textContent=bv>4.2?'OK':bv>3.8?'LOW':'CRITICAL';bb.className='badge '+badgeClass(6-bv,1.5,2.5);
 
-                // Efficiency
-                const ef=d.efficiency||0;
+                // Efficiency — smoothed
+                const ef=smoothVal('eff',d.efficiency||0,0.1);
                 document.getElementById('efficiency').textContent=ef.toFixed(0);
                 document.getElementById('eff-bar').style.width=Math.min(ef,100)+'%';
 
-                // Motor 1
-                const m1=d.m1_mA||0;
+                // Motor 1 — smoothed
+                const m1=smoothVal('m1',d.m1_mA||0,0.12);
                 document.getElementById('m1-current').textContent=m1.toFixed(0);document.getElementById('m1-current').className='val '+cClass(m1,600,800);
-                document.getElementById('m1-power').textContent=(d.m1_W||0).toFixed(2);
-                document.getElementById('m1-speed').textContent=d.m1_speed||0;
+                document.getElementById('m1-power').textContent=smoothVal('m1w',d.m1_W||0,0.1).toFixed(2);
+                document.getElementById('m1-speed').textContent=Math.round(smoothVal('m1s',d.m1_speed||0,0.1));
                 document.getElementById('m1-bar').style.width=Math.min(m1/800*100,100)+'%';document.getElementById('m1-bar').className='progress-fill '+bgClass(m1,600,800);
                 const m1b=document.getElementById('m1-badge');m1b.textContent=(d.m1_speed||0)>0?'ON':'OFF';m1b.className='badge '+((d.m1_speed||0)>0?'badge-green':'badge-red');
 
-                // Motor 2
-                const m2=d.m2_mA||0;
+                // Motor 2 — smoothed
+                const m2=smoothVal('m2',d.m2_mA||0,0.12);
                 document.getElementById('m2-current').textContent=m2.toFixed(0);document.getElementById('m2-current').className='val '+cClass(m2,600,800);
-                document.getElementById('m2-power').textContent=(d.m2_W||0).toFixed(2);
-                document.getElementById('m2-speed').textContent=d.m2_speed||0;
+                document.getElementById('m2-power').textContent=smoothVal('m2w',d.m2_W||0,0.1).toFixed(2);
+                document.getElementById('m2-speed').textContent=Math.round(smoothVal('m2s',d.m2_speed||0,0.1));
                 document.getElementById('m2-bar').style.width=Math.min(m2/800*100,100)+'%';document.getElementById('m2-bar').className='progress-fill '+bgClass(m2,600,800);
                 const m2b=document.getElementById('m2-badge');m2b.textContent=(d.m2_speed||0)>0?'ON':'OFF';m2b.className='badge '+((d.m2_speed||0)>0?'badge-green':'badge-red');
 
-                // Total power
-                const tw=d.total_W||0;
+                // Total power — smoothed
+                const tw=smoothVal('tw',d.total_W||0,0.1);
                 document.getElementById('total-w').textContent=tw.toFixed(2);document.getElementById('total-w').className='val '+cClass(tw,6,10);
                 document.getElementById('power-bar').style.width=Math.min(tw/12*100,100)+'%';document.getElementById('power-bar').className='progress-fill '+bgClass(tw,6,10);
 
-                // IMU
-                const ir=d.imu_rms||0;
+                // IMU — smoothed
+                const ir=smoothVal('imu',d.imu_rms||0,0.1);
                 document.getElementById('imu-rms').textContent=ir.toFixed(2);document.getElementById('imu-rms').className='val '+cClass(ir,1,2);
                 document.getElementById('imu-status').textContent=d.imu_status||'--';
                 document.getElementById('imu-bar').style.width=Math.min(ir/3*100,100)+'%';document.getElementById('imu-bar').className='progress-fill '+bgClass(ir,1,2);
