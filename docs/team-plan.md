@@ -9,7 +9,7 @@
 | Member | Role | Strengths | Responsibility |
 |---|---|---|---|
 | **Doyun** | System Designer / Lead | Power grid architecture, firmware, AI-assisted dev, project management | System architecture design, power distribution scheme, firmware (MicroPython + C), web dashboard, OLED screens, wireless protocol, documentation, team coordination. Works with Claude Code |
-| **Wooseung** | Electronics Engineer | EE, circuit design, soldering, wiring | All wiring, power distribution implementation, MOSFET switching circuits, sensor connections, voltage dividers, I2C/SPI bus, testing circuits |
+| **Wooseong** | Electronics Engineer | EE, circuit design, soldering, wiring | All wiring, power distribution implementation, MOSFET switching circuits, sensor connections, voltage dividers, I2C/SPI bus, testing circuits |
 | **Billy** | Mechanical Engineer | 3D printing, CAD, physical design, motor mounting | Factory chassis/enclosure, motor mounts, servo brackets, turntable/conveyor mechanism, physical factory layout, labels |
 
 ---
@@ -84,7 +84,7 @@ gantt
 |---|---|---|---|---|
 | D3 | **BMI160 IMU driver** | 2:00-3:30 | I2C read, acceleration + gyro. Calculate $a_{rms}$ for vibration. Test: print values over serial | Live vibration readings on serial monitor |
 | D4 | **PCA9685 motor + servo** | 3:30-5:00 | I2C PWM control. Set motor speed (duty cycle), servo angle. Test: motor spins at variable speed, servo moves | Motor responds to PWM, servo moves to set angles |
-| D5 | **ADC power sensing** | 5:00-6:00 | Read bus voltage (GP26), motor currents (GP27, GP28). Calibrate with Wooseung's voltage divider. Test: read actual voltages | ADC readings match multimeter within 10% |
+| D5 | **ADC power sensing** | 5:00-6:00 | Read bus voltage (GP26), motor currents (GP27, GP28). Calibrate with Wooseong's voltage divider. Test: read actual voltages | ADC readings match multimeter within 10% |
 
 ### Hour 6-9: Intelligence
 
@@ -100,22 +100,22 @@ gantt
 |---|---|---|---|---|
 | D9 | **Web dashboard** | 10:00-11:00 | Flask app reads serial from Pico A. Shows live graphs on laptop. Energy usage over time | Laptop displays live graphs alongside OLED |
 | D10 | **C SDK port** | 11:00-13:00 | Port core modules to C: main loop, ADC reading, PCA9685, nRF. Compile and flash | C firmware runs same demo as MicroPython |
-| D11 | **Integration** | 13:00-15:00 | Work with Wooseung + Billy to get everything working together. Debug, tune thresholds, fix timing | Full system runs end-to-end autonomously |
+| D11 | **Integration** | 13:00-15:00 | Work with Wooseong + Billy to get everything working together. Debug, tune thresholds, fix timing | Full system runs end-to-end autonomously |
 | D12 | **Documentation** | 15:00-16:00 | Update README, wiring diagram photos, architecture diagram. Final docs for judges | GitHub repo looks professional |
 
 ### Coordination Points with Team
 
 | When | Meet With | Purpose |
 |---|---|---|
-| Hour 2 | Wooseung | Test I2C bus — are IMU + PCA9685 detected? |
-| Hour 5 | Wooseung | Calibrate ADC readings against actual voltages |
-| Hour 9 | Wooseung + Billy | First full integration — motors on chassis, software controlling them |
+| Hour 2 | Wooseong | Test I2C bus — are IMU + PCA9685 detected? |
+| Hour 5 | Wooseong | Calibrate ADC readings against actual voltages |
+| Hour 9 | Wooseong + Billy | First full integration — motors on chassis, software controlling them |
 | Hour 13 | Both | Final integration — everything working together |
 | Hour 22 | Both | Full system test |
 
 ---
 
-## Wooseung — Electronics / Circuits
+## Wooseong — Electronics / Circuits
 
 ### Hour 0-2: Power Infrastructure
 
@@ -149,7 +149,7 @@ gantt
 | W11 | **Wire management** | 12:00-13:00 | Tidy wires, add colour-coded labels. Group power (red), ground (black), signal (yellow), I2C (white/grey), SPI (blue) | Judges can see clean wiring — earns Technical points |
 | W12 | **Backup circuits** | 13:00-14:00 | Pre-wire spare MOSFET switch, spare LED, spare sense resistor. If anything breaks during demo, swap in seconds | Backup ready on breadboard edge |
 
-### What Wooseung Needs from Doyun
+### What Wooseong Needs from Doyun
 
 | When | What |
 |---|---|
@@ -158,7 +158,7 @@ gantt
 | Hour 5 | Run ADC calibration script to verify voltage readings |
 | Hour 9 | Full firmware test on completed circuits |
 
-### What Wooseung Needs from Billy
+### What Wooseong Needs from Billy
 
 | When | What |
 |---|---|
@@ -189,7 +189,7 @@ gantt
 |---|---|---|---|---|
 | B5 | **Factory station labels + walls** | 7:00-8:00 | Print or write labels: "PUMP STATION", "FILLING", "QUALITY CHECK", "OUTPUT", "REJECT". Optional cardboard walls between stations | Factory looks like a factory, not a breadboard |
 | B6 | **Mount motors + servos** | 8:00-9:30 | Attach motor mounts to base. Screw servos into brackets. Route wire channels so cables don't interfere with moving parts | All actuators physically mounted and moving freely |
-| B7 | **Mount electronics** | 9:30-10:30 | Attach breadboards to base plate (double-sided tape or screws). Position Pico A, PCA9685, nRF near motors. Route wires to Wooseung's circuits | Electronics secured to chassis, nothing loose |
+| B7 | **Mount electronics** | 9:30-10:30 | Attach breadboards to base plate (double-sided tape or screws). Position Pico A, PCA9685, nRF near motors. Route wires to Wooseong's circuits | Electronics secured to chassis, nothing loose |
 
 ### Hour 10-15: Polish + Presentation
 
@@ -200,7 +200,7 @@ gantt
 | B10 | **Visual polish** | 13:30-14:30 | Add colour: paint stations, add arrows showing flow direction, add "GridBox" branding. Make it look professional for judges | Judges see a polished miniature factory, not a homework project |
 | B11 | **Presentation display** | 14:30-15:00 | Set up demo table: factory on left, control room on right, laptop in middle showing web dashboard. Cable management. Poster if time allows | Demo table ready for judges to walk up to |
 
-### What Billy Needs from Wooseung
+### What Billy Needs from Wooseong
 
 | When | What |
 |---|---|
@@ -267,7 +267,7 @@ graph LR
 - [ ] This repo cloned and up to date
 - [ ] Pin mapping printed on paper
 
-### Wooseung
+### Wooseong
 - [ ] Multimeter
 - [ ] Soldering iron + solder (if allowed)
 - [ ] Wire strippers

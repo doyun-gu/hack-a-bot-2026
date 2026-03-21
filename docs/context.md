@@ -169,7 +169,7 @@ hack-a-bot-2026/
 | Member | Role | Responsibility |
 |---|---|---|
 | **Doyun** | System Designer / Lead | Power grid architecture, firmware (MicroPython + C), web dashboard, OLED, wireless, docs, team coordination |
-| **Wooseung** | Electronics Engineer | All wiring, power distribution, MOSFET circuits, sensors, voltage dividers, I2C/SPI bus |
+| **Wooseong** | Electronics Engineer | All wiring, power distribution, MOSFET circuits, sensors, voltage dividers, I2C/SPI bus |
 | **Billy** | Mechanical Engineer | Factory chassis, 3D printing, motor mounts, servo brackets, turntable/conveyor, labels |
 
 See `docs/team-plan.md` for full task lists, timeline, and milestones.
