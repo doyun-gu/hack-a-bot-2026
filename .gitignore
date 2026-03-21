@@ -1,5 +1,25 @@
 # Local notes and brainstorming (not for GitHub)
 notes/
 
-# Claude Code local settings (contains permissions — not for GitHub)
+# Claude Code config (not for GitHub)
 .claude/settings.local.json
+CLAUDE.md
+
+# Build artifacts
+src/master-pico/c_sdk/build/
+src/slave-pico/c_sdk/build/
+*.uf2
+*.elf
+*.bin
+*.hex
+*.map
+*.dis
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# macOS
+.DS_Store

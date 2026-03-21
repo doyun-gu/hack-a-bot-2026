@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroSync — Live Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'SF Mono', 'Fira Code', monospace; background: #0a0a0a; color: #00ff88; }
+        .header { padding: 20px; text-align: center; border-bottom: 1px solid #333; }
+        .header h1 { font-size: 24px; color: #00ff88; }
+        .header .status { font-size: 12px; color: #666; margin-top: 5px; }
+        .status.connected { color: #00ff88; }
+        .status.disconnected { color: #ff4444; }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; padding: 20px; }
+        .card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 15px; }
+        .card h3 { color: #888; font-size: 11px; text-transform: uppercase; margin-bottom: 10px; }
+        .card .value { font-size: 32px; font-weight: bold; color: #00ff88; }
+        .card .unit { font-size: 14px; color: #666; }
+        .card.alert .value { color: #ff4444; }
+        .card.warn .value { color: #ffaa00; }
+
+        .chart { grid-column: 1 / -1; height: 200px; position: relative; }
+        .chart canvas { width: 100%; height: 100%; }
+
+        .log { grid-column: 1 / -1; background: #111; border: 1px solid #333; border-radius: 8px; padding: 15px; max-height: 200px; overflow-y: auto; }
+        .log h3 { color: #888; font-size: 11px; text-transform: uppercase; margin-bottom: 10px; }
+        .log pre { font-size: 11px; color: #00ff88; line-height: 1.6; }
+
+        @media (max-width: 768px) { .grid { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>NeuroSync — Live Dashboard</h1>
+        <div class="status disconnected" id="conn-status">Waiting for Pico...</div>
+    </div>
+
+    <div class="grid">
+        <div class="card" id="card-roll">
+            <h3>Roll (X-axis tilt)</h3>
+            <div class="value" id="val-roll">--</div>
+            <div class="unit">degrees</div>
+        </div>
+        <div class="card" id="card-pitch">
+            <h3>Pitch (Y-axis tilt)</h3>
+            <div class="value" id="val-pitch">--</div>
+            <div class="unit">degrees</div>
+        </div>
+        <div class="card" id="card-freq">
+            <h3>Tremor Frequency</h3>
+            <div class="value" id="val-freq">--</div>
+            <div class="unit">Hz</div>
+        </div>
+        <div class="card" id="card-stability">
+            <h3>Stability Score</h3>
+            <div class="value" id="val-stability">--</div>
+            <div class="unit">%</div>
+        </div>
+        <div class="card" id="card-mode">
+            <h3>Mode</h3>
+            <div class="value" id="val-mode">IDLE</div>
+            <div class="unit">&nbsp;</div>
+        </div>
+        <div class="card" id="card-wireless">
+            <h3>Wireless</h3>
+            <div class="value" id="val-wireless">--</div>
+            <div class="unit">packets/s</div>
+        </div>
+
+        <div class="log">
+            <h3>Serial Log</h3>
+            <pre id="log-output">Waiting for data...</pre>
+        </div>
+    </div>
+
+    <script>
+        const MODES = ['IDLE', 'STABILITY', 'TRACKING', 'REACTION', 'PATTERN', 'BIOMETRIC', 'CALIBRATE'];
+
+        async function update() {
+            try {
+                const res = await fetch('/api/latest');
+                const data = await res.json();
+
+                if (data && data.roll !== undefined) {
+                    document.getElementById('val-roll').textContent = data.roll?.toFixed(1) ?? '--';
+                    document.getElementById('val-pitch').textContent = data.pitch?.toFixed(1) ?? '--';
+                    document.getElementById('val-freq').textContent = data.frequency?.toFixed(1) ?? '--';
+                    document.getElementById('val-stability').textContent = data.stability?.toFixed(0) ?? '--';
+                    document.getElementById('val-mode').textContent = MODES[data.mode] ?? 'UNKNOWN';
+
+                    document.getElementById('conn-status').textContent = 'Connected';
+                    document.getElementById('conn-status').className = 'status connected';
+                }
+
+                const statusRes = await fetch('/api/status');
+                const status = await statusRes.json();
+                document.getElementById('val-wireless').textContent = status.readings ?? '--';
+
+                if (!status.connected) {
+                    document.getElementById('conn-status').textContent = 'Disconnected';
+                    document.getElementById('conn-status').className = 'status disconnected';
+                }
+            } catch (e) {
+                document.getElementById('conn-status').textContent = 'Server error';
+                document.getElementById('conn-status').className = 'status disconnected';
+            }
+        }
+
+        setInterval(update, 200);
+        update();
+    </script>
+</body>
+</html>
