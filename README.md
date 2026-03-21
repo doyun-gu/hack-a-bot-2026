@@ -98,29 +98,37 @@ graph LR
 
 ```
 hack-a-bot-2026/
-├── firmware/                    ← Flashable firmware snapshots
-│   ├── 01-v1/                   ← First complete build (21 modules)
-│   └── 02-v2/                   ← + datagram protocol, self-test, A/B comparison
+├── test.sh                         ← One command for all tests: ./test.sh led, ./test.sh oled, etc.
 │
-├── src/                         ← Development source code
-│   ├── master-pico/micropython/ ← Pico A: 13 modules (control loop, drivers, fault detection)
-│   ├── slave-pico/micropython/  ← Pico B: 7 modules (SCADA dashboard, operator input)
-│   ├── shared/protocol.py       ← 6-type binary datagram protocol (32-byte packets)
-│   ├── web/                     ← Flask dashboard + SQLite database
-│   ├── hardware/electronics/    ← Circuit docs (Wooseong)
-│   ├── hardware/chassis/        ← CAD + 3D print files (Billy)
-│   └── tools/                   ← setup-pico.sh, flash.sh
+├── firmware/                       ← Frozen firmware snapshots (flash directly)
+│   ├── 01-v1/                      ← MicroPython v1 (21 modules)
+│   ├── 02-v2/                      ← + datagram protocol, self-test, A/B comparison
+│   └── 03-v3/                      ← + mock data, C stubs, integration test
+│
+├── src/                            ← Development source code (11,500+ lines)
+│   ├── master-pico/
+│   │   ├── micropython/            ← Pico A: 14 MicroPython modules
+│   │   ├── c_sdk/                  ← Pico A: C production firmware (5 drivers + main.c)
+│   │   └── tests/                  ← 15 hardware test scripts
+│   ├── slave-pico/
+│   │   ├── micropython/            ← Pico B: 9 MicroPython modules
+│   │   ├── c_sdk/                  ← Pico B: C production firmware (3 drivers + main.c)
+│   │   └── tests/                  ← 4 OLED + display test scripts
+│   ├── shared/protocol.py          ← 6-type binary datagram protocol (32-byte packets)
+│   ├── web/                        ← Flask dashboard + SQLite + mock data generator
+│   ├── hardware/electronics/       ← Circuit schematics + test logs (Wooseong)
+│   ├── hardware/chassis/           ← CAD + 3D print files (Billy)
+│   └── tools/                      ← setup-pico.sh, flash.sh, setup-pico1.sh
 │
 ├── docs/
-│   ├── 01-overview/             ← Design doc, proposal, context, hardware ref
-│   ├── 02-electrical/           ← Wiring (81 connections), power system, datagram,
-│   │                               debug system, failure handling, motor specs,
-│   │                               energy signature fault detection (Wooseong)
-│   ├── 03-factory/              ← Physical factory design, weight sensing, build plans
-│   ├── 04-team/                 ← Team task lists + timeline
-│   └── 05-archive/              ← Past ideas explored (14 ideas ranked)
+│   ├── 01-overview/                ← Design doc, proposal, context, quick-start, project summary
+│   ├── 02-electrical/              ← Wiring, power system, datagram, debug, failure handling,
+│   │                                  motor specs, wireless reliability, energy signature
+│   ├── 03-factory/                 ← Factory design, conveyor calcs, weight sensing, demo script
+│   ├── 04-team/                    ← Team plan + task lists
+│   └── 05-archive/                 ← Past ideas explored
 │
-└── media/                       ← Build progress photos + demo videos
+└── media/                          ← Build progress photos + demo videos
 ```
 
 ---
