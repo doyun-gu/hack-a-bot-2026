@@ -74,60 +74,53 @@ try:
     while True:
         oled.fill(0)
 
-        # === YELLOW ZONE (y=0-15) — status bar ===
+        # === YELLOW ZONE (y=0-15) — 16 chars max ===
+        # "GridBox  . LIVE" = 15 chars, fits perfectly
         oled.text("GridBox", 0, 4, 1)
-        draw_spinner(oled, 56, 5, tick)  # rotating spinner
-        # Connection indicator: solid square = connected
-        oled.fill_rect(72, 5, 5, 5, 1)
-        oled.text("LIVE", 100, 4, 1)
+        draw_spinner(oled, 84, 5, tick)  # spinner next to LIVE
+        oled.text("LIVE", 96, 4, 1)
 
-        # === BLUE ZONE (y=16-63) — metrics ===
+        # === BLUE ZONE (y=16-63) — 16 chars per line ===
 
-        # Motor status — compact, scannable
         m1 = 340 + (tick * 7) % 60
         m2 = 270 + (tick * 5) % 40
         m1_pct = 60 + (tick * 3) % 20
-
-        oled.text("M1", 0, 18, 1)
-        # Mini bar for M1
-        bar_w = int(m1_pct * 40 / 100)
-        oled.rect(20, 18, 42, 7, 1)
-        oled.fill_rect(21, 19, bar_w, 5, 1)
-        oled.text(f"{m1}mA", 66, 18, 1)
-
         m2_pct = 40 + (tick * 2) % 15
-        oled.text("M2", 0, 28, 1)
-        bar_w2 = int(m2_pct * 40 / 100)
-        oled.rect(20, 28, 42, 7, 1)
-        oled.fill_rect(21, 29, bar_w2, 5, 1)
-        oled.text(f"{m2}mA", 66, 28, 1)
 
-        # Power + Voltage — single line
+        # M1 with mini bar
+        oled.text("M1", 0, 18, 1)
+        bar_w = int(m1_pct * 36 / 100)
+        oled.rect(20, 18, 38, 7, 1)
+        oled.fill_rect(21, 19, bar_w, 5, 1)
+        oled.text(f"{m1}mA", 62, 18, 1)
+
+        # M2 with mini bar
+        oled.text("M2", 0, 28, 1)
+        bar_w2 = int(m2_pct * 36 / 100)
+        oled.rect(20, 28, 38, 7, 1)
+        oled.fill_rect(21, 29, bar_w2, 5, 1)
+        oled.text(f"{m2}mA", 62, 28, 1)
+
+        # Voltage + Power + IMU — fits in 16 chars
         bus = 4.85 + (tick % 10) * 0.01
         total_w = bus * (m1 + m2) / 1000
-        oled.text(f"{bus:.1f}V", 0, 39, 1)
-        oled.text(f"{total_w:.1f}W", 40, 39, 1)
-
-        # IMU — small with status
         imu = 0.25 + (tick % 5) * 0.05
-        status = "OK" if imu < 1.0 else "!"
-        oled.text(f"IMU:{imu:.1f}g", 80, 39, 1)
+        oled.text(f"{bus:.1f}V {total_w:.1f}W", 0, 39, 1)
+        oled.text(f"{imu:.1f}g", 104, 39, 1)
 
-        # Production — bottom section
+        # Production + state — bottom
         items = tick // 3
         passed = int(items * 0.87)
         rejected = items - passed
         oled.hline(0, 49, 128, 1)
         oled.text(f"P:{passed}", 0, 52, 1)
-        oled.text(f"R:{rejected}", 40, 52, 1)
+        oled.text(f"R:{rejected}", 48, 52, 1)
 
-        # State indicator — bottom right
         if tick % 30 < 25:
-            oled.text("NORMAL", 80, 52, 1)
+            oled.text("OK", 112, 52, 1)
         else:
-            # Blink WARNING
             if tick % 2 == 0:
-                oled.text("WARN", 88, 52, 1)
+                oled.text("!!", 112, 52, 1)
 
         oled.show()
 
