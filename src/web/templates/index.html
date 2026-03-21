@@ -106,17 +106,8 @@
         .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
 
         /* ─── Servo Row ─── */
-        .servo-row { display: flex; gap: 8px; }
-        .servo-item {
-            flex: 1; display: flex; align-items: center; justify-content: space-between;
-            padding: 8px 12px; background: #0d1117; border: 1px solid #21262d; border-radius: 4px;
-        }
-        .servo-name { font-size: 11px; font-weight: 500; color: #c9d1d9; }
-        .servo-status { display: flex; align-items: center; gap: 6px; }
-        .servo-angle { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: #a371f7; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-        .status-dot.green { background: #3fb950; }
-        .status-dot.off { background: transparent; border: 1px dashed #484f58; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
 
         /* ─── Production ─── */
         .prod-stats { display: flex; gap: 12px; align-items: center; }
@@ -163,28 +154,12 @@
     <div class="header">
         <div class="header-left">
             <h1>GridBox</h1>
-            <span class="tag">Hack-A-Bot 2026</span>
-            <span class="tag">Group 1</span>
-            <span class="tag">LIVE</span>
+            <span class="tag">Hack-A-Bot 2026 — Group 1</span>
         </div>
         <div class="header-right">
+            <span class="state state-UNKNOWN" id="state-badge" style="font-size:11px;padding:3px 10px;">UNKNOWN</span>
             <span><span class="conn-dot lost" id="conn-dot"></span><span id="conn-text">Offline</span></span>
-            <span style="color:#484f58">Mode: <span id="mode" class="c-blue">--</span></span>
         </div>
-    </div>
-
-    <!-- Health Summary Bar -->
-    <div class="health-bar">
-        <div class="health-pill" id="hp-psu"><span class="health-dot" id="hd-psu"></span><span id="hp-psu-txt">PSU OK</span></div>
-        <div class="health-pill" id="hp-buck"><span class="health-dot" id="hd-buck"></span><span id="hp-buck-txt">Buck OK</span></div>
-        <div class="health-pill" id="hp-m1"><span class="health-dot" id="hd-m1"></span><span id="hp-m1-txt">M1 --</span></div>
-        <div class="health-pill" id="hp-m2"><span class="health-dot" id="hd-m2"></span><span id="hp-m2-txt">M2 --</span></div>
-        <div class="health-pill" id="hp-s1"><span class="health-dot" id="hd-s1"></span><span id="hp-s1-txt">S1 OK</span></div>
-        <div class="health-pill" id="hp-s2"><span class="health-dot" id="hd-s2"></span><span id="hp-s2-txt">S2 OK</span></div>
-        <div class="health-pill" id="hp-imu"><span class="health-dot" id="hd-imu"></span><span id="hp-imu-txt">IMU OK</span></div>
-        <div class="health-pill" id="hp-es"><span class="health-dot" id="hd-es"></span><span id="hp-es-txt">ES OK</span></div>
-        <div class="health-pill" id="hp-nrf"><span class="health-dot" id="hd-nrf"></span><span id="hp-nrf-txt">nRF OK</span></div>
-        <div class="health-pill" id="hp-db"><span class="health-dot" id="hd-db"></span><span id="hp-db-txt">DB OK</span></div>
     </div>
 
     <!-- System Overview Row -->
@@ -269,21 +244,21 @@
                 </div>
                 <div class="progress"><div class="progress-bar"><div class="progress-fill bg-blue" id="m2-bar" style="width:0%"></div></div></div>
             </div>
-            <div class="servo-row">
-                <div class="servo-item">
-                    <span class="servo-name">Servo 1: Valve</span>
-                    <div class="servo-status">
-                        <span class="servo-angle" id="s1-angle">--°</span>
-                        <span class="status-dot green" id="s1-dot"></span>
-                    </div>
-                </div>
-                <div class="servo-item">
-                    <span class="servo-name">Servo 2: Gate</span>
-                    <div class="servo-status">
-                        <span class="servo-angle" id="s2-angle">--°</span>
-                        <span class="status-dot green" id="s2-dot"></span>
-                    </div>
-                </div>
+        </div>
+
+        <!-- Servo cards — same height as motor cards -->
+        <div class="two-col" style="padding: 0 20px 8px;">
+            <div class="card" style="padding: 14px;">
+                <div class="card-header"><h3>Servo 1 — Fill Valve</h3><span class="badge badge-green" id="s1-badge">ACTIVE</span></div>
+                <div class="metric"><span class="val c-purple" id="s1-angle" style="color:#a371f7">--</span><span class="unit">degrees</span></div>
+                <div class="sub-metrics"><span>PCA9685 ch0</span><span style="margin-left:8px">Range: 0-180</span></div>
+                <div class="progress"><div class="progress-bar"><div class="progress-fill" id="s1-bar" style="width:50%;background:#a371f7"></div></div></div>
+            </div>
+            <div class="card" style="padding: 14px;">
+                <div class="card-header"><h3>Servo 2 — Sort Gate</h3><span class="badge badge-green" id="s2-badge">ACTIVE</span></div>
+                <div class="metric"><span class="val c-purple" id="s2-angle-val" style="color:#a371f7">--</span><span class="unit">degrees</span></div>
+                <div class="sub-metrics"><span>PCA9685 ch1</span><span style="margin-left:8px">Range: 0-180</span></div>
+                <div class="progress"><div class="progress-bar"><div class="progress-fill" id="s2-bar" style="width:50%;background:#a371f7"></div></div></div>
             </div>
         </div>
 
