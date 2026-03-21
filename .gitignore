@@ -1,2 +1,5 @@
 # Local notes and brainstorming (not for GitHub)
 notes/
+
+# Claude Code local settings (contains permissions — not for GitHub)
+.claude/settings.local.json
