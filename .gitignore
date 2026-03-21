@@ -1,8 +1,8 @@
 # Local notes and brainstorming (not for GitHub)
 notes/
 
-# Claude Code config (not for GitHub)
-.claude/settings.local.json
+# Claude Code (not for GitHub)
+.claude/
 CLAUDE.md
 
 # Build artifacts
