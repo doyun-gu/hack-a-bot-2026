@@ -519,7 +519,12 @@ def main():
 
                     elif pkt_type == PKT_HEARTBEAT:
                         uptime = time.ticks_diff(now, boot_ms) // 1000
-                        pkt = pack_heartbeat(now, uptime)
+                        total_wl = wireless_stats['sent'] + wireless_stats['failed']
+                        wl_rel = int((wireless_stats['sent'] / max(total_wl, 1)) * 100)
+                        pkt = pack_heartbeat(now, uptime,
+                                             wl_sent=wireless_stats['sent'],
+                                             wl_failed=wireless_stats['failed'],
+                                             wl_reliability=wl_rel)
 
                 # Determine criticality: ALERT=3x, COMMAND=2x, others=1x
                 is_alert = ("alert" in actions)

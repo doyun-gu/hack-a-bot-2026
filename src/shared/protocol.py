@@ -92,7 +92,7 @@ PACK_SIZE = 32
 FMT_POWER = '<BBHHHHHHHBBBBBBB9s'
 FMT_STATUS = '<BBBBHBHBHHBBIBB10s'
 FMT_PRODUCTION = '<BBHHHBHBBHHBB13s'
-FMT_HEARTBEAT = '<BBIIBB20s'
+FMT_HEARTBEAT = '<BBIIBBHHB15s'
 FMT_ALERT = '<BBBBIHHHB17s'
 FMT_COMMAND = '<BBBBHB25s'
 
@@ -105,6 +105,7 @@ _PAD9 = b'\x00' * 9
 _PAD10 = b'\x00' * 10
 _PAD13 = b'\x00' * 13
 _PAD17 = b'\x00' * 17
+_PAD15 = b'\x00' * 15
 _PAD20 = b'\x00' * 20
 _PAD25 = b'\x00' * 25
 
@@ -156,11 +157,15 @@ def pack_production(total, passed, rejected, reject_pct,
                        int(station_active), int(sorting_active), _PAD13)
 
 
-def pack_heartbeat(timestamp_ms, uptime_s, core0_pct=0, core1_pct=0):
-    """Pack HEARTBEAT packet (0x04)."""
+def pack_heartbeat(timestamp_ms, uptime_s, core0_pct=0, core1_pct=0,
+                    wl_sent=0, wl_failed=0, wl_reliability=100):
+    """Pack HEARTBEAT packet (0x04). Includes wireless reliability stats."""
     return struct.pack(FMT_HEARTBEAT, PKT_HEARTBEAT, _next_seq(),
                        int(timestamp_ms), int(uptime_s),
-                       int(core0_pct), int(core1_pct), _PAD20)
+                       int(core0_pct), int(core1_pct),
+                       int(wl_sent) & 0xFFFF, int(wl_failed) & 0xFFFF,
+                       min(int(wl_reliability), 255),
+                       _PAD15)
 
 
 def pack_alert(level, source, timestamp_ms, imu_mg, motor_ma, bus_mv, action):
@@ -223,6 +228,8 @@ def unpack_heartbeat(data):
         'type': v[0], 'seq': v[1],
         'timestamp_ms': v[2], 'uptime_s': v[3],
         'core0_load_pct': v[4], 'core1_load_pct': v[5],
+        'wireless_sent': v[6], 'wireless_failed': v[7],
+        'wireless_reliability_pct': v[8],
     }
 
 
@@ -305,12 +312,15 @@ if __name__ == "__main__":
     print("  pack_production / unpack: OK")
 
     # HEARTBEAT
-    pkt = pack_heartbeat(123456, 3600, 45, 80)
+    pkt = pack_heartbeat(123456, 3600, 45, 80, wl_sent=500, wl_failed=12, wl_reliability=97)
     assert len(pkt) == 32, f"HEARTBEAT size: {len(pkt)}"
     d = unpack(pkt)
     assert d['type'] == PKT_HEARTBEAT
     assert d['timestamp_ms'] == 123456
     assert d['core0_load_pct'] == 45
+    assert d['wireless_sent'] == 500
+    assert d['wireless_failed'] == 12
+    assert d['wireless_reliability_pct'] == 97
     print("  pack_heartbeat / unpack: OK")
 
     # ALERT
