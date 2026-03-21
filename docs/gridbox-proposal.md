@@ -146,79 +146,171 @@ stateDiagram-v2
 
 ---
 
-## Application Scenarios
+## Recommended Scenario: Smart Water Bottling Plant
 
-### Scenario 1: Smart Ventilation / HVAC System
+We pick **one concrete factory** and build the full story around it. This is what judges see:
+
+> *"This is a miniature smart water bottling plant. Recycled energy powers the system. Water is pumped, filtered, and bottled. Everything is monitored wirelessly. When equipment fails, the system protects itself automatically."*
+
+### The Process (What the Factory Does)
 
 ```mermaid
 graph LR
-    ENERGY[Recycled Energy] --> FAN[DC Motor: Intake fan]
-    ENERGY --> EXHAUST[DC Motor: Exhaust fan]
-    POT[Pot: Temperature setpoint] --> PICO[Pico: Controller]
-    IMU[IMU: Fan bearing health] --> PICO
-    PICO -->|PWM speed| FAN
-    PICO -->|PWM speed| EXHAUST
-    PICO -->|open/close| DAMPER[Servo: Duct damper]
-    PICO -->|wireless| DASH[OLED: HVAC status]
+    WATER[Water Source] -->|"Pump"| FILTER[Filtration Stage]
+    FILTER -->|"Conveyor"| FILL[Filling Station]
+    FILL -->|"Valve"| BOTTLE[Bottled Output]
+    BOTTLE -->|"Quality gate"| GOOD[Good bottles]
+    BOTTLE -->|"Quality gate"| REJECT[Rejected bottles]
 ```
+
+### Component → Factory Mapping
+
+```mermaid
+graph LR
+    subgraph PLANT["Water Bottling Plant"]
+        PUMP[DC Motor 1: Water Pump]
+        CONV[DC Motor 2: Conveyor Belt]
+        VALVE[Servo 1: Fill Valve]
+        GATE[Servo 2: Quality Gate]
+    end
+
+    subgraph CONTROL["Smart Controller"]
+        PICO[Pico A + IMU + ADC]
+    end
+
+    subgraph SCADA["Control Room"]
+        DASH[Pico B + OLED + Joystick + Pot]
+    end
+
+    PLANT --> CONTROL
+    CONTROL -->|wireless| SCADA
+```
+
+| Our Component | Factory Equipment | What It Does in the Plant |
+|---|---|---|
+| **DC Motor 1** | Water pump | Pumps water from source through filtration to filling station. Speed = flow rate. PWM controlled |
+| **DC Motor 2** | Conveyor belt | Moves bottles along the production line. Speed = production rate. PWM controlled |
+| **Servo 1** | Fill valve | Opens to fill bottle, closes when full. Timed open/close cycle per bottle |
+| **Servo 2** | Quality/sorting gate | Directs bottles: good → output, bad → reject bin. Position based on IMU vibration data |
+| **BMI160 IMU** | Equipment health monitor | Mounted on pump motor — detects bearing wear, cavitation, blockages via vibration |
+| **Potentiometer** | Production speed dial | Sets bottles-per-minute target. Pico adjusts pump speed + conveyor speed to match |
+| **Joystick** | Operator console | Manual override: control pump/conveyor speed, open/close valves, acknowledge faults |
+| **OLED** | SCADA dashboard | Shows: production rate, pump health, valve status, energy use, fault alerts |
+| **LEDs** | Status tower light | Green = running, Yellow = warning, Red = fault (like real factory stack lights) |
+| **ADC** | Power monitor | Measures bus voltage + motor current → calculates energy per bottle |
+| **nRF24L01+** | SCADA wireless link | Streams all data to control room — no wires between plant floor and office |
+| **Buck converter** | Transformer | Steps recycled energy (12V) down to usable levels for control electronics |
+
+### The Production Cycle (Automated)
+
+```mermaid
+flowchart LR
+    START[Bottle on conveyor] --> MOVE[Motor 2: move to fill station]
+    MOVE --> OPEN[Servo 1: open fill valve]
+    OPEN --> FILL[Motor 1: pump water - timed fill]
+    FILL --> CLOSE[Servo 1: close fill valve]
+    CLOSE --> CHECK{IMU: vibration normal?}
+    CHECK -->|Yes| PASS[Servo 2: pass → good output]
+    CHECK -->|No| FAIL[Servo 2: reject → waste bin]
+    PASS --> NEXT[Motor 2: next bottle]
+    FAIL --> NEXT
+    NEXT --> START
+```
+
+| Step | Duration | What Happens | What OLED Shows |
+|---|---|---|---|
+| 1. Move bottle | 1s | Conveyor motor runs at set speed | "CONVEYOR: MOVING" |
+| 2. Open valve | 0.2s | Servo 1 opens to 90° | "VALVE: OPEN" |
+| 3. Fill | 2s | Pump runs at calibrated speed | "FILLING: 2.0s" |
+| 4. Close valve | 0.2s | Servo 1 returns to 0° | "VALVE: CLOSED" |
+| 5. Quality check | 0.5s | IMU checks for abnormal vibration during fill | "QC: CHECKING..." |
+| 6. Sort | 0.3s | Servo 2 directs to pass or reject | "QC: PASS ✓" or "QC: REJECT ✗" |
+| 7. Next | 1s | Conveyor moves to next position | "BOTTLES: 47 | RATE: 12/min" |
+
+**Total cycle time: ~5 seconds per bottle = 12 bottles/minute**
+
+### What Can Go Wrong (And How GridBox Handles It)
+
+| Factory Problem | How It Happens | How GridBox Detects | Autonomous Response |
+|---|---|---|---|
+| **Pump bearing failure** | Wear over time → vibration increases | IMU $a_{rms}$ rises above 2g threshold | Stop pump, close valve, alert operator. "PUMP FAULT — BEARING" |
+| **Pipe blockage** | Debris in water → flow reduces | Pump motor current drops (less load), vibration pattern changes | Reduce pump speed, alert. "BLOCKAGE SUSPECTED" |
+| **Conveyor jam** | Bottle stuck → motor stalls | Motor current spikes, vibration stops | Stop conveyor, open reject gate, alert. "CONVEYOR JAM" |
+| **Overfill** | Valve timing wrong → water overflows | Fill time exceeds threshold | Close valve immediately. "OVERFILL — VALVE CLOSED" |
+| **Power drop** | Recycled energy source varies | ADC reads bus voltage dropping | Reduce production rate (slower motors), shed non-essential loads. "POWER LOW — REDUCED RATE" |
+| **Complete power loss** | Energy source stops | Bus voltage = 0 | All valves close (fail-safe), alert sent. "EMERGENCY SHUTDOWN" |
+
+### OLED Dashboard for Water Plant
+
+```
+WATER PLANT SCADA    [LIVE]
+
+Pump:      1200 RPM   0.8A
+Conveyor:   800 RPM   0.4A
+Valve:     CLOSED
+QC Gate:   PASS position
+
+Bottles today:    347
+Rate:             12/min
+Rejects:          3 (0.9%)
+Energy/bottle:    0.42 mWh
+Pump health:      0.3g OK
+```
+
+### Why Water Bottling?
+
+| Reason | Detail |
+|---|---|
+| **Everyone understands it** | Judges don't need to know engineering — "we pump water, fill bottles, check quality" |
+| **Visual demo** | Motors spinning, servos clicking open/close, LEDs showing status — physical and tangible |
+| **Sustainability perfect** | Clean water access, energy efficiency, waste reduction (reject bad fills) |
+| **Maps to real industry** | £50B global bottled water market. Same system scales to real plants |
+| **Every component earns its place** | Nothing wasted — each part has a clear factory function |
+| **Autonomy is genuine** | System runs the production cycle without human input. Detects faults. Makes decisions |
+
+---
+
+## Other Factory Scenarios (Same System, Different Story)
+
+The exact same hardware and firmware works for other factories — just change what the motors and servos represent:
+
+### Scenario B: Smart Greenhouse / Vertical Farm
+
+| Component | Greenhouse Role |
+|---|---|
+| DC Motor 1 | Ventilation fan — temperature control |
+| DC Motor 2 | Water pump — irrigation |
+| Servo 1 | Roof vent — opens when temperature high |
+| Servo 2 | Water valve — timed irrigation cycles |
+| Potentiometer | Temperature setpoint |
+| IMU | Fan vibration + structure tilt monitoring |
+| OLED | Climate dashboard: temp, humidity, fan speed, water schedule |
+
+### Scenario C: Recycling Sorting Facility
+
+| Component | Recycling Role |
+|---|---|
+| DC Motor 1 | Conveyor belt — moves waste along |
+| DC Motor 2 | Shredder motor — breaks down recyclables |
+| Servo 1 | Sorting gate — plastic left, metal right |
+| Servo 2 | Emergency stop gate |
+| Joystick | Manual sort override for unusual items |
+| IMU | Shredder vibration — detects jams |
+| OLED | Sorting stats: items processed, categories, jam alerts |
+
+### Scenario D: HVAC / Building Climate Control
 
 | Component | HVAC Role |
 |---|---|
-| DC Motor 1 | Intake fan — speed matches demand (low when cool, high when hot) |
-| DC Motor 2 | Exhaust fan — removes stale air, speed controlled |
-| Servo 1 | Duct damper — opens/closes ventilation to specific zones |
-| Servo 2 | Emergency vent — opens if air quality critical |
-| Potentiometer | Thermostat — user sets desired temperature |
-| IMU | Fan bearing monitor — detects wear before breakdown |
-| OLED | Shows: fan speeds, duct status, temperature, bearing health |
+| DC Motor 1 | Intake fan — fresh air supply |
+| DC Motor 2 | Exhaust fan — stale air removal |
+| Servo 1 | Duct damper — zone control |
+| Servo 2 | Emergency ventilation override |
+| Potentiometer | Thermostat setpoint |
+| IMU | Fan bearing health monitor |
+| OLED | Climate status: zone temperatures, fan speeds, energy use |
 
-**Demo:** Turn potentiometer (temperature rises) → fans speed up → turn back (temperature drops) → fans slow down. Shake motor (bearing fault) → fan stops, backup activates.
-
-### Scenario 2: Water Treatment / Pumping Station
-
-```mermaid
-graph LR
-    ENERGY2[Recycled Energy] --> PUMP[DC Motor: Water pump]
-    ENERGY2 --> MIXER[DC Motor: Chemical mixer]
-    POT2[Pot: Flow rate setpoint] --> PICO2[Pico: Controller]
-    IMU2[IMU: Pump vibration] --> PICO2
-    PICO2 -->|PWM speed| PUMP
-    PICO2 -->|PWM speed| MIXER
-    PICO2 -->|open/close| VALVE[Servo: Water valve]
-    PICO2 -->|wireless| DASH2[OLED: Pump station status]
-```
-
-| Component | Water Treatment Role |
-|---|---|
-| DC Motor 1 | Main pump — variable speed matches demand |
-| DC Motor 2 | Chemical dosing mixer — precise speed control |
-| Servo 1 | Water intake valve — open/close based on tank level |
-| Servo 2 | Emergency shut-off — closes if pump fault detected |
-| Potentiometer | Flow rate setpoint — operator sets desired throughput |
-| IMU | Pump vibration monitor — cavitation/bearing fault detection |
-
-### Scenario 3: Factory Production Line
-
-```mermaid
-graph LR
-    ENERGY3[Recycled Energy] --> CONV[DC Motor: Conveyor belt]
-    ENERGY3 --> SORT[DC Motor: Sorting wheel]
-    JOY3[Joystick: Manual control] --> PICO3[Pico: Controller]
-    IMU3[IMU: Conveyor vibration] --> PICO3
-    PICO3 -->|PWM speed| CONV
-    PICO3 -->|PWM speed| SORT
-    PICO3 -->|position| GATE[Servo: Sorting gate]
-    PICO3 -->|wireless| DASH3[OLED: Production status]
-```
-
-| Component | Factory Role |
-|---|---|
-| DC Motor 1 | Conveyor belt — adjustable speed for production rate |
-| DC Motor 2 | Sorting wheel — rotates to separate items |
-| Servo 1 | Sorting gate — directs items left or right |
-| Servo 2 | Emergency stop gate |
-| Joystick | Operator manual control — override speed/direction |
-| IMU | Conveyor belt vibration — detects jams or misalignment |
+**The firmware is the same.** Only the labels on the OLED change. Tell judges: *"Today it's a water bottling plant. Tomorrow it's a greenhouse, a recycling facility, or a building HVAC system. Same £15 controller, different application."*
 
 ---
 
