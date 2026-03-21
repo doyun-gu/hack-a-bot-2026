@@ -1,90 +1,87 @@
 # Source Code
 
-## Project Structure
+## Development Plan
+
+See [`firmware-dev-plan.md`](firmware-dev-plan.md) for the full roadmap: architecture, module dependency map, 4 development phases, line estimates, and technical decisions.
+
+## Structure
 
 ```
 src/
-├── master-pico/              # Pico A — primary sensing + processing unit
-│   ├── micropython/          # Development firmware (Python — fast iteration)
-│   │   ├── main.py           # Entry point
-│   │   ├── config.py         # Pin assignments + constants
-│   │   └── [driver].py       # Component drivers (added as needed)
-│   ├── c_sdk/                # Production firmware (C — maximum performance)
-│   │   ├── CMakeLists.txt    # Build configuration
-│   │   ├── main.c            # Entry point
-│   │   └── [driver].c/.h    # Component drivers (ported from Python)
-│   └── tests/                # Individual component test scripts
-│       ├── test_i2c_scan.py  # Scan I2C bus for connected devices
-│       ├── test_joystick.py  # Read joystick X/Y/button
-│       └── test_led.py       # Blink LED (alive check)
+├── firmware-dev-plan.md          ← Development roadmap (start here)
+├── master-pico/                  ← Pico A — Grid Controller
+│   ├── micropython/              ← Dev firmware (fast iteration)
+│   │   ├── main.py               ← Entry point + 100Hz main loop
+│   │   ├── config.py             ← Pin assignments + thresholds
+│   │   ├── bmi160.py             ← IMU driver (I2C)
+│   │   ├── nrf24l01.py           ← Wireless driver (SPI)
+│   │   ├── pca9685.py            ← PWM driver (I2C)
+│   │   ├── power_manager.py      ← ADC sensing + power calcs
+│   │   ├── motor_control.py      ← Motor speed + servo angles
+│   │   ├── imu_reader.py         ← Core 1: vibration monitoring
+│   │   ├── fault_manager.py      ← State machine + load shedding
+│   │   ├── energy_signature.py   ← Current analysis (Wooseong's design)
+│   │   ├── sorter.py             ← Weight detection + timed sorting
+│   │   ├── led_stations.py       ← 4-LED production sequence
+│   │   └── calibration.py        ← Startup calibration
+│   ├── c_sdk/                    ← Production firmware (demo day)
+│   └── tests/                    ← Individual component tests
 │
-├── slave-pico/               # Pico B — display + base station
-│   ├── micropython/          # Development firmware
-│   ├── c_sdk/                # Production firmware
-│   └── tests/                # Component tests
+├── slave-pico/                   ← Pico B — SCADA Station
+│   ├── micropython/
+│   │   ├── main.py               ← SCADA display loop
+│   │   ├── config.py             ← Pin assignments
+│   │   ├── nrf24l01.py           ← Wireless RX + commands
+│   │   ├── ssd1306.py            ← OLED driver
+│   │   ├── dashboard.py          ← 4+ OLED views
+│   │   ├── operator.py           ← Joystick + pot input
+│   │   └── commander.py          ← Commands to Pico A
+│   └── c_sdk/
 │
-├── shared/                   # Shared between both Picos
-│   └── protocol.py           # Wireless packet format (32-byte struct)
+├── shared/
+│   └── protocol.py               ← 32-byte wireless packet format
 │
-├── web/                      # Mac-side web dashboard
-│   ├── app.py                # Flask server — reads serial, serves UI
-│   └── templates/
-│       └── index.html        # Live dashboard (roll, pitch, score, etc.)
+├── web/                          ← Laptop dashboard
+│   ├── app.py
+│   └── templates/index.html
 │
-├── hardware/                 # Physical design files
-│   ├── README.md             # Pin mapping reference
-│   ├── cad/                  # 3D models, chassis (collaborator-managed)
-│   ├── wiring/               # Wiring diagrams
-│   └── datasheets/           # Component datasheets
+├── hardware/                     ← Physical design files
+│   ├── electronics/              ← Wooseong's workspace
+│   └── chassis/                  ← Billy's workspace
 │
-└── tools/                    # Development utilities
-    └── flash.sh              # Upload firmware to Pico via mpremote
+└── tools/
+    └── flash.sh                  ← Upload to Pico (master|slave)
 ```
 
-## Development Workflow
-
-### Two-Version Strategy
-
-| Version | Language | Purpose | When |
-|---|---|---|---|
-| **MicroPython** | Python | Development + testing — instant feedback via REPL | Build phase |
-| **C SDK** | C/C++ | Production demo — maximum performance + stability | Demo day |
-
-Develop in Python first (fast iteration). Port to C once working (rock-solid demo).
-
-### Quick Commands
+## Quick Commands
 
 ```bash
-# Flash master pico with MicroPython firmware
+# Flash master Pico
 ./tools/flash.sh master
 
-# Flash slave pico
+# Flash slave Pico
 ./tools/flash.sh slave
 
-# Run a test on connected Pico
-mpremote run master-pico/tests/test_i2c_scan.py
+# Run a test
+mpremote run master-pico/tests/test_imu.py
 
-# Open live REPL on Pico
+# Open REPL on Pico
 mpremote repl
 
 # Start web dashboard
-python web/app.py --port /dev/tty.usbmodem*
+python web/app.py --no-serial
 
-# Build C firmware (requires PICO_SDK_PATH set)
+# Build C firmware
 cd master-pico/c_sdk && mkdir -p build && cd build && cmake .. && make
 ```
 
-### Testing Strategy
+## Development Order
 
-Test each component individually BEFORE integrating:
-
-```
-1. test_led.py          → Pico is alive
-2. test_i2c_scan.py     → I2C bus working, devices detected
-3. test_joystick.py     → ADC reading correctly
-4. test_imu.py          → IMU returning valid data (added when IMU wired)
-5. test_servo.py        → Servos moving correctly (added when servos wired)
-6. test_wireless.py     → nRF24L01+ link between two Picos (added when both wired)
-7. test_oled.py         → OLED displaying text/graphics (added when OLED wired)
-8. test_all.py          → Full integration test
-```
+1. `nrf24l01.py` — wireless link (FIRST — score-capped without it)
+2. `bmi160.py` — IMU vibration sensing
+3. `pca9685.py` — servo + motor PWM control
+4. ADC sensing in `power_manager.py`
+5. `ssd1306.py` — OLED display
+6. Integration: fault detection + load shedding + dashboard
+7. Factory-specific: sorting + LED stations + calibration
+8. C SDK port of core modules
