@@ -6,7 +6,7 @@ Each version is a **complete snapshot** you can flash directly onto the Picos. P
 |---|---|---|---|
 | [`01-v1/`](01-v1/) | 2026-03-21 | Code complete, untested | Full feature set: 13 master + 7 slave modules, wireless, IMU, sorting, OLED dashboard |
 | [`02-v2/`](02-v2/) | 2026-03-21 | Code complete, untested | Multi-type datagram (6 packets), self-test + blink codes, dumb-vs-smart A/B, error handling hardened |
-| `03-v3/` | — | Planned | Bug fixes from hardware testing, calibrated thresholds |
+| [`03-v3/`](03-v3/) | 2026-03-21 | Code complete, untested | Mock data injection, C SDK stubs (4 modules), integration test (115 checks) |
 | `04-demo/` | — | Planned | Final demo version — polished, tuned, rehearsed |
 
 ## How to Flash Any Version
@@ -32,7 +32,7 @@ mpremote reset
 firmware/
 ├── 01-v1/     ← first complete build
 ├── 02-v2/     ← after adding datagram + debug
-├── 03-v3/     ← after hardware testing fixes
+├── 03-v3/     ← mock data + C SDK stubs + integration tests
 └── 04-demo/   ← final demo day version
 ```
 
