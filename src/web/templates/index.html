@@ -3,353 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GridBox — Live Dashboard</title>
+    <title>GridBox — SCADA Dashboard</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'SF Mono', 'Fira Code', monospace; background: #0a0a0a; color: #00ff88; }
+        body { font-family: 'Inter', -apple-system, sans-serif; background: #0b0e11; color: #e0e0e0; }
 
-        .header { padding: 16px; text-align: center; border-bottom: 1px solid #222; }
-        .header h1 { font-size: 22px; color: #00ff88; }
-        .header .subtitle { font-size: 11px; color: #555; margin-top: 3px; }
-        .header .conn { font-size: 11px; margin-top: 6px; }
-        .conn.ok { color: #00ff88; }
-        .conn.lost { color: #ff4444; }
-        .conn.warn { color: #ffaa00; }
+        /* Header */
+        .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #0f1318; border-bottom: 1px solid #1a1f26; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-left h1 { font-size: 16px; font-weight: 600; color: #fff; }
+        .header-left .tag { font-size: 10px; padding: 2px 8px; border-radius: 3px; background: #1a2332; color: #4dabf7; border: 1px solid #1e3a5f; }
+        .header-right { display: flex; align-items: center; gap: 16px; font-size: 11px; }
+        .conn-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+        .conn-dot.ok { background: #40c057; box-shadow: 0 0 6px #40c057; }
+        .conn-dot.lost { background: #fa5252; box-shadow: 0 0 6px #fa5252; }
 
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 12px; }
+        /* Grid */
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px; }
 
-        .card { background: #111; border: 1px solid #222; border-radius: 6px; padding: 12px; position: relative; }
-        .card h3 { color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-        .card .value { font-size: 32px; font-weight: bold; line-height: 1; }
-        .card .unit { font-size: 11px; color: #444; margin-top: 4px; }
+        /* Cards */
+        .card { background: #0f1318; border: 1px solid #1a1f26; border-radius: 6px; padding: 14px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card-header h3 { font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.8px; }
+        .card-header .badge { font-size: 9px; padding: 1px 6px; border-radius: 3px; font-weight: 500; }
 
-        /* Thick progress bar with label */
-        .bar-thick { height: 20px; background: #1a1a1a; border-radius: 4px; margin-top: 8px; overflow: hidden; position: relative; border: 1px solid #222; }
-        .bar-thick .fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; opacity: 0.7; }
-        .bar-thick .label { position: absolute; top: 0; left: 8px; right: 0; height: 100%; display: flex; align-items: center; font-size: 9px; color: #fff; font-weight: bold; letter-spacing: 0.3px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+        .metric { display: flex; align-items: baseline; gap: 6px; }
+        .metric .val { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 600; line-height: 1; }
+        .metric .unit { font-size: 12px; color: #6b7280; }
 
-        .green { color: #00ff88; }
-        .yellow { color: #ffaa00; }
-        .red { color: #ff4444; }
-        .blue { color: #00aaff; }
+        .sub-metrics { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: #6b7280; }
+        .sub-metrics span { font-family: 'JetBrains Mono', monospace; }
 
-        .fill-green { background: linear-gradient(90deg, #0d9f5e, #14cc73); }
-        .fill-yellow { background: linear-gradient(90deg, #b8860b, #daa520); }
-        .fill-red { background: linear-gradient(90deg, #b22222, #dc3545); }
-        .fill-blue { background: linear-gradient(90deg, #1565c0, #2196f3); }
+        /* Progress bar — thin, clean, label separate */
+        .progress { margin-top: 10px; }
+        .progress-bar { height: 4px; background: #1a1f26; border-radius: 2px; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+
+        /* Colours */
+        .c-green { color: #40c057; }
+        .c-yellow { color: #fab005; }
+        .c-red { color: #fa5252; }
+        .c-blue { color: #4dabf7; }
+        .c-white { color: #fff; }
+
+        .bg-green { background: #40c057; }
+        .bg-yellow { background: #fab005; }
+        .bg-red { background: #fa5252; }
+        .bg-blue { background: #4dabf7; }
+
+        .badge-green { background: #0d2818; color: #40c057; border: 1px solid #1a4d2e; }
+        .badge-yellow { background: #2d2305; color: #fab005; border: 1px solid #4d3b0a; }
+        .badge-red { background: #2d0a0a; color: #fa5252; border: 1px solid #4d1515; }
 
         .wide { grid-column: span 2; }
         .full { grid-column: 1 / -1; }
 
-        /* Charts - bigger */
-        .chart-container { grid-column: span 2; background: #111; border: 1px solid #222; border-radius: 6px; padding: 12px; }
-        .chart-container h3 { color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
-        .chart-container .legend { font-size: 9px; color: #555; margin-bottom: 4px; }
-        .chart-container .legend span { margin-right: 12px; }
-        canvas { width: 100%; height: 200px; display: block; }
-
         /* State badge */
-        .state-badge { display: inline-block; padding: 5px 16px; border-radius: 4px; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
-        .state-NORMAL { background: #0a2a0a; color: #00ff88; border: 1px solid #00ff88; }
-        .state-DRIFT { background: #2a2a0a; color: #ffaa00; border: 1px solid #ffaa00; }
-        .state-WARNING { background: #2a1a0a; color: #ff8800; border: 1px solid #ff8800; }
-        .state-FAULT { background: #2a0a0a; color: #ff4444; border: 1px solid #ff4444; }
-        .state-EMERGENCY { background: #3a0a0a; color: #ff0000; border: 1px solid #ff0000; animation: pulse 0.5s infinite; }
-        .state-UNKNOWN { background: #111; color: #444; border: 1px solid #333; }
+        .state { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 4px; letter-spacing: 0.5px; }
+        .state-NORMAL { background: #0d2818; color: #40c057; border: 1px solid #1a4d2e; }
+        .state-DRIFT { background: #2d2305; color: #fab005; border: 1px solid #4d3b0a; }
+        .state-WARNING { background: #2d1a05; color: #fd7e14; border: 1px solid #4d2e0a; }
+        .state-FAULT { background: #2d0a0a; color: #fa5252; border: 1px solid #4d1515; }
+        .state-EMERGENCY { background: #2d0a0a; color: #ff0000; border: 1px solid #660000; animation: pulse 0.5s infinite; }
+        .state-UNKNOWN { background: #1a1f26; color: #6b7280; border: 1px solid #2d333b; }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
         /* Production stats */
-        .prod-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 4px; }
-        .prod-stat { text-align: center; }
-        .prod-stat .num { font-size: 28px; font-weight: bold; line-height: 1.2; }
-        .prod-stat .label { font-size: 9px; color: #555; text-transform: uppercase; }
+        .prod-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; }
+        .prod-item { text-align: center; padding: 8px; background: #141920; border-radius: 4px; }
+        .prod-item .num { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600; }
+        .prod-item .lbl { font-size: 9px; color: #6b7280; text-transform: uppercase; margin-top: 2px; }
 
-        /* Circular gauge */
-        .gauge { width: 60px; height: 60px; position: relative; display: inline-block; }
-        .gauge svg { transform: rotate(-90deg); }
-        .gauge .value-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
+        /* Power flow canvas */
+        .flow-canvas { width: 100%; height: 280px; display: block; }
 
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } .wide { grid-column: span 1; } .chart-container { grid-column: 1 / -1; } }
+        /* Charts */
+        .chart-wrap { grid-column: span 2; background: #0f1318; border: 1px solid #1a1f26; border-radius: 6px; padding: 14px; }
+        .chart-wrap h3 { font-size: 10px; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+        .chart-legend { font-size: 10px; color: #6b7280; margin-bottom: 6px; display: flex; gap: 16px; }
+        .chart-legend .dot { width: 8px; height: 3px; border-radius: 1px; display: inline-block; margin-right: 4px; vertical-align: middle; }
+        .chart-canvas { width: 100%; height: 180px; display: block; }
+
+        @media (max-width: 1000px) {
+            .grid { grid-template-columns: 1fr 1fr; }
+            .wide { grid-column: span 1; }
+            .chart-wrap { grid-column: 1 / -1; }
+        }
     </style>
 </head>
 <body>
+    <!-- Header -->
     <div class="header">
-        <h1>GridBox — Live Dashboard</h1>
-        <div class="subtitle">Smart Infrastructure Control System</div>
-        <div class="conn lost" id="conn">Waiting for data...</div>
+        <div class="header-left">
+            <h1>GridBox</h1>
+            <span class="tag">SCADA</span>
+            <span class="tag">LIVE</span>
+        </div>
+        <div class="header-right">
+            <span><span class="conn-dot lost" id="conn-dot"></span><span id="conn-text">Offline</span></span>
+            <span style="color: #6b7280;">Mode: <span id="mode" class="c-blue">--</span></span>
+        </div>
     </div>
 
     <div class="grid">
-        <!-- Row 1: State + Voltage + Efficiency -->
+        <!-- Row 1: System State + Bus + Efficiency -->
         <div class="card wide">
-            <h3>System State</h3>
-            <span class="state-badge state-UNKNOWN" id="state-badge">UNKNOWN</span>
-            <span style="margin-left: 12px; font-size: 11px; color: #444;">Mode: <span id="mode" class="green">--</span></span>
+            <div class="card-header"><h3>System State</h3></div>
+            <span class="state state-UNKNOWN" id="state-badge">UNKNOWN</span>
         </div>
         <div class="card">
-            <h3>Bus Voltage</h3>
-            <div class="value green" id="bus-v">--</div>
-            <div class="unit">volts</div>
-            <div class="bar-thick">
-                <div class="fill fill-green" id="bus-bar" style="width: 0%"></div>
-                <div class="label" id="bus-bar-label">0%</div>
-            </div>
+            <div class="card-header"><h3>Bus Voltage</h3><span class="badge badge-green" id="bus-badge">OK</span></div>
+            <div class="metric"><span class="val c-green" id="bus-v">--</span><span class="unit">V</span></div>
+            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="bus-bar" style="width:0%"></div></div></div>
         </div>
         <div class="card">
-            <h3>Efficiency</h3>
-            <div class="value green" id="efficiency">--</div>
-            <div class="unit">percent saved</div>
-            <div class="bar-thick">
-                <div class="fill fill-green" id="eff-bar" style="width: 0%"></div>
-                <div class="label" id="eff-bar-label">0%</div>
-            </div>
+            <div class="card-header"><h3>Efficiency</h3></div>
+            <div class="metric"><span class="val c-green" id="efficiency">--</span><span class="unit">%</span></div>
+            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="eff-bar" style="width:0%"></div></div></div>
         </div>
 
         <!-- Row 2: Motors + Power + IMU -->
         <div class="card">
-            <h3>Motor 1 — Fan</h3>
-            <div class="value green" id="m1-current">--</div>
-            <div class="unit">mA &nbsp; <span id="m1-power">--</span>W &nbsp; speed: <span id="m1-speed" class="green">--</span>%</div>
-            <div class="bar-thick">
-                <div class="fill fill-blue" id="m1-bar" style="width: 0%"></div>
-                <div class="label" id="m1-bar-label">0 mA / 800 mA</div>
-            </div>
+            <div class="card-header"><h3>Motor 1 — Fan</h3><span class="badge badge-green" id="m1-badge">ON</span></div>
+            <div class="metric"><span class="val c-green" id="m1-current">--</span><span class="unit">mA</span></div>
+            <div class="sub-metrics"><span id="m1-power">--</span><span>W</span><span style="margin-left:8px">Speed:</span><span id="m1-speed" class="c-blue">--</span><span>%</span></div>
+            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-blue" id="m1-bar" style="width:0%"></div></div></div>
         </div>
         <div class="card">
-            <h3>Motor 2 — Conveyor</h3>
-            <div class="value green" id="m2-current">--</div>
-            <div class="unit">mA &nbsp; <span id="m2-power">--</span>W &nbsp; speed: <span id="m2-speed" class="green">--</span>%</div>
-            <div class="bar-thick">
-                <div class="fill fill-blue" id="m2-bar" style="width: 0%"></div>
-                <div class="label" id="m2-bar-label">0 mA / 800 mA</div>
-            </div>
+            <div class="card-header"><h3>Motor 2 — Conveyor</h3><span class="badge badge-green" id="m2-badge">ON</span></div>
+            <div class="metric"><span class="val c-green" id="m2-current">--</span><span class="unit">mA</span></div>
+            <div class="sub-metrics"><span id="m2-power">--</span><span>W</span><span style="margin-left:8px">Speed:</span><span id="m2-speed" class="c-blue">--</span><span>%</span></div>
+            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-blue" id="m2-bar" style="width:0%"></div></div></div>
         </div>
         <div class="card">
-            <h3>Total Power</h3>
-            <div class="value green" id="total-w">--</div>
-            <div class="unit">watts</div>
-            <div class="bar-thick">
-                <div class="fill fill-green" id="power-bar" style="width: 0%"></div>
-                <div class="label" id="power-bar-label">0W / 12W</div>
-            </div>
+            <div class="card-header"><h3>Total Power</h3></div>
+            <div class="metric"><span class="val c-green" id="total-w">--</span><span class="unit">W</span></div>
+            <div class="sub-metrics"><span style="color:#6b7280">Budget: 12W</span></div>
+            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="power-bar" style="width:0%"></div></div></div>
         </div>
         <div class="card">
-            <h3>IMU Vibration</h3>
-            <div class="value green" id="imu-rms">--</div>
-            <div class="unit">g RMS &nbsp; <span id="imu-status">--</span></div>
-            <div class="bar-thick">
-                <div class="fill fill-green" id="imu-bar" style="width: 0%"></div>
-                <div class="label" id="imu-bar-label">0g — HEALTHY</div>
+            <div class="card-header"><h3>IMU Vibration</h3><span class="badge badge-green" id="imu-badge">HEALTHY</span></div>
+            <div class="metric"><span class="val c-green" id="imu-rms">--</span><span class="unit">g</span></div>
+            <div class="sub-metrics"><span id="imu-status">--</span></div>
+            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="imu-bar" style="width:0%"></div></div></div>
+        </div>
+
+        <!-- Row 3: Production -->
+        <div class="card full">
+            <div class="card-header"><h3>Production Line</h3><span class="badge badge-green" id="prod-badge">RUNNING</span></div>
+            <div class="prod-row">
+                <div class="prod-item"><div class="num c-white" id="total-items">0</div><div class="lbl">Total Sorted</div></div>
+                <div class="prod-item"><div class="num c-green" id="passed">0</div><div class="lbl">Passed</div></div>
+                <div class="prod-item"><div class="num c-red" id="rejected">0</div><div class="lbl">Rejected</div></div>
+                <div class="prod-item"><div class="num c-yellow" id="reject-rate">0</div><div class="lbl">Reject Rate %</div></div>
             </div>
         </div>
 
-        <!-- Row 3: Production + ES + Faults -->
+        <!-- Row 4: ES + Faults -->
         <div class="card wide">
-            <h3>Production</h3>
-            <div class="prod-stats">
-                <div class="prod-stat"><div class="num green" id="total-items">0</div><div class="label">Total</div></div>
-                <div class="prod-stat"><div class="num green" id="passed">0</div><div class="label">Passed</div></div>
-                <div class="prod-stat"><div class="num red" id="rejected">0</div><div class="label">Rejected</div></div>
-            </div>
-            <div class="unit" style="margin-top: 6px;">Reject rate: <span id="reject-rate" class="yellow">0</span>%</div>
+            <div class="card-header"><h3>Energy Signature</h3><span class="badge badge-green" id="es-badge">HEALTHY</span></div>
+            <div class="metric"><span class="val c-green" id="es-score">--</span><span class="unit">divergence</span></div>
+            <div class="progress"><div class="progress-bar"><div class="progress-fill bg-green" id="es-bar" style="width:0%"></div></div></div>
         </div>
         <div class="card">
-            <h3>Energy Signature</h3>
-            <div class="value green" id="es-score">--</div>
-            <div class="unit">divergence score</div>
-            <div class="bar-thick">
-                <div class="fill fill-green" id="es-bar" style="width: 0%"></div>
-                <div class="label" id="es-bar-label">healthy</div>
-            </div>
+            <div class="card-header"><h3>Faults Today</h3></div>
+            <div class="metric"><span class="val c-green" id="faults">0</span><span class="unit">events</span></div>
         </div>
         <div class="card">
-            <h3>Faults Today</h3>
-            <div class="value green" id="faults">0</div>
-            <div class="unit">fault events</div>
+            <div class="card-header"><h3>Uptime</h3></div>
+            <div class="metric"><span class="val c-blue" id="uptime">0</span><span class="unit">sec</span></div>
         </div>
 
-        <!-- Charts - side by side, bigger -->
-        <div class="chart-container">
-            <h3>Power Consumption (60s)</h3>
-            <div class="legend"><span class="green">-- Total Power (W)</span></div>
-            <canvas id="power-chart"></canvas>
+        <!-- Power Flow Diagram -->
+        <div class="card full">
+            <div class="card-header"><h3>Power Flow Diagram</h3><span class="tag">LIVE</span></div>
+            <canvas class="flow-canvas" id="power-flow"></canvas>
         </div>
-        <div class="chart-container">
-            <h3>Motor Current (60s)</h3>
-            <div class="legend"><span class="green">-- Motor 1</span> <span class="blue">-- Motor 2</span></div>
-            <canvas id="current-chart"></canvas>
+
+        <!-- Charts -->
+        <div class="chart-wrap">
+            <h3>Power Consumption</h3>
+            <div class="chart-legend"><span><span class="dot bg-green"></span>Total (W)</span></div>
+            <canvas class="chart-canvas" id="power-chart"></canvas>
+        </div>
+        <div class="chart-wrap">
+            <h3>Motor Current</h3>
+            <div class="chart-legend"><span><span class="dot bg-green"></span>Motor 1</span><span><span class="dot bg-blue"></span>Motor 2</span></div>
+            <canvas class="chart-canvas" id="current-chart"></canvas>
         </div>
     </div>
 
     <script>
-        const MODES = ['IDLE', 'NORMAL', 'DUMB', 'MANUAL', 'CALIBRATE', 'LEARNING', 'EMERGENCY'];
-        const MAX_POINTS = 300;
-        const powerHistory = [], m1History = [], m2History = [];
+        const MODES = ['IDLE','NORMAL','DUMB','MANUAL','CALIBRATE','LEARNING','EMERGENCY'];
+        const MAX_PTS = 300;
+        const pH = [], m1H = [], m2H = [];
+        let startTime = Date.now();
 
-        function barColor(value, warn, crit) {
-            if (value >= crit) return ['fill-red', 'red'];
-            if (value >= warn) return ['fill-yellow', 'yellow'];
-            return ['fill-green', 'green'];
-        }
-
-        function setBar(barId, labelId, pct, labelText, fillClass) {
-            const bar = document.getElementById(barId);
-            const label = document.getElementById(labelId);
-            bar.style.width = Math.min(Math.max(pct, 0), 100) + '%';
-            bar.className = 'fill ' + fillClass;
-            if (label) label.textContent = labelText;
-        }
-
-        function setValueColor(el, value, warnAt, critAt) {
-            el.className = 'value ' + (value >= critAt ? 'red' : value >= warnAt ? 'yellow' : 'green');
-        }
+        function cClass(v, w, c) { return v >= c ? 'c-red' : v >= w ? 'c-yellow' : 'c-green'; }
+        function bgClass(v, w, c) { return v >= c ? 'bg-red' : v >= w ? 'bg-yellow' : 'bg-green'; }
+        function badgeClass(v, w, c) { return v >= c ? 'badge-red' : v >= w ? 'badge-yellow' : 'badge-green'; }
 
         function drawChart(canvas, datasets, maxY, colors) {
             const ctx = canvas.getContext('2d');
             const w = canvas.width, h = canvas.height;
-            ctx.clearRect(0, 0, w, h);
+            ctx.clearRect(0,0,w,h);
+            ctx.strokeStyle='#1a1f26'; ctx.lineWidth=0.5;
+            for(let i=0;i<=4;i++){const y=h*i/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+                ctx.fillStyle='#333';ctx.font='9px Inter';ctx.fillText((maxY*(4-i)/4).toFixed(0),4,y+10);}
+            datasets.forEach((data,di)=>{if(data.length<2)return;
+                ctx.strokeStyle=colors[di];ctx.lineWidth=1.5;ctx.beginPath();
+                data.forEach((v,i)=>{const x=i/(MAX_PTS-1)*w,y=h-Math.min(v,maxY)/maxY*h;
+                    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+                ctx.globalAlpha=0.03;ctx.fillStyle=colors[di];ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();ctx.fill();ctx.globalAlpha=1;});
+        }
 
-            // Grid lines
-            ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 0.5;
-            for (let i = 0; i <= 4; i++) {
-                const y = h * i / 4;
-                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-                // Y-axis labels
-                ctx.fillStyle = '#333'; ctx.font = '9px monospace';
-                ctx.fillText((maxY * (4-i) / 4).toFixed(0), 2, y + 10);
+        function drawPowerFlow(canvas, d) {
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width, h = canvas.height;
+            ctx.clearRect(0,0,w,h);
+
+            const m1On = (d.m1_speed||0) > 0, m2On = (d.m2_speed||0) > 0;
+            const state = d.state || 'UNKNOWN';
+            const busV = (d.bus_v||0).toFixed(1);
+            const m1mA = (d.m1_mA||0).toFixed(0);
+            const m2mA = (d.m2_mA||0).toFixed(0);
+            const m1spd = d.m1_speed||0;
+            const m2spd = d.m2_speed||0;
+
+            function box(x,y,bw,bh,label,sub,active,color) {
+                ctx.fillStyle = active ? '#141920' : '#0d0f12';
+                ctx.strokeStyle = active ? color : '#2d333b';
+                ctx.lineWidth = active ? 2 : 1;
+                ctx.beginPath(); ctx.roundRect(x,y,bw,bh,6); ctx.fill(); ctx.stroke();
+                ctx.fillStyle = active ? '#e0e0e0' : '#555';
+                ctx.font = '600 11px Inter'; ctx.fillText(label, x+8, y+18);
+                if (sub) { ctx.font = '400 10px "JetBrains Mono"'; ctx.fillStyle = active ? color : '#555'; ctx.fillText(sub, x+8, y+34); }
+                if (active) { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x+bw-12, y+12, 4, 0, Math.PI*2); ctx.fill(); }
             }
 
-            // Data lines
-            datasets.forEach((data, di) => {
-                if (data.length < 2) return;
-                ctx.strokeStyle = colors[di];
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                data.forEach((v, i) => {
-                    const x = (i / (MAX_POINTS - 1)) * w;
-                    const y = h - (Math.min(v, maxY) / maxY) * h;
-                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-                });
-                ctx.stroke();
+            function wire(x1,y1,x2,y2,active,color) {
+                ctx.strokeStyle = active ? color : '#2d333b';
+                ctx.lineWidth = active ? 2 : 1;
+                ctx.setLineDash(active ? [] : [4,4]);
+                ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+                ctx.setLineDash([]);
+                if (active) {
+                    const t = (Date.now() % 2000) / 2000;
+                    const px = x1 + (x2-x1)*t, py = y1 + (y2-y1)*t;
+                    ctx.fillStyle = color; ctx.beginPath(); ctx.arc(px,py,3,0,Math.PI*2); ctx.fill();
+                }
+            }
 
-                // Fill under line (subtle)
-                ctx.globalAlpha = 0.05;
-                ctx.fillStyle = colors[di];
-                ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
-                ctx.globalAlpha = 1;
-            });
+            function wireL(points, active, color) {
+                ctx.strokeStyle = active ? color : '#2d333b';
+                ctx.lineWidth = active ? 2 : 1;
+                ctx.setLineDash(active ? [] : [4,4]);
+                ctx.beginPath(); ctx.moveTo(points[0][0],points[0][1]);
+                for(let i=1;i<points.length;i++) ctx.lineTo(points[i][0],points[i][1]);
+                ctx.stroke(); ctx.setLineDash([]);
+                if (active) {
+                    const t = (Date.now() % 2000) / 2000;
+                    const seg = Math.floor(t * (points.length-1));
+                    const st = t * (points.length-1) - seg;
+                    if (seg < points.length-1) {
+                        const px = points[seg][0]+(points[seg+1][0]-points[seg][0])*st;
+                        const py = points[seg][1]+(points[seg+1][1]-points[seg][1])*st;
+                        ctx.fillStyle=color; ctx.beginPath(); ctx.arc(px,py,3,0,Math.PI*2); ctx.fill();
+                    }
+                }
+            }
+
+            const cx = w/2, bw = 120, bh = 44, gap = 20;
+
+            // PSU
+            box(20, h/2-bh/2, bw, bh, '12V PSU', busV+'V input', true, '#4dabf7');
+
+            // Buck converter
+            box(20+bw+gap*2, h/2-bh-gap/2, bw, bh, 'Buck → 5V', 'Logic power', true, '#40c057');
+
+            // Buck-boost
+            box(20+bw+gap*2, h/2+gap/2, bw, bh, 'Boost → 6-9V', 'Motor power', true, '#fab005');
+
+            // Motor 1
+            box(20+(bw+gap*2)*2, h/2-bh*2-gap, bw, bh, 'Motor 1: Fan', m1mA+'mA '+m1spd+'%', m1On, '#40c057');
+
+            // Motor 2
+            box(20+(bw+gap*2)*2, h/2-bh/2, bw, bh, 'Motor 2: Conv', m2mA+'mA '+m2spd+'%', m2On, '#4dabf7');
+
+            // Servo 1
+            box(20+(bw+gap*2)*2, h/2+bh/2+gap, bw/1.2, bh*0.8, 'Servo 1', 'Valve', true, '#be4bdb');
+
+            // Servo 2
+            box(20+(bw+gap*2)*2+bw/1.2+10, h/2+bh/2+gap, bw/1.2, bh*0.8, 'Servo 2', 'Gate', true, '#be4bdb');
+
+            // LEDs
+            const ledOn = state !== 'FAULT';
+            box(w-bw-20, h/2-bh-gap/2, bw, bh, 'LED Status', state, true, state==='FAULT'?'#fa5252':'#40c057');
+
+            // OLED
+            box(w-bw-20, h/2+gap/2, bw, bh, 'SCADA (Pico B)', 'Wireless', true, '#4dabf7');
+
+            // Wires — PSU to converters
+            wire(20+bw, h/2, 20+bw+gap*2, h/2-gap/2-bh/2+bh/2, true, '#4dabf7');
+            wire(20+bw, h/2, 20+bw+gap*2, h/2+gap/2+bh/2, true, '#fab005');
+
+            // Buck to Motor 1
+            wireL([[20+bw*2+gap*2, h/2-bh-gap/2+bh/2], [20+bw*2+gap*3, h/2-bh-gap/2+bh/2], [20+bw*2+gap*3, h/2-bh*2-gap+bh/2], [20+(bw+gap*2)*2, h/2-bh*2-gap+bh/2]], m1On, '#40c057');
+
+            // Boost to Motor 2
+            wire(20+bw*2+gap*2, h/2+gap/2+bh/2, 20+(bw+gap*2)*2, h/2, m2On, '#4dabf7');
+
+            // Buck to LEDs
+            wireL([[20+bw*2+gap*2, h/2-bh-gap/2+bh*0.8], [w-bw-20-gap, h/2-bh-gap/2+bh*0.8], [w-bw-20, h/2-gap/2]], ledOn, '#40c057');
+
+            // Wireless link (dashed)
+            ctx.strokeStyle = '#4dabf7'; ctx.lineWidth = 1; ctx.setLineDash([3,6]);
+            ctx.beginPath();
+            const nrfX = 20+(bw+gap*2)*2+bw/2, nrfY = h/2-bh*2-gap-10;
+            ctx.moveTo(nrfX, h/2+bh); ctx.lineTo(w-bw-20, h/2+gap/2+bh/2);
+            ctx.stroke(); ctx.setLineDash([]);
+            ctx.fillStyle='#4dabf7'; ctx.font='9px Inter'; ctx.fillText('nRF24L01+ wireless', (nrfX+w-bw-20)/2-40, h/2+bh+20);
         }
 
         async function update() {
             try {
                 const res = await fetch('/api/latest');
                 const d = await res.json();
-                if (!d || !d.timestamp) {
-                    document.getElementById('conn').textContent = 'No data';
-                    document.getElementById('conn').className = 'conn lost';
-                    return;
-                }
+                if (!d||!d.timestamp){document.getElementById('conn-dot').className='conn-dot lost';document.getElementById('conn-text').textContent='Offline';return;}
 
-                // Connection
-                const age = (Date.now() - new Date(d.timestamp).getTime()) / 1000;
-                const connEl = document.getElementById('conn');
-                if (age < 5) { connEl.textContent = `Connected (${age.toFixed(1)}s ago)`; connEl.className = 'conn ok'; }
-                else { connEl.textContent = `Stale (${age.toFixed(0)}s ago)`; connEl.className = 'conn warn'; }
+                const age=(Date.now()-new Date(d.timestamp).getTime())/1000;
+                document.getElementById('conn-dot').className='conn-dot '+(age<5?'ok':'lost');
+                document.getElementById('conn-text').textContent=age<5?'Online':'Stale ('+age.toFixed(0)+'s)';
+                document.getElementById('mode').textContent=MODES[d.mode]||'?';
 
                 // State
-                const state = d.state || 'UNKNOWN';
-                const badge = document.getElementById('state-badge');
-                badge.textContent = state; badge.className = 'state-badge state-' + state;
-                document.getElementById('mode').textContent = MODES[d.mode] || '?';
+                const st=d.state||'UNKNOWN';
+                const sb=document.getElementById('state-badge');sb.textContent=st;sb.className='state state-'+st;
 
-                // Bus voltage
-                const busV = d.bus_v || 0;
-                document.getElementById('bus-v').textContent = busV.toFixed(2);
-                setValueColor(document.getElementById('bus-v'), 6-busV, 1.5, 2.5);
-                const busPct = Math.min(busV / 6 * 100, 100);
-                const [busFill] = barColor(6-busV, 1.5, 2.5);
-                setBar('bus-bar', 'bus-bar-label', busPct, busV.toFixed(1) + 'V / 6.0V', busFill);
+                // Bus
+                const bv=d.bus_v||0;
+                document.getElementById('bus-v').textContent=bv.toFixed(2);
+                document.getElementById('bus-v').className='val '+cClass(6-bv,1.5,2.5);
+                document.getElementById('bus-bar').style.width=Math.min(bv/6*100,100)+'%';
+                document.getElementById('bus-bar').className='progress-fill '+bgClass(6-bv,1.5,2.5);
+                const bb=document.getElementById('bus-badge');bb.textContent=bv>4.2?'OK':bv>3.8?'LOW':'CRITICAL';bb.className='badge '+badgeClass(6-bv,1.5,2.5);
 
                 // Efficiency
-                const eff = d.efficiency || 0;
-                document.getElementById('efficiency').textContent = eff.toFixed(0);
-                setBar('eff-bar', 'eff-bar-label', eff, eff.toFixed(0) + '% efficient', 'fill-green');
+                const ef=d.efficiency||0;
+                document.getElementById('efficiency').textContent=ef.toFixed(0);
+                document.getElementById('eff-bar').style.width=Math.min(ef,100)+'%';
 
                 // Motor 1
-                const m1 = d.m1_mA || 0;
-                document.getElementById('m1-current').textContent = m1.toFixed(0);
-                document.getElementById('m1-power').textContent = (d.m1_W || 0).toFixed(2);
-                document.getElementById('m1-speed').textContent = d.m1_speed || 0;
-                setValueColor(document.getElementById('m1-current'), m1, 600, 800);
-                const [m1Fill] = barColor(m1, 600, 800);
-                setBar('m1-bar', 'm1-bar-label', m1/800*100, m1.toFixed(0) + ' mA / 800 mA', m1Fill);
+                const m1=d.m1_mA||0;
+                document.getElementById('m1-current').textContent=m1.toFixed(0);document.getElementById('m1-current').className='val '+cClass(m1,600,800);
+                document.getElementById('m1-power').textContent=(d.m1_W||0).toFixed(2);
+                document.getElementById('m1-speed').textContent=d.m1_speed||0;
+                document.getElementById('m1-bar').style.width=Math.min(m1/800*100,100)+'%';document.getElementById('m1-bar').className='progress-fill '+bgClass(m1,600,800);
+                const m1b=document.getElementById('m1-badge');m1b.textContent=(d.m1_speed||0)>0?'ON':'OFF';m1b.className='badge '+((d.m1_speed||0)>0?'badge-green':'badge-red');
 
                 // Motor 2
-                const m2 = d.m2_mA || 0;
-                document.getElementById('m2-current').textContent = m2.toFixed(0);
-                document.getElementById('m2-power').textContent = (d.m2_W || 0).toFixed(2);
-                document.getElementById('m2-speed').textContent = d.m2_speed || 0;
-                setValueColor(document.getElementById('m2-current'), m2, 600, 800);
-                const [m2Fill] = barColor(m2, 600, 800);
-                setBar('m2-bar', 'm2-bar-label', m2/800*100, m2.toFixed(0) + ' mA / 800 mA', m2Fill);
+                const m2=d.m2_mA||0;
+                document.getElementById('m2-current').textContent=m2.toFixed(0);document.getElementById('m2-current').className='val '+cClass(m2,600,800);
+                document.getElementById('m2-power').textContent=(d.m2_W||0).toFixed(2);
+                document.getElementById('m2-speed').textContent=d.m2_speed||0;
+                document.getElementById('m2-bar').style.width=Math.min(m2/800*100,100)+'%';document.getElementById('m2-bar').className='progress-fill '+bgClass(m2,600,800);
+                const m2b=document.getElementById('m2-badge');m2b.textContent=(d.m2_speed||0)>0?'ON':'OFF';m2b.className='badge '+((d.m2_speed||0)>0?'badge-green':'badge-red');
 
                 // Total power
-                const totalW = d.total_W || 0;
-                document.getElementById('total-w').textContent = totalW.toFixed(2);
-                setValueColor(document.getElementById('total-w'), totalW, 6, 10);
-                const [pwrFill] = barColor(totalW, 6, 10);
-                setBar('power-bar', 'power-bar-label', totalW/12*100, totalW.toFixed(1) + 'W / 12W budget', pwrFill);
+                const tw=d.total_W||0;
+                document.getElementById('total-w').textContent=tw.toFixed(2);document.getElementById('total-w').className='val '+cClass(tw,6,10);
+                document.getElementById('power-bar').style.width=Math.min(tw/12*100,100)+'%';document.getElementById('power-bar').className='progress-fill '+bgClass(tw,6,10);
 
                 // IMU
-                const imu = d.imu_rms || 0;
-                const imuSt = d.imu_status || '--';
-                document.getElementById('imu-rms').textContent = imu.toFixed(2);
-                document.getElementById('imu-status').textContent = imuSt;
-                setValueColor(document.getElementById('imu-rms'), imu, 1, 2);
-                const [imuFill] = barColor(imu, 1, 2);
-                setBar('imu-bar', 'imu-bar-label', imu/3*100, imu.toFixed(2) + 'g — ' + imuSt, imuFill);
+                const ir=d.imu_rms||0;
+                document.getElementById('imu-rms').textContent=ir.toFixed(2);document.getElementById('imu-rms').className='val '+cClass(ir,1,2);
+                document.getElementById('imu-status').textContent=d.imu_status||'--';
+                document.getElementById('imu-bar').style.width=Math.min(ir/3*100,100)+'%';document.getElementById('imu-bar').className='progress-fill '+bgClass(ir,1,2);
+                const ib=document.getElementById('imu-badge');ib.textContent=ir<1?'HEALTHY':ir<2?'WARNING':'FAULT';ib.className='badge '+badgeClass(ir,1,2);
 
                 // Production
-                document.getElementById('total-items').textContent = d.total_items || 0;
-                document.getElementById('passed').textContent = d.passed || 0;
-                document.getElementById('rejected').textContent = d.rejected || 0;
-                document.getElementById('reject-rate').textContent = (d.reject_rate || 0).toFixed(1);
+                document.getElementById('total-items').textContent=d.total_items||0;
+                document.getElementById('passed').textContent=d.passed||0;
+                document.getElementById('rejected').textContent=d.rejected||0;
+                document.getElementById('reject-rate').textContent=(d.reject_rate||0).toFixed(1);
 
-                // Energy signature
-                const es = d.es_score || 0;
-                document.getElementById('es-score').textContent = es.toFixed(3);
-                setValueColor(document.getElementById('es-score'), es, 0.3, 0.5);
-                const [esFill] = barColor(es, 0.3, 0.5);
-                const esLabel = es < 0.15 ? 'healthy' : es < 0.5 ? 'drift detected' : 'FAULT';
-                setBar('es-bar', 'es-bar-label', es*100, esLabel, esFill);
+                // ES
+                const es=d.es_score||0;
+                document.getElementById('es-score').textContent=es.toFixed(3);document.getElementById('es-score').className='val '+cClass(es,0.3,0.5);
+                document.getElementById('es-bar').style.width=Math.min(es*100,100)+'%';document.getElementById('es-bar').className='progress-fill '+bgClass(es,0.3,0.5);
+                const eb=document.getElementById('es-badge');eb.textContent=es<0.15?'HEALTHY':es<0.5?'DRIFT':'FAULT';eb.className='badge '+badgeClass(es,0.3,0.5);
 
                 // Faults
-                const faults = d.faults_today || 0;
-                document.getElementById('faults').textContent = faults;
-                setValueColor(document.getElementById('faults'), faults, 1, 3);
+                const ft=d.faults_today||0;
+                document.getElementById('faults').textContent=ft;document.getElementById('faults').className='val '+cClass(ft,1,3);
 
-                // Chart histories
-                powerHistory.push(totalW); m1History.push(m1); m2History.push(m2);
-                if (powerHistory.length > MAX_POINTS) powerHistory.shift();
-                if (m1History.length > MAX_POINTS) m1History.shift();
-                if (m2History.length > MAX_POINTS) m2History.shift();
+                // Uptime
+                document.getElementById('uptime').textContent=Math.floor((Date.now()-startTime)/1000);
 
-                // Draw charts
-                const pc = document.getElementById('power-chart');
-                pc.width = pc.offsetWidth; pc.height = 200;
-                drawChart(pc, [powerHistory], 12, ['#00ff88']);
+                // Charts
+                pH.push(tw);m1H.push(m1);m2H.push(m2);
+                if(pH.length>MAX_PTS)pH.shift();if(m1H.length>MAX_PTS)m1H.shift();if(m2H.length>MAX_PTS)m2H.shift();
+                const pc=document.getElementById('power-chart');pc.width=pc.offsetWidth;pc.height=180;drawChart(pc,[pH],12,['#40c057']);
+                const cc=document.getElementById('current-chart');cc.width=cc.offsetWidth;cc.height=180;drawChart(cc,[m1H,m2H],800,['#40c057','#4dabf7']);
 
-                const cc = document.getElementById('current-chart');
-                cc.width = cc.offsetWidth; cc.height = 200;
-                drawChart(cc, [m1History, m2History], 800, ['#00ff88', '#00aaff']);
+                // Power flow diagram
+                const pf=document.getElementById('power-flow');pf.width=pf.offsetWidth;pf.height=280;drawPowerFlow(pf,d);
 
-            } catch (e) {
-                document.getElementById('conn').textContent = 'Server error';
-                document.getElementById('conn').className = 'conn lost';
-            }
+            } catch(e) { document.getElementById('conn-dot').className='conn-dot lost'; document.getElementById('conn-text').textContent='Error'; }
         }
 
-        setInterval(update, 200);
+        setInterval(update,200);
         update();
     </script>
 </body>
