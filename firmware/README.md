@@ -5,7 +5,7 @@ Each version is a **complete snapshot** you can flash directly onto the Picos. P
 | Version | Date | Status | Key Features |
 |---|---|---|---|
 | [`01-v1/`](01-v1/) | 2026-03-21 | Code complete, untested | Full feature set: 13 master + 7 slave modules, wireless, IMU, sorting, OLED dashboard |
-| `02-v2/` | — | Planned | Multi-type datagram, self-test, LED blink codes, dumb-vs-smart comparison |
+| [`02-v2/`](02-v2/) | 2026-03-21 | Code complete, untested | Multi-type datagram (6 packets), self-test + blink codes, dumb-vs-smart A/B, error handling hardened |
 | `03-v3/` | — | Planned | Bug fixes from hardware testing, calibrated thresholds |
 | `04-demo/` | — | Planned | Final demo version — polished, tuned, rehearsed |
 
