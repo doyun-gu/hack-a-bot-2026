@@ -621,6 +621,70 @@ graph LR
 
 ---
 
+## Core Innovation: Pico as Smart Power Router
+
+The Pico doesn't just monitor the grid — **it IS the grid's switching fabric.** GPIO pins control transistors that physically route power. ADC pins sense current at every branch. The controller and the grid are the same device.
+
+### Energy Recycling Loop
+
+```mermaid
+flowchart LR
+    SENSE["SENSE<br/>ADC reads current<br/>at every branch"] --> CALC["CALCULATE<br/>Who's using power?<br/>Who's wasting it?<br/>How much excess?"]
+    CALC --> DECIDE["DECIDE<br/>Redirect excess to:<br/>• Under-powered branch<br/>• Capacitor storage<br/>• Reduce input demand"]
+    DECIDE --> ROUTE["ROUTE<br/>GPIO controls MOSFETs<br/>Physically switches<br/>power paths"]
+    ROUTE --> VERIFY["VERIFY<br/>ADC re-measures<br/>Utilization: 60% → 95%<br/>35% power recycled"]
+    VERIFY --> SENSE
+```
+
+### How GPIO Routes Power
+
+Each load connects through a MOSFET transistor controlled by a GPIO pin:
+
+| GPIO State | Transistor | Power Path | Result |
+|---|---|---|---|
+| HIGH (3.3V) | ON — conducts | Power flows to load | Motor runs |
+| LOW (0V) | OFF — blocks | Power cut from load | Motor stops |
+| PWM (variable) | Switching fast | Average power controlled | Variable speed |
+
+### Current Sensing (Per Branch)
+
+A sense resistor (1Ω from kit) in series with each load measures current via ADC:
+
+$$I_{branch} = \frac{V_{sense}}{R_{sense}}$$
+
+| Branch Current | Voltage on ADC (1Ω) | Meaning |
+|---|---|---|
+| 0.5A | 0.5V | Normal load |
+| 0A | 0V | Load off — power allocated but **wasted** → redirect it |
+| 1.0A+ | 1.0V+ | Overload — reduce PWM or disconnect |
+
+### Power Flow Dashboard (OLED)
+
+```
+POWER FLOW            [LIVE]
+
+INPUT:  5.0V  1.8A  9.0W
+├ Fan:   0.6A  3.0W  ██████░░
+├ Pump:  0.8A  4.0W  ████████░
+├ Valve: 0.1A  0.5W  █░░░░░░░
+├ LEDs:  0.2A  1.0W  ██░░░░░░
+└ RECYCLED: 0.5W → capacitor
+
+UTILIZATION:  94%  GRADE A
+```
+
+### Two-Pico Collaboration
+
+```mermaid
+graph LR
+    A["Pico A: Grid Controller"] -->|"telemetry:<br/>voltage, current,<br/>power per branch"| B["Pico B: SCADA"]
+    B -->|"commands:<br/>change priority,<br/>override switches,<br/>new thresholds"| A
+```
+
+Bidirectional wireless — Pico B isn't just a display. It sends **commands back** to Pico A: change priorities, override switches, set new thresholds. Real operator control.
+
+---
+
 ## EEE Theory Applied
 
 This project applies concepts from the EEE curriculum:
