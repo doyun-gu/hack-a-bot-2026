@@ -128,12 +128,18 @@ hack-a-bot-2026/
 ## Supported By
 
 <p align="center">
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="University of Manchester" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="30"/></a>
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="28"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="28"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="University of Manchester" height="28"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="28"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="28"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="28"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Amentum.svg" alt="Amentum" height="28"/></a>&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Dominos.svg" alt="Dominos" height="28"/></a>
+</p>
+
+<p align="center">
+  Also supported by: <strong>RoboSoc</strong> · <strong>Cradle</strong> · <strong>Google Developer Groups</strong> · <strong>UKRI</strong> · <strong>RAICo</strong> · <strong>Red Bull</strong>
 </p>
 
 <p align="center">
