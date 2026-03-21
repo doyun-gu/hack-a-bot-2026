@@ -46,10 +46,16 @@ class PCA9685:
         self.set_frequency(freq)
 
     def _read_reg(self, reg):
-        return self.i2c.readfrom_mem(self.addr, reg, 1)[0]
+        try:
+            return self.i2c.readfrom_mem(self.addr, reg, 1)[0]
+        except OSError:
+            return 0
 
     def _write_reg(self, reg, value):
-        self.i2c.writeto_mem(self.addr, reg, bytes([value]))
+        try:
+            self.i2c.writeto_mem(self.addr, reg, bytes([value]))
+        except OSError:
+            pass
 
     def set_frequency(self, freq_hz):
         """Set PWM frequency in Hz. Valid range: 24-1526 Hz."""
@@ -74,7 +80,10 @@ class PCA9685:
         """
         reg = LED0_ON_L + 4 * channel
         data = struct.pack('<HH', on & 0xFFF, off & 0xFFF)
-        self.i2c.writeto_mem(self.addr, reg, data)
+        try:
+            self.i2c.writeto_mem(self.addr, reg, data)
+        except OSError:
+            pass
 
     def set_duty(self, channel, duty_percent):
         """Set duty cycle 0-100% for a channel."""
@@ -110,19 +119,10 @@ class PCA9685:
     def all_off(self):
         """Turn off all 16 channels."""
         data = struct.pack('<HH', 0, 0)
-        self.i2c.writeto_mem(self.addr, ALL_LED_ON_L, data)
-
-    def set_frequency(self, freq_hz):
-        """Set PWM frequency in Hz."""
-        prescale = int(CLOCK_FREQ / (RESOLUTION * freq_hz) + 0.5) - 1
-        prescale = max(3, min(255, prescale))
-
-        old_mode = self._read_reg(MODE1)
-        self._write_reg(MODE1, (old_mode & ~RESTART) | SLEEP)
-        self._write_reg(PRE_SCALE, prescale)
-        self._write_reg(MODE1, old_mode)
-        time.sleep_us(500)
-        self._write_reg(MODE1, old_mode | RESTART)
+        try:
+            self.i2c.writeto_mem(self.addr, ALL_LED_ON_L, data)
+        except OSError:
+            pass
 
 
 if __name__ == "__main__":

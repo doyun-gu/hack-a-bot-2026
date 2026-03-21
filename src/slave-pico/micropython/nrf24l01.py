@@ -113,30 +113,46 @@ class NRF24L01:
 
     def _read_reg(self, reg):
         self._csn_low()
-        self.spi.readinto(self.buf1, R_REGISTER | reg)
-        self.spi.readinto(self.buf1)
-        self._csn_high()
+        try:
+            self.spi.readinto(self.buf1, R_REGISTER | reg)
+            self.spi.readinto(self.buf1)
+        except OSError:
+            self.buf1[0] = 0
+        finally:
+            self._csn_high()
         return self.buf1[0]
 
     def _write_reg(self, reg, value):
         self._csn_low()
-        self.spi.readinto(self.buf1, W_REGISTER | reg)
-        self.spi.readinto(self.buf1, value)
-        self._csn_high()
+        try:
+            self.spi.readinto(self.buf1, W_REGISTER | reg)
+            self.spi.readinto(self.buf1, value)
+        except OSError:
+            pass
+        finally:
+            self._csn_high()
 
     def _read_reg_bytes(self, reg, length):
-        self._csn_low()
-        self.spi.readinto(self.buf1, R_REGISTER | reg)
         buf = bytearray(length)
-        self.spi.readinto(buf)
-        self._csn_high()
+        self._csn_low()
+        try:
+            self.spi.readinto(self.buf1, R_REGISTER | reg)
+            self.spi.readinto(buf)
+        except OSError:
+            pass
+        finally:
+            self._csn_high()
         return buf
 
     def _write_reg_bytes(self, reg, data):
         self._csn_low()
-        self.spi.readinto(self.buf1, W_REGISTER | reg)
-        self.spi.write(data)
-        self._csn_high()
+        try:
+            self.spi.readinto(self.buf1, W_REGISTER | reg)
+            self.spi.write(data)
+        except OSError:
+            pass
+        finally:
+            self._csn_high()
 
     def set_channel(self, ch):
         """Set RF channel (0-125). Frequency = 2400 + ch MHz."""
@@ -184,9 +200,14 @@ class NRF24L01:
 
         # Write payload
         self._csn_low()
-        self.spi.readinto(self.buf1, W_TX_PAYLOAD)
-        self.spi.write(data)
-        self._csn_high()
+        try:
+            self.spi.readinto(self.buf1, W_TX_PAYLOAD)
+            self.spi.write(data)
+        except OSError:
+            self._csn_high()
+            return False
+        finally:
+            self._csn_high()
 
         # Pulse CE to transmit
         self.ce.value(1)

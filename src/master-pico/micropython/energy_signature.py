@@ -107,7 +107,6 @@ class EnergySignatureMonitor:
         self._score = 0.0
         self._is_anomaly = False
         self._learning = False
-        self._samples = []
 
     def _read_current_mA(self):
         """Read single ADC sample as current in mA."""

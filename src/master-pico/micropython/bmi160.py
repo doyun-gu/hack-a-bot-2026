@@ -116,13 +116,22 @@ class BMI160:
             return 0x0B   # 800Hz
 
     def _read_reg(self, reg):
-        return self.i2c.readfrom_mem(self.addr, reg, 1)[0]
+        try:
+            return self.i2c.readfrom_mem(self.addr, reg, 1)[0]
+        except OSError:
+            return 0
 
     def _read_reg_bytes(self, reg, length):
-        return self.i2c.readfrom_mem(self.addr, reg, length)
+        try:
+            return self.i2c.readfrom_mem(self.addr, reg, length)
+        except OSError:
+            return bytes(length)
 
     def _write_reg(self, reg, value):
-        self.i2c.writeto_mem(self.addr, reg, bytes([value]))
+        try:
+            self.i2c.writeto_mem(self.addr, reg, bytes([value]))
+        except OSError:
+            pass
 
     def who_am_i(self):
         """Read chip ID register. Should return 0xD1 for BMI160."""
