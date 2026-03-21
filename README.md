@@ -130,7 +130,3 @@ hack-a-bot-2026/
   <a href="https://www.eeesoc.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="40"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="The University of Manchester" height="40"/></a>
 </p>
-
-<p align="center">
-  <em>Hack-A-Bot 2026 — Project 6: Creative — University of Manchester</em>
-</p>
