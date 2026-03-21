@@ -7,130 +7,160 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'SF Mono', 'Fira Code', monospace; background: #0a0a0a; color: #00ff88; }
-        .header { padding: 20px; text-align: center; border-bottom: 1px solid #333; }
-        .header h1 { font-size: 24px; color: #00ff88; }
-        .header .subtitle { font-size: 12px; color: #666; margin-top: 4px; }
-        .header .conn { font-size: 12px; margin-top: 8px; }
+
+        .header { padding: 16px; text-align: center; border-bottom: 1px solid #222; }
+        .header h1 { font-size: 22px; color: #00ff88; }
+        .header .subtitle { font-size: 11px; color: #555; margin-top: 3px; }
+        .header .conn { font-size: 11px; margin-top: 6px; }
         .conn.ok { color: #00ff88; }
         .conn.lost { color: #ff4444; }
         .conn.warn { color: #ffaa00; }
 
-        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 16px; }
-        .card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 14px; }
-        .card h3 { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .card .value { font-size: 28px; font-weight: bold; }
-        .card .unit { font-size: 12px; color: #666; margin-top: 2px; }
-        .card .bar { height: 6px; background: #333; border-radius: 3px; margin-top: 8px; overflow: hidden; }
-        .card .bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 12px; }
+
+        .card { background: #111; border: 1px solid #222; border-radius: 6px; padding: 12px; position: relative; }
+        .card h3 { color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .card .value { font-size: 32px; font-weight: bold; line-height: 1; }
+        .card .unit { font-size: 11px; color: #444; margin-top: 4px; }
+
+        /* Thick progress bar with label */
+        .bar-thick { height: 14px; background: #1a1a1a; border-radius: 7px; margin-top: 8px; overflow: hidden; position: relative; border: 1px solid #222; }
+        .bar-thick .fill { height: 100%; border-radius: 7px; transition: width 0.3s ease; }
+        .bar-thick .label { position: absolute; top: 0; left: 0; right: 0; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #ccc; font-weight: bold; letter-spacing: 0.5px; }
 
         .green { color: #00ff88; }
         .yellow { color: #ffaa00; }
         .red { color: #ff4444; }
+        .blue { color: #00aaff; }
 
-        .bar-green { background: #00ff88; }
-        .bar-yellow { background: #ffaa00; }
-        .bar-red { background: #ff4444; }
+        .fill-green { background: linear-gradient(90deg, #00cc66, #00ff88); }
+        .fill-yellow { background: linear-gradient(90deg, #cc8800, #ffaa00); }
+        .fill-red { background: linear-gradient(90deg, #cc2222, #ff4444); }
+        .fill-blue { background: linear-gradient(90deg, #0066cc, #00aaff); }
 
         .wide { grid-column: span 2; }
         .full { grid-column: 1 / -1; }
 
-        .chart-container { grid-column: 1 / -1; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 14px; }
-        .chart-container h3 { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        canvas { width: 100%; height: 150px; display: block; }
+        /* Charts - bigger */
+        .chart-container { grid-column: span 2; background: #111; border: 1px solid #222; border-radius: 6px; padding: 12px; }
+        .chart-container h3 { color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .chart-container .legend { font-size: 9px; color: #555; margin-bottom: 4px; }
+        .chart-container .legend span { margin-right: 12px; }
+        canvas { width: 100%; height: 200px; display: block; }
 
-        .state-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 14px; font-weight: bold; }
+        /* State badge */
+        .state-badge { display: inline-block; padding: 5px 16px; border-radius: 4px; font-size: 13px; font-weight: bold; letter-spacing: 1px; }
         .state-NORMAL { background: #0a2a0a; color: #00ff88; border: 1px solid #00ff88; }
         .state-DRIFT { background: #2a2a0a; color: #ffaa00; border: 1px solid #ffaa00; }
         .state-WARNING { background: #2a1a0a; color: #ff8800; border: 1px solid #ff8800; }
         .state-FAULT { background: #2a0a0a; color: #ff4444; border: 1px solid #ff4444; }
         .state-EMERGENCY { background: #3a0a0a; color: #ff0000; border: 1px solid #ff0000; animation: pulse 0.5s infinite; }
-        .state-UNKNOWN { background: #1a1a1a; color: #666; border: 1px solid #666; }
+        .state-UNKNOWN { background: #111; color: #444; border: 1px solid #333; }
         @keyframes pulse { 50% { opacity: 0.5; } }
 
-        .prod-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        /* Production stats */
+        .prod-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 4px; }
         .prod-stat { text-align: center; }
-        .prod-stat .num { font-size: 24px; font-weight: bold; }
-        .prod-stat .label { font-size: 10px; color: #888; }
+        .prod-stat .num { font-size: 28px; font-weight: bold; line-height: 1.2; }
+        .prod-stat .label { font-size: 9px; color: #555; text-transform: uppercase; }
 
-        @media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } .wide { grid-column: span 1; } }
+        /* Circular gauge */
+        .gauge { width: 60px; height: 60px; position: relative; display: inline-block; }
+        .gauge svg { transform: rotate(-90deg); }
+        .gauge .value-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; font-weight: bold; }
+
+        @media (max-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } .wide { grid-column: span 1; } .chart-container { grid-column: 1 / -1; } }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>GridBox — Live Dashboard</h1>
         <div class="subtitle">Smart Infrastructure Control System</div>
-        <div class="conn lost" id="conn">Waiting for Pico...</div>
+        <div class="conn lost" id="conn">Waiting for data...</div>
     </div>
 
     <div class="grid">
-        <!-- Row 1: System state + bus voltage -->
+        <!-- Row 1: State + Voltage + Efficiency -->
         <div class="card wide">
             <h3>System State</h3>
             <span class="state-badge state-UNKNOWN" id="state-badge">UNKNOWN</span>
-            <div class="unit" style="margin-top: 8px;">Mode: <span id="mode">--</span></div>
+            <span style="margin-left: 12px; font-size: 11px; color: #444;">Mode: <span id="mode" class="green">--</span></span>
         </div>
         <div class="card">
             <h3>Bus Voltage</h3>
             <div class="value green" id="bus-v">--</div>
-            <div class="unit">V</div>
-            <div class="bar"><div class="bar-fill bar-green" id="bus-bar" style="width: 0%"></div></div>
+            <div class="unit">volts</div>
+            <div class="bar-thick">
+                <div class="fill fill-green" id="bus-bar" style="width: 0%"></div>
+                <div class="label" id="bus-bar-label">0%</div>
+            </div>
         </div>
         <div class="card">
             <h3>Efficiency</h3>
             <div class="value green" id="efficiency">--</div>
-            <div class="unit">%</div>
-            <div class="bar"><div class="bar-fill bar-green" id="eff-bar" style="width: 0%"></div></div>
+            <div class="unit">percent saved</div>
+            <div class="bar-thick">
+                <div class="fill fill-green" id="eff-bar" style="width: 0%"></div>
+                <div class="label" id="eff-bar-label">0%</div>
+            </div>
         </div>
 
-        <!-- Row 2: Motor 1 + Motor 2 + Total Power + IMU -->
+        <!-- Row 2: Motors + Power + IMU -->
         <div class="card">
-            <h3>Motor 1 (Fan)</h3>
+            <h3>Motor 1 — Fan</h3>
             <div class="value green" id="m1-current">--</div>
-            <div class="unit">mA &nbsp; <span id="m1-power">--</span> W &nbsp; <span id="m1-speed">--</span>%</div>
-            <div class="bar"><div class="bar-fill bar-green" id="m1-bar" style="width: 0%"></div></div>
+            <div class="unit">mA &nbsp; <span id="m1-power">--</span>W &nbsp; speed: <span id="m1-speed" class="green">--</span>%</div>
+            <div class="bar-thick">
+                <div class="fill fill-blue" id="m1-bar" style="width: 0%"></div>
+                <div class="label" id="m1-bar-label">0 mA / 800 mA</div>
+            </div>
         </div>
         <div class="card">
-            <h3>Motor 2 (Conveyor)</h3>
+            <h3>Motor 2 — Conveyor</h3>
             <div class="value green" id="m2-current">--</div>
-            <div class="unit">mA &nbsp; <span id="m2-power">--</span> W &nbsp; <span id="m2-speed">--</span>%</div>
-            <div class="bar"><div class="bar-fill bar-green" id="m2-bar" style="width: 0%"></div></div>
+            <div class="unit">mA &nbsp; <span id="m2-power">--</span>W &nbsp; speed: <span id="m2-speed" class="green">--</span>%</div>
+            <div class="bar-thick">
+                <div class="fill fill-blue" id="m2-bar" style="width: 0%"></div>
+                <div class="label" id="m2-bar-label">0 mA / 800 mA</div>
+            </div>
         </div>
         <div class="card">
             <h3>Total Power</h3>
             <div class="value green" id="total-w">--</div>
-            <div class="unit">W</div>
+            <div class="unit">watts</div>
+            <div class="bar-thick">
+                <div class="fill fill-green" id="power-bar" style="width: 0%"></div>
+                <div class="label" id="power-bar-label">0W / 12W</div>
+            </div>
         </div>
         <div class="card">
             <h3>IMU Vibration</h3>
             <div class="value green" id="imu-rms">--</div>
             <div class="unit">g RMS &nbsp; <span id="imu-status">--</span></div>
-            <div class="bar"><div class="bar-fill bar-green" id="imu-bar" style="width: 0%"></div></div>
+            <div class="bar-thick">
+                <div class="fill fill-green" id="imu-bar" style="width: 0%"></div>
+                <div class="label" id="imu-bar-label">0g — HEALTHY</div>
+            </div>
         </div>
 
-        <!-- Row 3: Production stats -->
+        <!-- Row 3: Production + ES + Faults -->
         <div class="card wide">
             <h3>Production</h3>
             <div class="prod-stats">
-                <div class="prod-stat">
-                    <div class="num green" id="total-items">0</div>
-                    <div class="label">Total</div>
-                </div>
-                <div class="prod-stat">
-                    <div class="num green" id="passed">0</div>
-                    <div class="label">Passed</div>
-                </div>
-                <div class="prod-stat">
-                    <div class="num red" id="rejected">0</div>
-                    <div class="label">Rejected</div>
-                </div>
+                <div class="prod-stat"><div class="num green" id="total-items">0</div><div class="label">Total</div></div>
+                <div class="prod-stat"><div class="num green" id="passed">0</div><div class="label">Passed</div></div>
+                <div class="prod-stat"><div class="num red" id="rejected">0</div><div class="label">Rejected</div></div>
             </div>
-            <div class="unit" style="margin-top: 8px;">Reject rate: <span id="reject-rate">0</span>%</div>
+            <div class="unit" style="margin-top: 6px;">Reject rate: <span id="reject-rate" class="yellow">0</span>%</div>
         </div>
         <div class="card">
             <h3>Energy Signature</h3>
             <div class="value green" id="es-score">--</div>
             <div class="unit">divergence score</div>
-            <div class="bar"><div class="bar-fill bar-green" id="es-bar" style="width: 0%"></div></div>
+            <div class="bar-thick">
+                <div class="fill fill-green" id="es-bar" style="width: 0%"></div>
+                <div class="label" id="es-bar-label">healthy</div>
+            </div>
         </div>
         <div class="card">
             <h3>Faults Today</h3>
@@ -138,66 +168,75 @@
             <div class="unit">fault events</div>
         </div>
 
-        <!-- Charts -->
+        <!-- Charts - side by side, bigger -->
         <div class="chart-container">
-            <h3>Power (last 60s)</h3>
+            <h3>Power Consumption (60s)</h3>
+            <div class="legend"><span class="green">-- Total Power (W)</span></div>
             <canvas id="power-chart"></canvas>
         </div>
-
         <div class="chart-container">
-            <h3>Motor Current (last 60s)</h3>
+            <h3>Motor Current (60s)</h3>
+            <div class="legend"><span class="green">-- Motor 1</span> <span class="blue">-- Motor 2</span></div>
             <canvas id="current-chart"></canvas>
         </div>
     </div>
 
     <script>
         const MODES = ['IDLE', 'NORMAL', 'DUMB', 'MANUAL', 'CALIBRATE', 'LEARNING', 'EMERGENCY'];
-        const MAX_POINTS = 300; // 60s at 5Hz
+        const MAX_POINTS = 300;
+        const powerHistory = [], m1History = [], m2History = [];
 
-        // Chart data
-        const powerHistory = [];
-        const m1History = [];
-        const m2History = [];
-
-        function stateColor(state) {
-            if (state === 'NORMAL') return '#00ff88';
-            if (state === 'DRIFT') return '#ffaa00';
-            if (state === 'WARNING') return '#ff8800';
-            if (state === 'FAULT' || state === 'EMERGENCY') return '#ff4444';
-            return '#666';
+        function barColor(value, warn, crit) {
+            if (value >= crit) return ['fill-red', 'red'];
+            if (value >= warn) return ['fill-yellow', 'yellow'];
+            return ['fill-green', 'green'];
         }
 
-        function setValueColor(el, value, warnThreshold, critThreshold) {
-            el.className = 'value ' + (value >= critThreshold ? 'red' : value >= warnThreshold ? 'yellow' : 'green');
+        function setBar(barId, labelId, pct, labelText, fillClass) {
+            const bar = document.getElementById(barId);
+            const label = document.getElementById(labelId);
+            bar.style.width = Math.min(Math.max(pct, 0), 100) + '%';
+            bar.className = 'fill ' + fillClass;
+            if (label) label.textContent = labelText;
         }
 
-        function drawChart(canvas, datasets, maxY) {
+        function setValueColor(el, value, warnAt, critAt) {
+            el.className = 'value ' + (value >= critAt ? 'red' : value >= warnAt ? 'yellow' : 'green');
+        }
+
+        function drawChart(canvas, datasets, maxY, colors) {
             const ctx = canvas.getContext('2d');
-            const w = canvas.width;
-            const h = canvas.height;
+            const w = canvas.width, h = canvas.height;
             ctx.clearRect(0, 0, w, h);
 
-            // Grid
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < 5; i++) {
+            // Grid lines
+            ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 0.5;
+            for (let i = 0; i <= 4; i++) {
                 const y = h * i / 4;
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                // Y-axis labels
+                ctx.fillStyle = '#333'; ctx.font = '9px monospace';
+                ctx.fillText((maxY * (4-i) / 4).toFixed(0), 2, y + 10);
             }
 
             // Data lines
-            const colors = ['#00ff88', '#00aaff', '#ffaa00'];
             datasets.forEach((data, di) => {
                 if (data.length < 2) return;
-                ctx.strokeStyle = colors[di % colors.length];
-                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = colors[di];
+                ctx.lineWidth = 2;
                 ctx.beginPath();
                 data.forEach((v, i) => {
                     const x = (i / (MAX_POINTS - 1)) * w;
-                    const y = h - (v / maxY) * h;
+                    const y = h - (Math.min(v, maxY) / maxY) * h;
                     if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
                 });
                 ctx.stroke();
+
+                // Fill under line (subtle)
+                ctx.globalAlpha = 0.05;
+                ctx.fillStyle = colors[di];
+                ctx.lineTo(w, h); ctx.lineTo(0, h); ctx.closePath(); ctx.fill();
+                ctx.globalAlpha = 1;
             });
         }
 
@@ -205,71 +244,70 @@
             try {
                 const res = await fetch('/api/latest');
                 const d = await res.json();
-
                 if (!d || !d.timestamp) {
                     document.getElementById('conn').textContent = 'No data';
                     document.getElementById('conn').className = 'conn lost';
                     return;
                 }
 
-                // Connection status
+                // Connection
                 const age = (Date.now() - new Date(d.timestamp).getTime()) / 1000;
-                if (age < 5) {
-                    document.getElementById('conn').textContent = `Connected (${age.toFixed(1)}s ago)`;
-                    document.getElementById('conn').className = 'conn ok';
-                } else {
-                    document.getElementById('conn').textContent = `Stale (${age.toFixed(0)}s ago)`;
-                    document.getElementById('conn').className = 'conn warn';
-                }
+                const connEl = document.getElementById('conn');
+                if (age < 5) { connEl.textContent = `Connected (${age.toFixed(1)}s ago)`; connEl.className = 'conn ok'; }
+                else { connEl.textContent = `Stale (${age.toFixed(0)}s ago)`; connEl.className = 'conn warn'; }
 
                 // State
                 const state = d.state || 'UNKNOWN';
                 const badge = document.getElementById('state-badge');
-                badge.textContent = state;
-                badge.className = 'state-badge state-' + state;
-
-                // Mode
-                document.getElementById('mode').textContent = MODES[d.mode] || 'UNKNOWN';
+                badge.textContent = state; badge.className = 'state-badge state-' + state;
+                document.getElementById('mode').textContent = MODES[d.mode] || '?';
 
                 // Bus voltage
                 const busV = d.bus_v || 0;
                 document.getElementById('bus-v').textContent = busV.toFixed(2);
-                document.getElementById('bus-bar').style.width = Math.min(busV / 6 * 100, 100) + '%';
-                document.getElementById('bus-bar').className = 'bar-fill ' + (busV < 3.8 ? 'bar-red' : busV < 4.2 ? 'bar-yellow' : 'bar-green');
+                setValueColor(document.getElementById('bus-v'), 6-busV, 1.5, 2.5);
+                const busPct = Math.min(busV / 6 * 100, 100);
+                const [busFill] = barColor(6-busV, 1.5, 2.5);
+                setBar('bus-bar', 'bus-bar-label', busPct, busV.toFixed(1) + 'V / 6.0V', busFill);
 
                 // Efficiency
                 const eff = d.efficiency || 0;
                 document.getElementById('efficiency').textContent = eff.toFixed(0);
-                document.getElementById('eff-bar').style.width = Math.min(eff, 100) + '%';
+                setBar('eff-bar', 'eff-bar-label', eff, eff.toFixed(0) + '% efficient', 'fill-green');
 
                 // Motor 1
-                const m1mA = d.m1_mA || 0;
-                document.getElementById('m1-current').textContent = m1mA.toFixed(0);
+                const m1 = d.m1_mA || 0;
+                document.getElementById('m1-current').textContent = m1.toFixed(0);
                 document.getElementById('m1-power').textContent = (d.m1_W || 0).toFixed(2);
                 document.getElementById('m1-speed').textContent = d.m1_speed || 0;
-                document.getElementById('m1-bar').style.width = Math.min(m1mA / 800 * 100, 100) + '%';
-                setValueColor(document.getElementById('m1-current'), m1mA, 600, 800);
+                setValueColor(document.getElementById('m1-current'), m1, 600, 800);
+                const [m1Fill] = barColor(m1, 600, 800);
+                setBar('m1-bar', 'm1-bar-label', m1/800*100, m1.toFixed(0) + ' mA / 800 mA', m1Fill);
 
                 // Motor 2
-                const m2mA = d.m2_mA || 0;
-                document.getElementById('m2-current').textContent = m2mA.toFixed(0);
+                const m2 = d.m2_mA || 0;
+                document.getElementById('m2-current').textContent = m2.toFixed(0);
                 document.getElementById('m2-power').textContent = (d.m2_W || 0).toFixed(2);
                 document.getElementById('m2-speed').textContent = d.m2_speed || 0;
-                document.getElementById('m2-bar').style.width = Math.min(m2mA / 800 * 100, 100) + '%';
-                setValueColor(document.getElementById('m2-current'), m2mA, 600, 800);
+                setValueColor(document.getElementById('m2-current'), m2, 600, 800);
+                const [m2Fill] = barColor(m2, 600, 800);
+                setBar('m2-bar', 'm2-bar-label', m2/800*100, m2.toFixed(0) + ' mA / 800 mA', m2Fill);
 
                 // Total power
                 const totalW = d.total_W || 0;
                 document.getElementById('total-w').textContent = totalW.toFixed(2);
-                setValueColor(document.getElementById('total-w'), totalW, 5, 8);
+                setValueColor(document.getElementById('total-w'), totalW, 6, 10);
+                const [pwrFill] = barColor(totalW, 6, 10);
+                setBar('power-bar', 'power-bar-label', totalW/12*100, totalW.toFixed(1) + 'W / 12W budget', pwrFill);
 
                 // IMU
-                const imuRms = d.imu_rms || 0;
-                document.getElementById('imu-rms').textContent = imuRms.toFixed(2);
-                document.getElementById('imu-status').textContent = d.imu_status || '--';
-                document.getElementById('imu-bar').style.width = Math.min(imuRms / 3 * 100, 100) + '%';
-                document.getElementById('imu-bar').className = 'bar-fill ' + (imuRms > 2 ? 'bar-red' : imuRms > 1 ? 'bar-yellow' : 'bar-green');
-                setValueColor(document.getElementById('imu-rms'), imuRms, 1, 2);
+                const imu = d.imu_rms || 0;
+                const imuSt = d.imu_status || '--';
+                document.getElementById('imu-rms').textContent = imu.toFixed(2);
+                document.getElementById('imu-status').textContent = imuSt;
+                setValueColor(document.getElementById('imu-rms'), imu, 1, 2);
+                const [imuFill] = barColor(imu, 1, 2);
+                setBar('imu-bar', 'imu-bar-label', imu/3*100, imu.toFixed(2) + 'g — ' + imuSt, imuFill);
 
                 // Production
                 document.getElementById('total-items').textContent = d.total_items || 0;
@@ -278,33 +316,32 @@
                 document.getElementById('reject-rate').textContent = (d.reject_rate || 0).toFixed(1);
 
                 // Energy signature
-                const esScore = d.es_score || 0;
-                document.getElementById('es-score').textContent = esScore.toFixed(3);
-                document.getElementById('es-bar').style.width = Math.min(esScore / 1 * 100, 100) + '%';
-                document.getElementById('es-bar').className = 'bar-fill ' + (esScore > 0.5 ? 'bar-red' : esScore > 0.3 ? 'bar-yellow' : 'bar-green');
-                setValueColor(document.getElementById('es-score'), esScore, 0.3, 0.5);
+                const es = d.es_score || 0;
+                document.getElementById('es-score').textContent = es.toFixed(3);
+                setValueColor(document.getElementById('es-score'), es, 0.3, 0.5);
+                const [esFill] = barColor(es, 0.3, 0.5);
+                const esLabel = es < 0.15 ? 'healthy' : es < 0.5 ? 'drift detected' : 'FAULT';
+                setBar('es-bar', 'es-bar-label', es*100, esLabel, esFill);
 
                 // Faults
                 const faults = d.faults_today || 0;
                 document.getElementById('faults').textContent = faults;
                 setValueColor(document.getElementById('faults'), faults, 1, 3);
 
-                // Update chart histories
-                powerHistory.push(totalW);
-                m1History.push(m1mA);
-                m2History.push(m2mA);
+                // Chart histories
+                powerHistory.push(totalW); m1History.push(m1); m2History.push(m2);
                 if (powerHistory.length > MAX_POINTS) powerHistory.shift();
                 if (m1History.length > MAX_POINTS) m1History.shift();
                 if (m2History.length > MAX_POINTS) m2History.shift();
 
                 // Draw charts
                 const pc = document.getElementById('power-chart');
-                pc.width = pc.offsetWidth; pc.height = 150;
-                drawChart(pc, [powerHistory], 10);
+                pc.width = pc.offsetWidth; pc.height = 200;
+                drawChart(pc, [powerHistory], 12, ['#00ff88']);
 
                 const cc = document.getElementById('current-chart');
-                cc.width = cc.offsetWidth; cc.height = 150;
-                drawChart(cc, [m1History, m2History], 800);
+                cc.width = cc.offsetWidth; cc.height = 200;
+                drawChart(cc, [m1History, m2History], 800, ['#00ff88', '#00aaff']);
 
             } catch (e) {
                 document.getElementById('conn').textContent = 'Server error';
