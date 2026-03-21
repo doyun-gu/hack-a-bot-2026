@@ -25,7 +25,7 @@ People with tremor can't eat independently, can't carry a cup of water, can't ho
 ## System Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph PICO_A["PICO A — Wearable Sensor (wrist)"]
         IMU["BMI160 IMU<br/>6-axis | 100Hz<br/>(I2C: SDA/SCL)"]
         JOY["Joystick<br/>Mode select / Sensitivity<br/>(ADC: GP26, GP27)"]
@@ -87,7 +87,7 @@ graph TB
 ## Control Loop
 
 ```mermaid
-flowchart TD
+flowchart LR
     START([Every 10ms — 100Hz loop]) --> READ_IMU[Read BMI160<br/>accel_x, accel_y, accel_z<br/>gyro_x, gyro_y, gyro_z]
     READ_IMU --> FILTER[Complementary Filter<br/>roll = 0.98 × prev_roll + gyro × dt + 0.02 × accel_roll<br/>pitch = same for pitch axis]
     FILTER --> CHECK_MODE{Which mode?}
@@ -264,7 +264,7 @@ All achieved by **swapping what clips onto the same 5x6cm platform**. One device
 The joystick serves **four critical functions** — not filler:
 
 ```mermaid
-graph TD
+graph LR
     JOY["Analog Joystick<br/>(X-axis ADC + Y-axis ADC + Button)"] --> PRESS["Button Press"]
     JOY --> X_AXIS["X-Axis (left/right)"]
     JOY --> Y_AXIS["Y-Axis (up/down)"]
@@ -294,7 +294,7 @@ If you have access to a 3D printer, you could print a **thumb-grip cap** that si
 ## Physical Build
 
 ```mermaid
-graph TD
+graph LR
     subgraph TOP["TOP PLATE (5x6cm perfboard)"]
         CLIP["Spoon/cup clip zone"]
     end

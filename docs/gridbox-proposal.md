@@ -99,7 +99,7 @@ mindmap
 ## Where Does the Recycled Energy Go?
 
 ```mermaid
-graph TD
+graph LR
     subgraph SOURCES["ENERGY SOURCES"]
         S1["Motor 1: Wind<br/>(spin = generate)"]
         S2["Motor 2: Vibration<br/>(shake = generate)"]
@@ -138,7 +138,7 @@ graph TD
 ### Load Priority System
 
 ```mermaid
-flowchart TD
+flowchart LR
     MEASURE["Measure total generated power<br/>(ADC reads bus voltage)"] --> COMPARE{"Power vs Demand?"}
 
     COMPARE -->|"Surplus > 20%"| ALL_ON["ALL LOADS ON<br/>+ charge battery bank<br/>OLED: 'SURPLUS — STORING'<br/>LED 4 ON (EV charging)"]
@@ -165,7 +165,7 @@ flowchart TD
 ## System Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph PICO_A["PICO A — Grid Controller (the brain)"]
         ADC_V["ADC: Bus voltage measurement<br/>Reads power from each generator"]
         ADC_POT["ADC: Potentiometer<br/>Solar simulation / load demand"]
@@ -303,7 +303,7 @@ Joystick up/down scrolls between views.
 ## Real-World Applications
 
 ```mermaid
-graph TD
+graph LR
     GRIDBOX["GridBox Core Technology<br/>Capture → Convert → Monitor → Distribute"] --> APP1["REMOTE VILLAGES<br/>Micro wind/hydro → powers<br/>medical fridge, phone charging,<br/>LED lighting<br/>Smart load shedding protects<br/>critical loads (vaccine storage)"]
 
     GRIDBOX --> APP2["FACTORY ENERGY RECYCLING<br/>Machine vibrations → captured<br/>Powers sensors, monitoring<br/>Reduces energy bill<br/>Detects machine faults early<br/>via vibration monitoring"]
@@ -378,7 +378,7 @@ graph LR
 ## Physical Build
 
 ```mermaid
-graph TD
+graph LR
     subgraph BOX["GRIDBOX — Physical Layout"]
         subgraph GEN_AREA["Left: Generation"]
             M1["DC Motor 1<br/>with fan blade or crank<br/>'Wind Turbine'"]

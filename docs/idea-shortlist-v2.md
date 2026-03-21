@@ -51,7 +51,7 @@ graph LR
 ### Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph TRAY["Pico A — Diagnostic Tray"]
         T_IMU["BMI160: tremor angle + frequency"]
         T_SERVO["Servos: difficulty tilt + pointer"]
@@ -121,7 +121,7 @@ graph LR
 ### Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph ROBOT["Pico A — Robot (balances)"]
         R_IMU["BMI160: measures tilt from vertical"]
         R_MOTOR["DC Motor: flywheel — speed up/down to correct tilt"]
@@ -147,7 +147,7 @@ graph TB
 ### How It Works
 
 ```mermaid
-flowchart TD
+flowchart LR
     READ["Read IMU: tilt angle from vertical"] --> PID["PID Controller<br/>error = 0° - current_angle"]
     PID --> MOTOR_CMD["Adjust motor speed:<br/>Tilting left → speed up motor (pushes right)<br/>Tilting right → slow down motor (pushes left)"]
     MOTOR_CMD --> BALANCE["Robot stays vertical"]
@@ -193,7 +193,7 @@ flowchart TD
 ### Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph CTRL["Pico A — Controller (handheld)"]
         C_IMU["BMI160: tilt = steering direction"]
         C_JOY["Joystick: fine control override"]
@@ -286,7 +286,7 @@ graph LR
 ### Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph POURER["Pico A — Pourer"]
         P_MOTOR["DC Motor: tilts bottle cradle"]
         P_SERVO["Servo: flow control gate"]
@@ -329,7 +329,7 @@ graph TB
 ### Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph WEAR["Pico A — Wearable (belt/wrist)"]
         W_MOTOR["DC Motor: vibration feedback<br/>Different speeds = different directions"]
         W_SERVO["Servo: directional pointer on wrist"]
@@ -372,7 +372,7 @@ graph TB
 ### Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph GLOVE["Pico A — Controller (wearable)"]
         G_IMU["BMI160: hand tilt → arm direction"]
         G_POT["Potentiometer: grip force control"]
@@ -490,7 +490,7 @@ With wheels (DC motor driven) and an ESP32-CAM, entirely new categories open up:
 Autonomous robot navigates toward people using camera vision. Streams live video to operator. Servo-mounted camera for panning. IMU detects obstacles/slopes.
 
 ```mermaid
-graph TB
+graph LR
     subgraph ROBOT["Robot (Pico A + ESP32-CAM)"]
         CAM["ESP32-CAM<br/>Live video stream<br/>Basic motion detection"]
         MOTOR_L["DC Motor L: left wheel"]
@@ -556,7 +556,7 @@ Autonomous or RC patrol robot with live camera. Detects motion via ESP32, alerts
 Remote-controlled mobile robot with camera — family members can "visit" elderly relatives remotely. Drive around their home, see through the camera, servo waves hello.
 
 ```mermaid
-graph TB
+graph LR
     subgraph ROBOT["Telepresence Robot"]
         CAM2["ESP32-CAM: live video to family"]
         WHEELS["DC Motors: mobility"]

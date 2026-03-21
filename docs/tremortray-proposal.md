@@ -58,7 +58,7 @@ graph LR
 ## System Architecture
 
 ```mermaid
-graph TB
+graph LR
     subgraph TRAY["PICO A — Diagnostic Tray (patient holds)"]
         direction TB
         IMU["BMI160 IMU<br/>Mounted on tray surface<br/>Measures tilt + rotation<br/>100Hz sampling<br/>(I2C: GP4 SDA, GP5 SCL)"]
@@ -109,7 +109,7 @@ graph TB
 ## Where Each Sensor Goes (Physical Layout)
 
 ```mermaid
-graph TB
+graph LR
     subgraph TRAY_TOP["TRAY TOP VIEW (7×9cm perfboard)"]
         direction TB
         BALL["Ball / marble<br/>sits here<br/>(centre of tray)"]
@@ -228,7 +228,7 @@ This **differentiates types of tremor** — something even expensive clinical to
 ### During Test
 
 ```mermaid
-graph TD
+graph LR
     subgraph SCREEN_LIVE["LIVE TEST DISPLAY"]
         direction TB
         TITLE_L["TREMORTRAY  Level 2"]
@@ -246,7 +246,7 @@ graph TD
 ### After Test — Results
 
 ```mermaid
-graph TD
+graph LR
     subgraph SCREEN_RESULTS["TEST RESULTS"]
         direction TB
         TITLE_R["RESULTS — Level 2"]
@@ -314,7 +314,7 @@ graph LR
 ## Physical Build (Kit Only)
 
 ```mermaid
-graph TD
+graph LR
     subgraph BUILD["Assembly — Kit Parts Only"]
         P["Perfboard 7×9cm<br/>(full size = tray surface)"]
         S1["MG90S Servo A<br/>screwed to edge"]
@@ -406,7 +406,7 @@ graph LR
 Other teams may use the same IMU. Here's why we're six layers deeper:
 
 ```mermaid
-graph TD
+graph LR
     subgraph OTHER["What other teams build"]
         O1["IMU reads shaking → shows numbers"]
     end
@@ -475,7 +475,7 @@ graph LR
 Instead of a boring clinical test, the patient plays a **game:**
 
 ```mermaid
-flowchart TD
+flowchart LR
     START["TEST BEGINS<br/>OLED: 'Hold steady...'"] --> STABLE{"Tray within ±2°?"}
 
     STABLE -->|"Yes — stable"| POINTS["Award points<br/>+10 pts/second<br/>Streak counter: +1s<br/>LED: GREEN"]
@@ -518,7 +518,7 @@ flowchart TD
 Servos don't just set a fixed difficulty — they **continuously adapt during the test:**
 
 ```mermaid
-flowchart TD
+flowchart LR
     BEGIN["Test begins — tray flat (0°)"] --> SAMPLE["Measure stability<br/>for 3-second window"]
 
     SAMPLE --> EVAL{"Average stability<br/>in last 3 seconds?"}
@@ -631,7 +631,7 @@ sequenceDiagram
 The ball is **visual proof**, not an electronic sensor target:
 
 ```mermaid
-graph TD
+graph LR
     subgraph DESIGN["Ball + Tray Design"]
         TRAY_SURFACE["Perfboard 7×9cm<br/>Full size — no cutting"]
         BUMPER["Wire bumper around edge<br/>Bent 22AWG wire<br/>Prevents ball rolling off<br/>~5mm height"]
@@ -763,7 +763,7 @@ stateDiagram-v2
 The flat tray is the starting point. The full vision is a **4-test interactive diagnostic station:**
 
 ```mermaid
-graph TD
+graph LR
     DEVICE["NeuroSync Device"] --> T1["TEST 1: Stability Hold<br/>Hold level for 30s<br/>IMU measures resting tremor<br/>Ball shows stability visually"]
     DEVICE --> T2["TEST 2: Target Tracking<br/>Servo pointer moves<br/>Patient follows with joystick<br/>Measures intention tremor"]
     DEVICE --> T3["TEST 3: Reaction Challenge<br/>Servo suddenly tilts device<br/>Patient corrects<br/>Measures reaction time + recovery"]
@@ -804,7 +804,7 @@ graph TD
 Same core technology, different software modes:
 
 ```mermaid
-graph TD
+graph LR
     CORE["Core Technology<br/>IMU + Servos + Wireless + Display<br/>Measures hand micro-movements"] --> MED["MEDICAL<br/>Tremor diagnosis<br/>Condition classification<br/>Rehab tracking<br/>Treatment monitoring"]
     CORE --> SEC["SECURITY<br/>Biometric hand-signature<br/>Unique tremor = identity<br/>Can't fake neurological pattern<br/>Duress detection"]
     CORE --> SAFETY["WORKPLACE SAFETY<br/>Pre-shift fitness test<br/>Fatigue screening<br/>Impairment detection<br/>Aviation, mining, surgery"]
@@ -849,7 +849,7 @@ sequenceDiagram
 If DC motors are available, the device evolves from servo-based to **reaction wheel stabilisation** — spacecraft-grade technology:
 
 ```mermaid
-graph TD
+graph LR
     subgraph REACTION["Reaction Wheel Concept"]
         MOTOR["DC Motor spins<br/>heavy flywheel disc"]
         MOMENTUM["Flywheel stores<br/>angular momentum"]
