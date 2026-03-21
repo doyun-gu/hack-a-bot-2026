@@ -30,17 +30,17 @@ def draw_sample(oled, mode_name, inverted):
 
     oled.fill(bg)
 
-    # Yellow zone header (y=0-15)
-    oled.text("GridBox", 0, 0, fg)
-    oled.text("LIVE", 96, 0, fg)
-    oled.fill_rect(0, 9, 128, 1, fg)  # thin divider
+    # Yellow zone (y=0-15) — header only, nothing else
+    oled.text("GridBox", 0, 4, fg)
+    oled.fill_rect(60, 6, 4, 4, fg)  # status dot
+    oled.text("LIVE", 100, 4, fg)
 
-    # Blue zone content (y=16-63)
-    oled.text(f"Mode: {mode_name}", 0, 14, fg)
-    oled.text("M1: 350mA  65%", 0, 26, fg)
-    oled.text("M2: 280mA  45%", 0, 36, fg)
-    oled.text("Bus: 4.9V  OK", 0, 46, fg)
-    oled.text("IMU: 0.3g  OK", 0, 56, fg)
+    # Blue zone (y=16-63) — all content below the yellow band
+    oled.text(f"Mode: {mode_name}", 0, 18, fg)
+    oled.text("M1: 350mA  65%", 0, 28, fg)
+    oled.text("M2: 280mA  45%", 0, 38, fg)
+    oled.text("Bus: 4.9V  OK", 0, 48, fg)
+    oled.text("IMU: 0.3g  OK", 0, 58, fg)
 
     oled.show()
 

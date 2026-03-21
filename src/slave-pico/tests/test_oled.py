@@ -123,32 +123,27 @@ try:
 
         # Draw live status screen with toggling dot
         oled.fill(0)
-        oled.text("GridBox", 0, 0, 1)
-        oled.text("LIVE", 104, 0, 1)
-
+        # Yellow zone (y=0-15) — header bar
+        oled.text("GridBox", 0, 4, 1)
+        oled.text("LIVE", 100, 4, 1)
         # Toggling dot — proves OLED is updating
         if tick % 2 == 0:
-            oled.fill_rect(96, 2, 4, 4, 1)  # dot ON
-        # else: dot is OFF (blank)
+            oled.fill_rect(68, 6, 4, 4, 1)  # dot ON
 
-        oled.hline(0, 10, 128, 1)
-
-        # Simulated live values
+        # Blue zone (y=16-63) — all content below yellow band
         import random
         m1 = 340 + (tick * 7) % 60
         m2 = 270 + (tick * 5) % 40
         bus = 4.85 + (tick % 10) * 0.01
 
-        oled.text(f"M1: {m1}mA  ON", 0, 14, 1)
-        oled.text(f"M2: {m2}mA  ON", 0, 24, 1)
-        oled.text(f"Bus: {bus:.2f}V", 0, 34, 1)
-        oled.text(f"IMU: 0.3g  OK", 0, 44, 1)
-
-        # Bottom status bar
-        oled.hline(0, 54, 128, 1)
-        oled.text(f"Tick:{tick:4d}", 0, 56, 1)
+        oled.text(f"M1: {m1}mA  ON", 0, 18, 1)
+        oled.text(f"M2: {m2}mA  ON", 0, 28, 1)
+        oled.text(f"Bus: {bus:.2f}V", 0, 38, 1)
+        oled.text(f"IMU: 0.3g  OK", 0, 48, 1)
+        oled.hline(0, 57, 128, 1)
         status = "NORMAL" if tick % 20 < 15 else "CHECK"
-        oled.text(status, 80, 56, 1)
+        oled.text(f"T:{tick:4d}", 0, 58, 1)
+        oled.text(status, 80, 58, 1)
 
         oled.show()
         tick += 1
