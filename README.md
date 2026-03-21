@@ -1,9 +1,9 @@
 # GridBox — Smart Infrastructure Control System
 
 <p align="center">
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/brand/Title_Date_Logo.png" alt="Hack-A-Bot 2026" width="200"/></a>
-  &nbsp;&nbsp;
-  <img src="https://hackabot-2026.com/live/assets/images/projects/badges/creative.png" alt="Project 6 Creative Badge" width="100"/>
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/brand/Title_Date_Logo.png" alt="Hack-A-Bot 2026" height="120"/></a>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://hackabot-2026.com/live/assets/images/projects/badges/creative.png" alt="Project 6 Creative Badge" height="100"/>
 </p>
 
 <p align="center">
@@ -128,12 +128,14 @@ hack-a-bot-2026/
 ## Supported By
 
 <p align="center">
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="35"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="35"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="University of Manchester" height="35"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/robosoc.svg" alt="RoboSoc" height="35"/></a>
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="University of Manchester" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="30"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="30"/></a>
 </p>
 
 <p align="center">
-  <em>Part of <a href="https://hackabot-2026.com">Hack-A-Bot 2026</a> — supported by ARM, EEESoc, RoboSoc, Makerspace, Quanser, Cradle, Amentum, Ice Nine, Google Developer Groups, UKRI, RAICo</em>
+  <em><a href="https://hackabot-2026.com">Hack-A-Bot 2026</a> — Project 6: Creative — University of Manchester</em>
 </p>
