@@ -53,15 +53,17 @@ hack-a-bot-2026/
 
 ## Current State
 
-- **Phase:** Idea refinement — lead idea selected, proposal written
-- **Lead idea: SteadyHand** (95pts) — tremor-stabilising assistive device
+- **Phase:** Idea development — two lead proposals with full Mermaid diagrams
+- **Lead idea: TremorTray** (96pts) — hand tremor diagnostic tool
+  - Full proposal: `docs/tremortray-proposal.md`
+  - Dual-sensor: IMU (on tray) + joystick (under tray as position sensor)
+  - Servo-controlled difficulty levels (flat → tilt → dynamic rocking)
+  - Clinical severity scoring (replaces subjective UPDRS scale)
+  - Judge holds tray and gets their own tremor score = best possible demo
+- **Alternative: SteadyHand** (95pts) — tremor stabiliser
   - Full proposal: `docs/steadyhand-proposal.md`
-  - Dual-mode: stabiliser (spoon stays level) + rehab trainer (ball balance test)
-  - Fall detection as bonus feature on same IMU
-  - OLED health dashboard with 4 display modes
-  - Scaled for MG90S: ~5x6cm platform, ~70g, spoon-sized
 - **Other ideas:** `docs/idea-shortlist.md` (10 ideas scored)
-- **Next:** Lock in final decision with team, scaffold firmware, wireless link first
+- **Next:** Develop TremorTray further, scaffold firmware, wireless link first
 
 ## Dev Commands
 

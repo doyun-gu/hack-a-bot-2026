@@ -2,11 +2,12 @@
 
 Quick guide to what's in this folder.
 
-## Lead Idea
+## Lead Ideas
 
-| File | What It Contains |
-|---|---|
-| [`steadyhand-proposal.md`](steadyhand-proposal.md) | **Full proposal for SteadyHand** (95/100) — tremor-stabilising assistive device. Covers: problem statement, healthcare use cases (10+ user groups), dual-mode design (stabiliser + rehab trainer), architecture, control loop, mechanical build plan, OLED display modes, demo script, build timeline, competitor comparison |
+| File | Score | What It Contains |
+|---|---|---|
+| [`tremortray-proposal.md`](tremortray-proposal.md) | **96/100** | **TremorTray** — hand tremor diagnostic tool. Dual-sensor (IMU + joystick-as-position-sensor), servo difficulty levels, clinical severity scoring, UPDRS replacement. Full Mermaid diagrams |
+| [`steadyhand-proposal.md`](steadyhand-proposal.md) | **95/100** | **SteadyHand** — tremor-stabilising assistive device. Dual-mode (stabiliser + rehab), household applications, PID control. Full Mermaid diagrams |
 
 ## Reference
 
