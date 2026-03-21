@@ -128,14 +128,17 @@ hack-a-bot-2026/
 ## Supported By
 
 <p align="center">
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="28"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="28"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="University of Manchester" height="28"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="28"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="28"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="28"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Amentum.svg" alt="Amentum" height="28"/></a>&nbsp;&nbsp;&nbsp;
-  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Dominos.svg" alt="Dominos" height="28"/></a>
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="University of Manchester" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/makerspace.svg" alt="Makerspace" height="50"/></a>
+</p>
+
+<p align="center">
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/quanser.svg" alt="Quanser" height="45"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/icenine.svg" alt="Ice Nine" height="45"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Amentum.svg" alt="Amentum" height="45"/></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://hackabot-2026.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/Dominos.svg" alt="Dominos" height="45"/></a>
 </p>
 
 <p align="center">
