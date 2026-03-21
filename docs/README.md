@@ -13,6 +13,7 @@ Quick guide to what's in this folder.
 
 | File / Folder | What It Contains |
 |---|---|
-| [`idea-shortlist.md`](idea-shortlist.md) | All 10 project ideas scored against the rubric — includes Fire Escape Guide, Silent Distress Signal, Fall Detection, and more |
-| [`hardware-reference.md`](hardware-reference.md) | Component table (all provided hardware, quantities, purpose) and key interface pinouts (SPI, I2C, ADC, PWM) |
-| [`images/`](images/) | Project logos and visual assets used in the main README |
+| [`idea-shortlist-v2.md`](idea-shortlist-v2.md) | **LATEST — 14 ideas** scored with full component set (DC motor, pot, ESP32-CAM, wheels). Mermaid diagrams, architecture, decision guide |
+| [`idea-shortlist.md`](idea-shortlist.md) | Original 10 ideas (base kit only) — kept for reference |
+| [`hardware-reference.md`](hardware-reference.md) | Component table + pinout interfaces |
+| [`images/`](images/) | Project logos and visual assets |
