@@ -1,120 +1,94 @@
-# Hack-A-Bot 2026 — Project 6: Creative
+# GridBox — Smart Infrastructure Control System
 
 <p align="center">
-  <img src="https://hackabot-2026.com/live/assets/images/projects/badges/creative.png" alt="Project 6 Creative Badge" width="180"/>
+  <img src="https://hackabot-2026.com/live/assets/images/projects/badges/creative.png" alt="Project 6 Creative Badge" width="120"/>
 </p>
 
 <p align="center">
-  <strong>An open-ended embedded systems & robotics challenge</strong><br/>
-  Design a problem-driven device using two Raspberry Pi Pico 2 microcontrollers with wireless coordination
+  <strong>A £15 smart factory controller powered by recycled energy</strong><br/>
+  Monitors, decides, and acts autonomously — replacing £162K of industrial equipment
 </p>
 
----
-
-## Supported By
-
 <p align="center">
-  <a href="https://www.arm.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.eeesoc.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="50"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
-  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="The University of Manchester" height="50"/></a>
+  <a href="docs/01-overview/gridbox-design.md">Design Doc</a> · <a href="docs/01-overview/context.md">Project Context</a> · <a href="docs/02-electrical/wiring-connections.md">Wiring Guide</a> · <a href="docs/04-team/team-plan.md">Team Plan</a>
 </p>
 
 ---
 
-## Challenge Brief
+## Group 1 — Hack-A-Bot 2026, Project 6: Creative
 
-Teams have **24 hours** to design and build a working physical prototype that uses **two Raspberry Pi Pico 2 boards** communicating wirelessly to address a real-world need. The device must be demonstrated live to judges.
-
-### Theme Prompts (Choose One)
-
-| Theme | Description |
-|-------|-------------|
-| **Assistive Technology** | Improve accessibility, safety, independence, or usability for people who need it |
-| **Autonomy** | Sense, decide, and act with minimal human input |
-| **Interactive Play** | Create engaging, physical interactive experiences |
-| **Sustainability** | Reduce waste, save energy, or monitor resources |
-
-### Core Requirements
-
-- Two Pi Pico 2 boards with **wireless coordination** to address a real need
-- Working **physical prototype** completed within 24 hours
-- **Live demonstration** of core functionality to judges
-- Clear **problem definition** with identified end-user or context
+| | Name | Role | Responsibility |
+|---|---|---|---|
+| 🔧 | **Doyun Gu** | System Designer / Lead | Power grid architecture, firmware (MicroPython + C), web dashboard, SCADA protocol, team coordination |
+| ⚡ | **Wooseong Jung** | Electronics Engineer | Circuit design, MOSFET switching, current sensing, IMU wiring, energy signature fault detection |
+| 🏗️ | **Billy Park** | Mechanical Engineer | 3D printing, chassis design, turntable mechanism, motor mounts, factory layout, physical assembly |
 
 ---
 
-## Hardware Kit
+## What We're Building
 
-Every team is provided with the following components:
+GridBox is a miniature **smart factory** — a water bottling / sorting plant powered by recycled energy. Two Raspberry Pi Pico 2 boards work together wirelessly: one controls the factory floor, the other is a remote SCADA monitoring station.
 
-### Microcontrollers & Wireless
+```mermaid
+graph LR
+    ENERGY[Recycled Energy] --> PICO_A[Pico A: Factory Controller]
+    PICO_A --> M1[DC Motor: Fan/Pump]
+    PICO_A --> M2[DC Motor: Conveyor]
+    PICO_A --> S1[Servo: Valve]
+    PICO_A --> S2[Servo: Sort Gate]
+    PICO_A -->|"nRF24L01+ wireless"| PICO_B[Pico B: SCADA Station]
+    PICO_B --> OLED[OLED Dashboard]
+    PICO_B --> JOY[Joystick Control]
+    PICO_A -->|"USB serial"| WEB[Laptop: Web Dashboard]
+```
 
-| Component | Qty | Description |
-|-----------|-----|-------------|
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-2/materials/raspberry-pi-pico-2.webp" alt="Raspberry Pi Pico 2" width="80"/> | 2 | **Raspberry Pi Pico 2** — Dual-core ARM Cortex-M33 microcontroller, the brain of the project |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/nrf24l01-pa-lna-module.webp" alt="nRF24L01+" width="80"/> | 2 | **nRF24L01+ PA+LNA 2.4 GHz** — Long-range wireless transceiver modules for Pico-to-Pico communication |
+### Key Features
 
-### Actuators & Drivers
+| Feature | How It Works |
+|---|---|
+| **Smart power management** | ADC senses current at every branch. Pico reroutes excess power. $P \propto n^3$ — 20% slower = 49% less energy |
+| **Autonomous fault detection** | IMU vibration monitoring (ISO 10816) + current signature analysis. Detects bearing wear, jams, loose connections |
+| **Intelligent load shedding** | Bus voltage drops → system sheds non-essential loads by priority. Critical systems stay powered |
+| **Weight-based sorting** | Motor current change = item weight. Timed servo gate sorts good/bad at the end of the belt |
+| **Wireless SCADA** | 6-type binary datagram protocol at 50Hz. OLED dashboard with 5 views. Joystick override + potentiometer setpoint |
+| **Failure simulator** | Inject faults on command during demo — judges watch the system handle wireless dropout, motor stall, power sag, IMU failure |
+| **Web dashboard** | Live graphs on laptop via USB serial. SQLite database for persistent data logging |
 
-| Component | Qty | Description |
-|-----------|-----|-------------|
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/pca9685-servo-driver.webp" alt="PCA9685" width="80"/> | 1 | **PCA9685 Servo Driver** — 16-channel PWM driver over I2C, controls multiple servos from a single bus |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-2/materials/mg90s-servo.webp" alt="MG90S Servo" width="80"/> | — | **MG90S Servo Motors** — Compact metal-gear servos for precise mechanical actuation |
+### The Demo
 
-### Sensors & Input
-
-| Component | Qty | Description |
-|-----------|-----|-------------|
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-1/materials/analog-joystick.webp" alt="Joystick" width="80"/> | — | **Analog Joystick Modules** — Dual-axis analog input for manual control |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/bmi160-imu.webp" alt="BMI160 IMU" width="80"/> | 1 | **BMI160 IMU** — 6-axis inertial measurement unit (gyroscope + accelerometer) for motion sensing |
-
-### Display
-
-| Component | Qty | Description |
-|-----------|-----|-------------|
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-2/materials/oled-display-096.webp" alt="OLED Display" width="80"/> | 1 | **0.96" OLED Display** — I2C status screen for feedback and debugging |
-
-### Power
-
-| Component | Qty | Description |
-|-----------|-----|-------------|
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-2/materials/lm2596s-buck-converter.webp" alt="LM2596S" width="80"/> | 1 | **LM2596S Buck Converter** — Adjustable step-down voltage regulator for powering logic |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/300w-20a-buck-boost-converter.webp" alt="Buck-Boost Converter" width="80"/> | 1 | **300W 20A Buck-Boost Converter** — High-power voltage conversion for driving motors and actuators |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-2/materials/12v-6a-power-supply.webp" alt="12V PSU" width="80"/> | 1 | **12V 6A Power Supply** — Bench power source providing up to 72W |
-
-### Prototyping & Wiring
-
-| Component | Qty | Description |
-|-----------|-----|-------------|
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/breadboard-400-tie-points.webp" alt="Breadboard" width="80"/> | — | **400-Tie Breadboards** — Solderless prototyping surfaces |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-2/materials/perfboard-7x9cm.webp" alt="Perfboard" width="80"/> | — | **7×9 cm Perfboard** — For permanent soldered circuits |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/wire-22awg-solid-core.webp" alt="Wire" width="80"/> | — | **22 AWG Solid-Core Wire** — Hookup wiring for connections |
-
-### Mechanical & Tools
-
-| Component | Qty | Description |
-|-----------|-----|-------------|
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/m3x8-self-tapping-screws.webp" alt="Screws" width="80"/> | — | **M3×8 mm Self-Tapping Screws** — Mechanical fasteners for structural assembly |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/assorted-electronic-components-kit.webp" alt="Components Kit" width="80"/> | 1 | **Assorted Components Kit** — Resistors, LEDs, capacitors, diodes, and other essentials |
-| <img src="https://hackabot-2026.com/live/assets/images/projects/project-6/materials/precision-screwdriver-set.webp" alt="Screwdriver Set" width="80"/> | 1 | **Precision Screwdriver Set** — Hand tools for assembly and adjustments |
+| Step | What Happens |
+|---|---|
+| 1 | Power on — system auto-starts, motors spin, LEDs green |
+| 2 | Turn potentiometer — motor speeds change, OLED updates live |
+| 3 | Place items on turntable — sorted by weight into PASS / REJECT bins |
+| 4 | Shake motor — fault detected in <100ms, motor stops, power reroutes |
+| 5 | Press joystick to reset — system recovers automatically |
+| 6 | Show OLED — "Smart mode saved 69% energy vs dumb mode" |
 
 ---
 
-## Scoring Rubric
+## Themes
 
-| Category | Points | What Judges Look For |
-|----------|--------|----------------------|
-| **Problem Definition & Solution Fit** | 30 | Clear problem statement, identified end-user, convincing rationale for why this solution addresses the need |
-| **Live Demo & Effectiveness** | 25 | Core functionality works reliably during demonstration, system responds as intended |
-| **Technical Implementation & Engineering** | 20 | Clean wiring, good code structure, effective use of wireless comms, appropriate sensor/actuator integration |
-| **Innovation & Creativity** | 15 | Novel approach, creative use of available components, original problem framing |
-| **Communication & Documentation** | 10 | README, wiring diagrams, CAD files, clear explanation of design decisions |
-| **Total** | **100** | |
+<p align="center">
+  <strong>Sustainability</strong> — Smart energy management, waste reduction, recycled power<br/>
+  <strong>Autonomy</strong> — Sense, decide, and act with zero human input
+</p>
 
-### Score Caps (Critical)
+---
 
-> **60-point cap** — If the two-Pico wireless coordination requirement is not met
-> **50-point cap** — If core functionality cannot be demonstrated live
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Microcontrollers** | 2× Raspberry Pi Pico 2 (RP2350, ARM Cortex-M33, dual-core) |
+| **Wireless** | nRF24L01+ PA+LNA, 2.4GHz, custom 6-type binary datagram protocol |
+| **Sensors** | BMI160 IMU (vibration), ADC (voltage + current via 1Ω sense resistors) |
+| **Actuators** | 2× DC Motor (200RPM geared), 2× MG90S Servo, via PCA9685 PWM driver |
+| **Display** | 0.96" SSD1306 OLED (128×64, 5 dashboard views) |
+| **Switching** | N-channel MOSFETs on GPIO for power routing |
+| **Firmware** | MicroPython (development) + C SDK (production demo) |
+| **Dashboard** | Flask + SQLite + live graphs on laptop |
+| **Power** | 12V PSU → LM2596S buck (5V logic) + 300W buck-boost (motor power) |
 
 ---
 
@@ -122,22 +96,41 @@ Every team is provided with the following components:
 
 ```
 hack-a-bot-2026/
-├── README.md              # This file
-├── src/                   # Source code for both Picos
-│   ├── pico_controller/   # Controller Pico firmware
-│   └── pico_actuator/     # Actuator Pico firmware
-├── docs/                  # Wiring diagrams, CAD files, design notes
-└── media/                 # Photos and videos of the prototype
+├── firmware/                    ← Flashable firmware snapshots
+│   ├── 01-v1/                   ← First complete build (21 modules)
+│   └── 02-v2/                   ← + datagram protocol, self-test, A/B comparison
+│
+├── src/                         ← Development source code
+│   ├── master-pico/micropython/ ← Pico A: 13 modules (control loop, drivers, fault detection)
+│   ├── slave-pico/micropython/  ← Pico B: 7 modules (SCADA dashboard, operator input)
+│   ├── shared/protocol.py       ← 6-type binary datagram protocol (32-byte packets)
+│   ├── web/                     ← Flask dashboard + SQLite database
+│   ├── hardware/electronics/    ← Circuit docs (Wooseong)
+│   ├── hardware/chassis/        ← CAD + 3D print files (Billy)
+│   └── tools/                   ← setup-pico.sh, flash.sh
+│
+├── docs/
+│   ├── 01-overview/             ← Design doc, proposal, context, hardware ref
+│   ├── 02-electrical/           ← Wiring (81 connections), power system, datagram,
+│   │                               debug system, failure handling, motor specs,
+│   │                               energy signature fault detection (Wooseong)
+│   ├── 03-factory/              ← Physical factory design, weight sensing, build plans
+│   ├── 04-team/                 ← Team task lists + timeline
+│   └── 05-archive/              ← Past ideas explored (14 ideas ranked)
+│
+└── media/                       ← Build progress photos + demo videos
 ```
 
 ---
 
-## Team
+## Supported By
 
-*Team members to be added*
+<p align="center">
+  <a href="https://www.arm.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/ARM.svg" alt="ARM" height="40"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://www.eeesoc.com"><img src="https://hackabot-2026.com/live/assets/images/projects/sponsors/eeesoc.svg" alt="EEESoc" height="40"/></a>&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://www.manchester.ac.uk"><img src="docs/images/uom_black.png" alt="The University of Manchester" height="40"/></a>
+</p>
 
----
-
-## License
-
-This project was built during **Hack-A-Bot 2026**, supported by **ARM** and **EEESoc**.
+<p align="center">
+  <em>Hack-A-Bot 2026 — Project 6: Creative — University of Manchester</em>
+</p>
