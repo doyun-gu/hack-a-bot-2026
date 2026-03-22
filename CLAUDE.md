@@ -155,19 +155,34 @@ The Pico IS the power grid's switching fabric:
 - [ ] **6. Command test** — Pico B sends joystick/pot commands, Pico A responds (motor speed, servo, mode)
 - [ ] **7. Fault injection test** — trigger each fault (F1-F6), verify display + LED + wireless alert
 
-### Todo — Hardware (revised 2026-03-22)
+### Todo — Hardware (revised 2026-03-22, ~66 wires total)
 
-- [ ] Complete hardware wiring (~78 wires per wiring-connections.md Rev 2)
-- [ ] Connect PCA9685 PWM driver to Pico A (I2C: SDA=GP4, SCL=GP5, addr 0x40)
-- [ ] Connect DC motors: PCA9685 CH2/CH3 → 1kΩ → MOSFET gate (+ sense R + flyback diode)
-- [ ] Connect BMI160 IMU to Pico A (I2C: same bus, addr 0x68)
-- [ ] Connect OLED SSD1306 to Pico B (I2C: SDA=GP4, SCL=GP5)
-- [ ] Connect joystick + potentiometer to Pico B (ADC: GP26, GP27, GP28)
-- [ ] Connect recycle path MOSFET (GP13)
-- [ ] Connect servos to PCA9685 (channels 0-1)
-- [ ] Power supply: 12V PSU → LM2596S buck → 5V bus
-- [x] ~~LED bank on GP12~~ — **REPLACED** by MAX7219 display on Pico B
-- [x] ~~Motor MOSFETs on GP10/GP11~~ — **REPLACED** by PCA9685 Ch2/Ch3 → MOSFET
+**Wooseong — DONE:**
+- [x] Power supply chain (P1-P7) — 5V + motor rail verified
+- [x] Pico A power (A1-A2)
+- [x] Pico A nRF SPI (A14-A20) — PASS
+- [x] Pico B power (B1-B2)
+- [x] Pico B nRF SPI (B9-B15) — PASS
+- [x] Wireless link tested — 200+ packets, 0 bad
+- [x] Pico B MAX7219 display (B16-B20) — PASS
+- [x] Pico A I2C SDA/SCL wired (A3-A6, partial)
+
+**Wooseong — REMAINING:**
+- [ ] Add 4.7kΩ I2C pull-ups (A7-A8)
+- [ ] PCA9685 power + ground (A9-A13)
+- [ ] BMI160 IMU power + ground (A9-A10) + mount on Motor 1
+- [ ] Motor MOSFET circuits (A21-A28) — PCA9685 CH2/CH3 → 1kΩ → gate
+- [ ] ADC sensing (A33-A35) — voltage divider + sense resistors
+- [ ] Recycle path MOSFET (A29-A32)
+- [ ] OLED SSD1306 on Pico B (B3-B8)
+- [ ] Servos to PCA9685 CH0-CH1 (S1-S4)
+
+**CANCELLED:**
+- [x] ~~LED bank (GP12)~~ — replaced by MAX7219
+- [x] ~~Status LEDs (GP14/GP15)~~ — replaced by MAX7219
+- [x] ~~Motor MOSFETs on GP10/GP11~~ — replaced by PCA9685 PWM
+- [x] ~~Joystick~~ — autonomous demo, no manual input
+- [x] ~~Potentiometer~~ — autonomous demo, no manual input
 
 ### Todo — Production
 

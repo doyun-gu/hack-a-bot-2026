@@ -2,7 +2,9 @@
 
 > Print this and check off each connection as you wire it. Every wire is listed once.
 >
-> **Revision 2 (2026-03-22):** LED bank REMOVED (replaced by MAX7219 display on Pico B). Motor MOSFET gates now driven by PCA9685 PWM instead of direct GPIO. See [Change Log](#change-log) at bottom.
+> **Revision 3 (2026-03-22):** Major scope reduction — LED bank, status LEDs, joystick, potentiometer all removed. Motor MOSFETs driven by PCA9685 PWM. ~66 wires total. See [Change Log](#change-log) at bottom.
+>
+> **Wooseong's progress:** Steps 1-7 DONE (power, nRF both Picos, wireless link, MAX7219). Steps 8-14 remaining.
 
 ---
 
