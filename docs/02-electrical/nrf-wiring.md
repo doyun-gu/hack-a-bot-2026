@@ -15,27 +15,6 @@
 
 **WARNING: The nRF image is the FRONT view. When you flip the board, left and right are reversed. Always verify by reading the text labels on the BACK.**
 
-### Pin Diagram
-
-Looking at the module from the **top, antenna pointing up:**
-
-```
-            ANTENNA
-              ↑
-        ┌───────────┐
-        │           │
-        │ nRF24L01+ │
-        │           │
-        └──┬─┬─┬─┬──┘
-           │ │ │ │
-    ┌──────┴─┴─┴─┴──────┐
-    │  1   3   5   7    │  ← bottom row
-    │  2   4   6   8    │  ← top row
-    └───────────────────┘
-
-    Pin 1 = bottom-left (square pad / dot marking)
-```
-
 ---
 
 ## Wiring Table
