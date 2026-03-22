@@ -106,6 +106,85 @@ Looking at the Pico B with USB port at the top:
 
 ---
 
+## Display Indicator Messages
+
+The display uses raw segment encoding — each character is mapped to 7 segments. Not all letters are possible, but enough for clear status messages.
+
+### System Status
+
+| Display | Meaning | When |
+|---|---|---|
+| `BOOT` | System booting | Startup / self-test |
+| `PASS` | Self-test passed | All hardware OK |
+| `FAIL` | Self-test failed | Hardware issue |
+| `run` | Running normally | Main loop active |
+| `HALT` | Emergency stop | E-stop triggered |
+| `AUTO` | Autonomous mode | Smart routing active |
+
+### Wireless Link (nRF24L01+)
+
+| Display | Meaning | When |
+|---|---|---|
+| `LINK On` | nRF connected | Heartbeat received |
+| `LINK OFF` | nRF disconnected | No heartbeat for 3s |
+| `SPI FAIL` | SPI bus error | nRF not responding |
+| `SEND` | Transmitting | Command sent to Pico A |
+| `rECd` | Data received | Telemetry packet from Pico A |
+| `98 Pct` | 98% reliability | Packet success rate |
+
+### Power Monitoring
+
+| Display | Meaning | When |
+|---|---|---|
+| `4.8 U` | Bus voltage 4.8V | Live ADC reading |
+| `350 A` | Current 350mA | Motor current reading |
+| `1.7 P` | Power 1.7W | Total power draw |
+| `Lo bAt` | Low battery/voltage | Bus voltage < 4.2V |
+| `FULL Pwr` | Full power | All loads running |
+| `LoAd Hi` | Overload | Current too high |
+
+### Fault Codes
+
+| Display | Meaning | When |
+|---|---|---|
+| `FAULT 1` | Overcurrent | Motor stall or jam |
+| `FAULT 2` | Voltage drop | Power supply issue |
+| `FAULT 3` | IMU vibration | Equipment shaking |
+| `FAULT 4` | Link lost | nRF heartbeat timeout |
+| `FAULT 5` | nRF failure | SPI not responding |
+| `FAULT 6` | Sensor error | ADC out of range |
+
+### Factory / Production
+
+| Display | Meaning | When |
+|---|---|---|
+| `FILL` | Filling bottle | Valve servo open |
+| `donE` | Item complete | Passed quality check |
+| `PULL` | Reject item | Failed weight check |
+| `48 PCS` | 48 items produced | Production counter |
+| `2.1 Pct` | 2.1% reject rate | Quality metric |
+
+### Demo / A-B Comparison
+
+| Display | Meaning | When |
+|---|---|---|
+| `dULLb` | Dumb mode | Baseline comparison |
+| `COOL` | Smart mode | Energy-saving active |
+| `-49 Pct` | 49% power saved | Comparison result |
+
+### LED + Display Combined Status
+
+The heartbeat LED and 7-segment display work together:
+
+| LED Pattern | Display | Meaning |
+|---|---|---|
+| Slow blink (400ms) | `run` or data | Normal operation |
+| Fast burst (100ms) | `SEND` / `rECd` | Wireless activity |
+| Rapid blink (120ms) | `FAULT n` | Fault detected |
+| Fast blink (80ms) | `BOOT` | System starting up |
+
+---
+
 ## How to Test
 
 After wiring, run:
