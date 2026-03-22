@@ -12,6 +12,19 @@ A £15 smart infrastructure controller powered by recycled energy. Senses power 
 
 **Demo scenario:** Miniature smart water bottling plant — pump, fill valve, conveyor, quality gate, all running autonomously with fault detection.
 
+## Deep Context (read after /compact)
+
+For full project context after compaction or in a new session, read `.context/`:
+
+| File | Contents |
+|---|---|
+| `.context/project-overview.md` | Hackathon rules, scoring, team, GridBox concept |
+| `.context/architecture.md` | Two-Pico design, protocol, software layers, dual-core strategy |
+| `.context/file-map.md` | Complete annotated file tree (what every file does) |
+| `.context/hardware.md` | Pin mapping, wiring, SPI/I2C buses, components |
+| `.context/dev-workflow.md` | Build, flash, test, debug commands + common issues |
+| `.context/status.md` | **Current state** — done/todo checklists (update frequently) |
+
 ## Key Design Documents
 
 | Document | Location | Contents |
