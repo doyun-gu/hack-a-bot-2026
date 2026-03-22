@@ -60,24 +60,7 @@ GND ───┴─── Pin 1 (GND)
 
 The nRF24L01+ draws current in short **bursts** — idle at 12mA, then suddenly 115mA during transmission (lasting ~1ms). This sudden current demand causes the 3.3V supply voltage to **dip**:
 
-```
-Without capacitor:
-
-3.3V ─────╲    ╱─────╲    ╱───── voltage
-           ╲  ╱       ╲  ╱
-            ╲╱   2.8V  ╲╱         ← dips below 2.7V minimum
-                                     nRF resets, loses packet
-           TX burst   TX burst
-```
-
-```
-With 10µF capacitor:
-
-3.3V ──────────────────────────── voltage stays stable
-           ~~3.2V  ~~3.2V        ← small dip, stays above 2.7V
-                                     capacitor supplies the burst current
-           TX burst   TX burst
-```
+![nRF24L01+ Voltage With and Without Capacitor](../images/nrf_capacitor_effect.png)
 
 The capacitor acts as a **tiny battery** — it stores charge and releases it during the current burst, keeping the voltage stable.
 
