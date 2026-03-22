@@ -10,11 +10,12 @@
 
 ![nRF24L01+ to Pico 2 Wiring](../images/wiring_nrf_to_pico.svg)
 
-### Reference Image (FRONT view — component side)
+### Reference Pinouts
 
 ![nRF24L01+ Pinout Reference](../images/nrf_pinout_reference.png)
+![Raspberry Pi Pico 2 Pinout Reference](../images/pico2_pinout_reference.svg)
 
-**WARNING: This is the FRONT view. When you flip the board, left and right are reversed. Always verify by reading the text labels on the BACK.**
+**WARNING: The nRF image is the FRONT view. When you flip the board, left and right are reversed. Always verify by reading the text labels on the BACK.**
 
 ### Pin Diagram
 
