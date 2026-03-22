@@ -1,0 +1,165 @@
+"""
+Test: SSD1306 OLED Display with live heartbeat
+- OLED shows status screens
+- Onboard LED toggles on every update (like airplane wing light)
+- Small dot on OLED toggles to show it's live
+
+Usage: mpremote run test_oled.py
+"""
+
+import sys
+sys.path.append('/micropython')
+
+from machine import Pin, I2C
+import time
+import config
+from ssd1306 import SSD1306
+
+print("=" * 40)
+print("  SSD1306 OLED Display Test")
+print("  LED heartbeat + OLED live dot")
+print("=" * 40)
+
+# Onboard LED for heartbeat
+led = Pin(25, Pin.OUT)
+
+i2c = I2C(config.I2C_ID, sda=Pin(config.I2C_SDA),
+          scl=Pin(config.I2C_SCL), freq=config.I2C_FREQ)
+
+try:
+    oled = SSD1306(i2c, width=config.OLED_WIDTH,
+                   height=config.OLED_HEIGHT, addr=config.SSD1306_ADDR)
+    print(f"OLED OK: {config.OLED_WIDTH}x{config.OLED_HEIGHT}\n")
+
+    # Boot sequence — clean engineering style
+    print("Boot sequence...")
+
+    # Phase 1: System identification
+    oled.fill(0)
+    oled.text("GridBox v2", 24, 12, 1)
+    oled.hline(24, 22, 80, 1)
+    oled.text("SCADA Controller", 8, 28, 1)
+    oled.show()
+    led.value(1)
+    time.sleep(1)
+
+    # Phase 2: Self-test checklist (like a real boot log)
+    checks = [
+        ("I2C", True),
+        ("OLED", True),
+        ("IMU", True),
+        ("PCA9685", True),
+        ("nRF24L01+", True),
+        ("ADC", True),
+    ]
+
+    oled.fill(0)
+    oled.text("SELF-TEST", 32, 0, 1)
+    oled.hline(0, 10, 128, 1)
+    oled.show()
+    time.sleep_ms(300)
+
+    for i, (name, ok) in enumerate(checks):
+        y = 14 + i * 8
+        oled.text(f"{name}", 4, y, 1)
+        oled.show()
+        time.sleep_ms(200)
+        status = "OK" if ok else "FAIL"
+        oled.text(status, 100, y, 1)
+        oled.show()
+        led.toggle()
+        print(f"  {name}: {status}")
+        time.sleep_ms(150)
+
+    time.sleep_ms(500)
+
+    # Phase 3: Ready — simple, no flash
+    oled.fill(0)
+    oled.text("SYSTEM READY", 16, 24, 1)
+    oled.hline(16, 34, 96, 1)
+    oled.text("All checks passed", 4, 42, 1)
+    oled.show()
+    led.value(1)
+    time.sleep(1)
+    print("Boot complete.\n")
+
+    # Screen 1: Title + status (3 seconds)
+    oled.fill(0)
+    oled.rect(0, 0, 128, 64, 1)
+    oled.text("GridBox SCADA", 12, 4, 1)
+    oled.hline(4, 14, 120, 1)
+    oled.text("Motor 1: OK", 8, 20, 1)
+    oled.text("Motor 2: OK", 8, 32, 1)
+    oled.text("Bus: 4.9V", 8, 44, 1)
+    oled.show()
+    print("Screen 1: System status")
+    time.sleep(3)
+
+    # Screen 2: Power bars (3 seconds)
+    oled.fill(0)
+    oled.rect(0, 0, 128, 64, 1)
+    oled.text("Power Flow", 24, 4, 1)
+    oled.hline(4, 14, 120, 1)
+    oled.text("M1", 4, 20, 1)
+    oled.rect(24, 20, 100, 8, 1)
+    oled.fill_rect(24, 20, 65, 8, 1)
+    oled.text("M2", 4, 34, 1)
+    oled.rect(24, 34, 100, 8, 1)
+    oled.fill_rect(24, 34, 40, 8, 1)
+    oled.text("Total: 1.9W", 8, 50, 1)
+    oled.show()
+    print("Screen 2: Power flow")
+    time.sleep(3)
+
+    # Screen 3: Live heartbeat loop — runs continuously
+    print("Screen 3: Live heartbeat (Ctrl+C to stop)")
+    print("  LED toggles every 500ms")
+    print("  OLED dot toggles every 500ms")
+
+    tick = 0
+    while True:
+        # Toggle onboard LED — visible heartbeat
+        led.toggle()
+
+        # Draw live status screen with toggling dot
+        oled.fill(0)
+        # Yellow zone (y=0-15) — header bar
+        oled.text("GridBox", 0, 4, 1)
+        oled.text("LIVE", 100, 4, 1)
+        # Toggling dot — proves OLED is updating
+        if tick % 2 == 0:
+            oled.fill_rect(68, 6, 4, 4, 1)  # dot ON
+
+        # Blue zone (y=16-63) — all content below yellow band
+        import random
+        m1 = 340 + (tick * 7) % 60
+        m2 = 270 + (tick * 5) % 40
+        bus = 4.85 + (tick % 10) * 0.01
+
+        oled.text(f"M1: {m1}mA  ON", 0, 18, 1)
+        oled.text(f"M2: {m2}mA  ON", 0, 28, 1)
+        oled.text(f"Bus: {bus:.2f}V", 0, 38, 1)
+        oled.text(f"IMU: 0.3g  OK", 0, 48, 1)
+        oled.hline(0, 57, 128, 1)
+        status = "NORMAL" if tick % 20 < 15 else "CHECK"
+        oled.text(f"T:{tick:4d}", 0, 58, 1)
+        oled.text(status, 80, 58, 1)
+
+        oled.show()
+        tick += 1
+
+        # Print to serial too
+        if tick % 4 == 0:
+            print(f"[LIVE] tick={tick} M1={m1}mA M2={m2}mA Bus={bus:.2f}V LED={'ON' if led.value() else 'OFF'}")
+
+        time.sleep_ms(500)
+
+except OSError as e:
+    print(f"I2C error: {e}")
+    print("Check OLED wiring: SDA=GP4, SCL=GP5, VCC=3.3V, GND=GND")
+except KeyboardInterrupt:
+    led.value(0)
+    oled.fill(0)
+    oled.text("Test stopped", 16, 28, 1)
+    oled.show()
+    print("\nTest stopped cleanly")
