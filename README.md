@@ -33,6 +33,8 @@ Monitors, decides, and acts autonomously — replacing **£162K** of industrial 
 
 **Team:** Doyun Gu (Lead) · Wooseong Jung (Electronics) · Billy Park (Mechatronics)
 
+**24-hour hackathon** · 21 Mar 2026 12:00 — 22 Mar 2026 12:00
+
 <a href="docs/01-overview/gridbox-design.md">Design Doc</a> · <a href="docs/01-overview/context.md">Project Context</a> · <a href="docs/02-electrical/wiring-connections.md">Wiring Guide</a> · <a href="docs/04-team/team-plan.md">Team Plan</a>
 
 </td>
