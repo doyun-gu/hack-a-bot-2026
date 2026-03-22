@@ -53,13 +53,24 @@ def clear():
         _write(d, 0x00)
 
 
+def _pad_right(text, width):
+    """Right-align: pad spaces on the left."""
+    text = text[:width]
+    return ' ' * (width - len(text)) + text
+
+
+def _pad_left(text, width):
+    """Left-align: pad spaces on the right."""
+    text = text[:width]
+    return text + ' ' * (width - len(text))
+
+
 def show(text):
     """Display up to 8 characters. Right-aligned if shorter.
 
     Examples: show("LINK On"), show("FAULT 1"), show("PASS")
     """
-    # Pad to 8 chars, right-aligned
-    text = text[:8].rjust(8)
+    text = _pad_right(text, 8)
 
     # MAX7219 digit 1 = rightmost, digit 8 = leftmost
     for i, ch in enumerate(text):
@@ -69,7 +80,7 @@ def show(text):
 
 def show_left(text):
     """Display up to 8 characters. Left-aligned."""
-    text = text[:8].ljust(8)
+    text = _pad_left(text, 8)
     for i, ch in enumerate(text):
         seg = _CHARS.get(ch, 0x00)
         _write(8 - i, seg)
