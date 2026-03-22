@@ -38,6 +38,15 @@ POT_PIN = 28             # GP28 — Potentiometer
 JOY_CENTRE = 32768       # midpoint of 16-bit ADC
 JOY_DEADZONE = 3000      # ignore values within this range of centre
 
+# ============ SPI1 BUS (MAX7219 7-Segment Display) ============
+SPI1_ID = 1
+SPI1_SCK = 10            # GP10
+SPI1_MOSI = 11           # GP11
+SPI1_BAUD = 10_000_000
+MAX7219_CS = 13          # GP13
+MAX7219_DIGITS = 8       # 8-digit module
+MAX7219_INTENSITY = 8    # 0-15 (brightness)
+
 # ============ STATUS LEDs ============
 LED_RED = 14             # GP14
 LED_GREEN = 15           # GP15
