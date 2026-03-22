@@ -54,7 +54,7 @@ SENSE → DECIDE → ACT → REPORT → (loop)
 |---|---|
 | **Doyun Gu** | System Designer / Lead — architecture, firmware, wireless protocol, dashboard, docs |
 | **Wooseong Jung** | Electronics Engineer — ~66 wires, power distribution, motor driver, sensors |
-| **Billy Park** | Mechanical Engineer — factory chassis, 3D printing, motor mounts, assembly |
+| **Billy Park** | Mechatronics Engineer — CAD design (Fusion 360), 3D printing, conveyor, assembly |
 
 ## Demo (3 Minutes)
 

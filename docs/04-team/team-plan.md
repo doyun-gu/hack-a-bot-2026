@@ -10,7 +10,7 @@
 |---|---|---|---|
 | **Doyun** | System Designer / Lead | Power grid architecture, firmware, project management | System architecture design, power distribution scheme, firmware (MicroPython + C), web dashboard, OLED screens, wireless protocol, documentation, team coordination |
 | **Wooseong** | Electronics Engineer | EE, circuit design, soldering, wiring | All wiring, power distribution implementation, MOSFET switching circuits, sensor connections, voltage dividers, I2C/SPI bus, testing circuits |
-| **Billy** | Mechanical Engineer | 3D printing, CAD, physical design, motor mounting | Factory chassis/enclosure, motor mounts, servo brackets, turntable/conveyor mechanism, physical factory layout, labels |
+| **Billy** | Mechatronics Engineer | CAD design (Fusion 360), 3D printing, physical assembly | Conveyor mechanism, motor mounts, sorting system, servo brackets, factory layout, labels |
 
 ---
 
@@ -167,7 +167,7 @@ gantt
 
 ---
 
-## Billy — Mechanical / 3D Printing / Physical Design
+## Billy — Mechatronics / CAD / Physical Assembly
 
 ### Hour 0-3: Design + Print Start
 

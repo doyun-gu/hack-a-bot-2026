@@ -23,7 +23,7 @@
 |---|---|---|
 | **Doyun Gu** | System Designer / Lead | Power grid architecture, firmware (MicroPython + C), web dashboard, SCADA protocol, team coordination |
 | **Wooseong Jung** | Electronics Engineer | Circuit design, MOSFET switching, current sensing, IMU wiring, energy signature fault detection |
-| **Billy Park** | Mechanical Engineer | 3D printing, chassis design, turntable mechanism, motor mounts, factory layout, physical assembly |
+| **Billy Park** | Mechatronics Engineer | CAD design (Fusion 360), 3D printing, conveyor mechanism, motor mounts, sorting system, physical assembly |
 
 ---
 

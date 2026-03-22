@@ -26,7 +26,7 @@ git checkout -b wooseong/electronics
 git push -u origin wooseong/electronics
 ```
 
-### If you are Billy (Mechanical):
+### If you are Billy (Mechatronics):
 
 ```bash
 git checkout -b billy/mechanical
@@ -141,7 +141,7 @@ src/hardware/datasheets/   ← component datasheets you reference
 media/                     ← photos of your build progress
 ```
 
-### Billy — Mechanical
+### Billy — Mechatronics
 
 Put your files in:
 ```

@@ -81,7 +81,7 @@ So a 10g item causing ~2mA change = ~40 ADC counts. With 10-sample averaging, th
 
 ---
 
-## What Billy Needs to Know for Mechanical Design
+## What Billy Needs to Know for Mechatronics Design
 
 ### Motor Mounting
 
