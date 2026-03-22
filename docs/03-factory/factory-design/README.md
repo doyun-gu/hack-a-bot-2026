@@ -14,5 +14,6 @@
 |---|---|---|
 | [`weight-sensing-sorting.md`](weight-sensing-sorting.md) | Doyun | Weight detection via motor current — 4-LED station system, sorting logic, calibration |
 | [`factory-layout.md`](factory-layout.md) | Doyun | Physical layout — zones, dimensions, side view, demo table setup, rendered diagrams |
-| [`factory-build-plan.md`](factory-build-plan.md) | Billy | Battery sorting factory — turntable + weight + size-gap mechanism |
-| [`factory-deep-dive.md`](factory-deep-dive.md) | Billy | 4 factory types compared with scoring — Battery Recovery chosen (96pts) |
+| [`factory-build-plan.md`](factory-build-plan.md) | Doyun | Battery sorting factory — turntable + weight + size-gap mechanism, demo script, build materials |
+| [`factory-deep-dive.md`](factory-deep-dive.md) | Doyun | 4 factory types compared with scoring — Battery Recovery chosen (96pts) |
+| [`factory-full-layout.md`](factory-full-layout.md) | Doyun | Full component plan — PCA9685 channel map, conveyor + sorting + HVAC systems |
