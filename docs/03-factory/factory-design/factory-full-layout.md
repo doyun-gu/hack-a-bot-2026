@@ -227,161 +227,90 @@ WEIGHT DETECTION:
 
 ### 2. SORTING SYSTEM
 
+Sorts batteries into 4 categories by size and weight.
+
+```mermaid
+flowchart TD
+    A[Battery on belt] --> B{SIZE GAP}
+    B -->|Small - falls through| C[SMALL BIN<br/>Button Cell Recovery]
+    B -->|Large - stays on belt| D{"HAZMAT CHECK<br/>[180 #1 arm]"}
+    D -->|IMU detects damage| E[HAZMAT BIN<br/>Damaged - Containment]
+    D -->|Normal| F{"WEIGHT CHECK<br/>ADC GP27 current"}
+    F -->|Current > threshold| G["HEAVY BIN<br/>Li-ION Processing<br/>[180 #2 arm]"]
+    F -->|Current < threshold| H["LIGHT BIN<br/>Alkaline Recycling<br/>[180 #3 arm]"]
+    F -->|Passed all checks| I["[90 #2] TRANSFER GATE"]
+    I --> J{"[180 #4] OUTPUT DIVERTER"}
+    J -->|Left| K[LINE A<br/>Small Batch Pack]
+    J -->|Right| L[LINE B<br/>Bulk Pack]
 ```
-WHAT IT DOES:
-  Sorts batteries into 4 categories by size and weight.
 
-HOW IT SORTS:
+**Total Bins:**
 
-  STEP 1 - SIZE CHECK (physical)
-  +------------------------------------------+
-  | Battery hits a GAP in the belt            |
-  | Small items (button cells) fall through   |
-  | Large items stay on belt                  |
-  | --> SMALL BIN                             |
-  +------------------------------------------+
-        |
-        v (large items continue)
-
-  STEP 2 - HAZMAT CHECK (180 #1 arm)
-  +------------------------------------------+
-  | 180 #1 arm is positioned at belt edge     |
-  | If IMU detects abnormal vibration         |
-  | pattern = damaged/swollen battery         |
-  | --> ARM SWEEPS item to HAZMAT BIN         |
-  | If normal: item passes through            |
-  +------------------------------------------+
-        |
-        v (safe items continue)
-
-  STEP 3 - WEIGHT CHECK (180 #2 and #3 arms)
-  +------------------------------------------+
-  | Pico reads Motor 1 current (ADC GP27)     |
-  |                                           |
-  | Current > threshold?                      |
-  |   YES --> 180 #2 pushes to HEAVY BIN      |
-  |   NO  --> 180 #3 pushes to LIGHT BIN      |
-  +------------------------------------------+
-
-  STEP 4 - OUTPUT ROUTING (180 #4 diverter)
-  +------------------------------------------+
-  | Items that pass all checks reach output    |
-  | 180 #4 diverter routes to:                |
-  |   LEFT  = Packaging Line A (small batch)  |
-  |   RIGHT = Packaging Line B (bulk batch)   |
-  +------------------------------------------+
-
-TOTAL BINS:
-  [SMALL]   - fell through gap   - "Button Cell Recovery"
-  [HAZMAT]  - rejected by 180 #1 - "Damaged - Containment"
-  [HEAVY]   - pushed by 180 #2   - "Li-ION Processing"
-  [LIGHT]   - pushed by 180 #3   - "Alkaline Recycling"
-  [LINE A]  - routed by 180 #4   - "Small Batch Pack"
-  [LINE B]  - routed by 180 #4   - "Bulk Pack"
-```
+| Bin | Trigger | Label |
+|---|---|---|
+| SMALL | Fell through gap | Button Cell Recovery |
+| HAZMAT | Rejected by 180 #1 | Damaged - Containment |
+| HEAVY | Pushed by 180 #2 | Li-ION Processing |
+| LIGHT | Pushed by 180 #3 | Alkaline Recycling |
+| LINE A | Routed by 180 #4 | Small Batch Pack |
+| LINE B | Routed by 180 #4 | Bulk Pack |
 
 ### 3. HVAC SYSTEM
 
+Controls air quality in the factory. Extracts toxic fumes from battery processing. Directs airflow where needed.
+
+**Components:** DC Motor 2 = main extraction fan (ALWAYS ON), 90 #3 = Zone A damper (sorting area), 90 #4 = Zone B damper (output area).
+
+#### Smart HVAC Logic
+
+```mermaid
+flowchart TD
+    A{Factory State?} -->|Normal load| B["NORMAL MODE<br/>Fan: 60%<br/>Zone A: OPEN<br/>Zone B: HALF"]
+    A -->|High load| C["HIGH LOAD<br/>Fan: 80%<br/>Both zones: FULL OPEN"]
+    A -->|IMU fault| D["THERMAL EVENT<br/>Fan: 100% MAX<br/>Both zones: FULL OPEN<br/>Emergency gate: CLOSED"]
+    A -->|Idle| E["POWER SAVING<br/>Fan: 40%<br/>Zone A: MOSTLY CLOSED<br/>Zone B: CLOSED"]
 ```
-WHAT IT DOES:
-  Controls air quality in the factory. Extracts toxic fumes
-  from battery processing. Directs airflow where needed.
 
-HOW:
-  DC Motor 2 = main extraction fan (ALWAYS ON)
-  90 #3 = Zone A damper (sorting area)
-  90 #4 = Zone B damper (output area)
+> "Real battery plants spend 40-60% of energy on ventilation. A dumb system runs fans at 100% all day. Our smart system matches airflow to actual processing load. That's where the energy savings come from."
 
-SMART HVAC LOGIC:
+**Power Priority (load shedding order):**
 
-  NORMAL MODE:
-    Fan: 60% speed
-    Zone A damper: 90 deg OPEN (sorting needs more air)
-    Zone B damper: 45 deg HALF-OPEN (output needs less)
-
-  HIGH LOAD (lots of batteries being sorted):
-    Fan: 80% speed
-    Zone A damper: 90 deg FULL OPEN
-    Zone B damper: 90 deg FULL OPEN
-
-  THERMAL EVENT (IMU fault detected):
-    Fan: 100% MAX SPEED
-    Zone A damper: 90 deg FULL OPEN
-    Zone B damper: 90 deg FULL OPEN
-    Emergency gate (90 #5): CLOSED (stop all intake)
-    All sorting arms: STOP
-    = Maximum extraction, zero new input
-
-  POWER SAVING MODE (no batteries being processed):
-    Fan: 40% speed (minimum safe level)
-    Zone A damper: 30 deg MOSTLY CLOSED
-    Zone B damper: 0 deg CLOSED
-    = Minimum energy while maintaining safety
-
-WHY THIS MATTERS:
-  "Real battery plants spend 40-60% of energy on ventilation.
-   A dumb system runs fans at 100% all day.
-   Our smart system matches airflow to actual processing load.
-   That's where the energy savings come from."
-
-POWER PRIORITY (load shedding order):
-  P1 = Fan (Motor 2)     --> NEVER shed. Safety critical.
-  P2 = Conveyor (Motor 1) --> Shed second-to-last. Revenue.
-  P3 = Sorting (servos)   --> Shed if needed. Pause sorting.
-  P4 = Lights (LEDs)      --> Shed FIRST. Non-essential.
-```
+| Priority | System | Action |
+|---|---|---|
+| P1 | Fan (Motor 2) | NEVER shed. Safety critical. |
+| P2 | Conveyor (Motor 1) | Shed second-to-last. Revenue. |
+| P3 | Sorting (servos) | Shed if needed. Pause sorting. |
+| P4 | Lights (LEDs) | Shed FIRST. Non-essential. |
 
 ## The Sorting Flow - Full Picture
 
+#### Sorting Flow
+
+```mermaid
+flowchart TD
+    A[Judge drops battery] --> B["[90 #1] INTAKE GATE"]
+    B --> C["CONVEYOR BELT<br/>Motor 1"]
+    C --> D{SIZE GAP}
+    D -->|Small| E[SMALL BIN]
+    D -->|Large| F{"[180 #1] SIZE REJECT ARM<br/>Damaged/swollen?"}
+    F -->|Yes| G[HAZMAT BIN]
+    F -->|Safe| H{"WEIGHT CHECK<br/>ADC GP27"}
+    H -->|Heavy| I["[180 #2] → HEAVY BIN<br/>Li-ION"]
+    H -->|Light| J["[180 #3] → LIGHT BIN<br/>Alkaline"]
+    H -->|Clean item| K["[90 #2] TRANSFER GATE"]
+    K --> L{"[180 #4] OUTPUT DIVERTER"}
+    L -->|Left| M[LINE A<br/>small batch]
+    L -->|Right| N[LINE B<br/>bulk batch]
 ```
-Judge drops battery
-        |
-        v
-[90 #1 INTAKE GATE] -- closed? wait. open? proceed.
-        |
-        v
-====== CONVEYOR BELT (Motor 1) ======
-        |
-        v
-[SIZE GAP] --- small? ---> falls to SMALL BIN
-        |
-  (large)
-        |
-        v
-[180 #1 SIZE REJECT ARM] --- damaged/swollen? ---> HAZMAT BIN
-        |
-  (safe)
-        |
-        v
-[WEIGHT CHECK: ADC GP27 reads motor current]
-        |
-  heavy? --YES--> [180 #2 HEAVY ARM] ---> HEAVY BIN "Li-ION"
-        |
-  light? --YES--> [180 #3 LIGHT ARM] ---> LIGHT BIN "Alkaline"
-        |
-  (passed all checks - clean item)
-        |
-        v
-[90 #2 TRANSFER GATE] -- opens to release
-        |
-        v
-[180 #4 OUTPUT DIVERTER]
-        |        |
-  LEFT        RIGHT
-        v        v
-  [LINE A]   [LINE B]
-  small batch  bulk batch
 
+#### HVAC Flow (runs continuously)
 
-MEANWHILE, THE WHOLE TIME:
-
-[DC Motor 2 FAN] ---> blowing through duct --->
-        |                       |
-  [90 #3 ZONE A DAMPER]       [90 #4 ZONE B DAMPER]
-        |                       |
-  air to sorting area        air to output area
-
-[90 #5 EMERGENCY GATE] = ready to slam shut if IMU triggers
+```mermaid
+flowchart LR
+    FAN["DC Motor 2 FAN<br/>[!] ALWAYS ON"] --> DUCT[Ductwork]
+    DUCT --> DA["[90 #3] Zone A Damper<br/>→ Sorting Area"]
+    DUCT --> DB["[90 #4] Zone B Damper<br/>→ Output Area"]
+    EMG["[90 #5] EMERGENCY GATE<br/>Slams shut on fault"] -.-> B["[90 #1] INTAKE"]
 ```
 
 ## Physical Build - How to Actually Make It

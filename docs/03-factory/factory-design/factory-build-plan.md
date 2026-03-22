@@ -27,18 +27,18 @@
 
 We DON'T have a scale. But we DO have current sensing on Motor 1.
 
-```
-HEAVIER object on turntable
-    = Motor needs MORE torque to spin it
-    = Motor draws MORE current
-    = ADC GP27 reads HIGHER voltage across 1 ohm sense resistor
-    = We know it's HEAVY
-
-LIGHTER object on turntable
-    = Motor needs LESS torque
-    = Motor draws LESS current
-    = ADC GP27 reads LOWER voltage
-    = We know it's LIGHT
+```mermaid
+flowchart LR
+    subgraph HEAVY["Heavier Object"]
+        H1[More torque needed] --> H2[More current drawn]
+        H2 --> H3[ADC GP27 reads HIGH]
+        H3 --> H4[Classified: HEAVY]
+    end
+    subgraph LIGHT["Lighter Object"]
+        L1[Less torque needed] --> L2[Less current drawn]
+        L2 --> L3[ADC GP27 reads LOW]
+        L3 --> L4[Classified: LIGHT]
+    end
 ```
 
 ### The Math (Simple)
@@ -190,25 +190,18 @@ LOADING
 
 ## Sorting Flow - Step by Step
 
-```
-STEP 1: Judge drops a battery onto the turntable
-        |
-STEP 2: Motor 1 spins the turntable
-        |
-STEP 3: Item reaches the SIZE GAP
-        |
-        +---> SMALL item? ---> Falls through gap ---> SMALL BIN (done!)
-        |
-        +---> LARGE item? ---> Stays on disc, keeps spinning
-              |
-STEP 4:       Item reaches WEIGHT CHECK ZONE
-              Pico A reads Motor 1 current from ADC GP27
-              |
-              +---> Current ABOVE threshold? (heavy)
-              |     ---> Servo 1 pushes item off ---> HEAVY BIN
-              |
-              +---> Current BELOW threshold? (light)
-                    ---> Servo 2 pushes item off ---> LIGHT BIN
+```mermaid
+flowchart TD
+    A[Judge drops battery onto turntable] --> B[Motor 1 spins turntable]
+    B --> C[Item reaches SIZE GAP]
+    C -->|Small item| D[Falls through gap]
+    D --> E[SMALL BIN]
+    C -->|Large item — stays on disc| F[Item reaches WEIGHT CHECK ZONE]
+    F --> G{Pico A reads Motor 1 current\nADC GP27}
+    G -->|Current ABOVE threshold| H[Servo 1 pushes item off]
+    H --> I[HEAVY BIN]
+    G -->|Current BELOW threshold| J[Servo 2 pushes item off]
+    J --> K[LIGHT BIN]
 ```
 
 ## What Goes In Each Bin

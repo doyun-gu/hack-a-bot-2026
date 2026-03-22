@@ -39,11 +39,13 @@ What it is: A mini pill-making factory
 
 ### The 4 Stages
 
-```
-GREEN BEANS IN -> [MIXING] -> [PRESSING] -> [COATING] -> [QC CHECK] -> PILLS OUT
-                  Motor 1      Motor 2       Motor 3 fan   Servos sort
-                  spins a      spins a       blows air     good vs bad
-                  paddle       disc
+```mermaid
+flowchart LR
+    A[GREEN BEANS IN] --> B["[MIXING]<br/>Motor 1<br/>spins a paddle"]
+    B --> C["[PRESSING]<br/>Motor 2<br/>spins a disc"]
+    C --> D["[COATING]<br/>Motor 3 fan<br/>blows air"]
+    D --> E["[QC CHECK]<br/>Servos sort<br/>good vs bad"]
+    E --> F[PILLS OUT]
 ```
 
 ### What Each Part Does
@@ -105,12 +107,13 @@ What it is: A battery recycling plant that sorts dead batteries safely
 
 ### The 4 Stages
 
-```
-DEAD BATTERIES IN -> [SORTING] -> [DISCHARGE] -> [SHREDDING] -> METALS OUT
-                      Motor 1       Motor 3         Motor 4
-                      turntable     slow spin        fast spin
-
-                + Motor 2 (SAFETY FAN) runs THE WHOLE TIME
+```mermaid
+flowchart LR
+    A[DEAD BATTERIES IN] --> B["[SORTING]<br/>Motor 1<br/>turntable"]
+    B --> C["[DISCHARGE]<br/>Motor 3<br/>slow spin"]
+    C --> D["[SHREDDING]<br/>Motor 4<br/>fast spin"]
+    D --> E[METALS OUT]
+    F["Motor 2 (SAFETY FAN)<br/>runs THE WHOLE TIME"] -.-> B & C & D
 ```
 
 ### What Each Part Does
@@ -137,16 +140,14 @@ DEAD BATTERIES IN -> [SORTING] -> [DISCHARGE] -> [SHREDDING] -> METALS OUT
 
 This is the best demo of smart power management:
 
-```
-WHEN POWER BUDGET IS EXCEEDED:
-
-  Dumb System:           Our Smart System:
-  Everything at 100%     Priority-based
-  -> breaker trips        -> Lighting OFF first
-  -> fan stops            -> Shredder PAUSED
-  -> toxic gas builds up  -> Sorting slowed
-  -> DANGER               -> Fan STILL AT 100%
-                          -> SAFE
+```mermaid
+flowchart LR
+    subgraph DUMB["Dumb System"]
+        D1[Everything at 100%] --> D2[Breaker trips] --> D3[Fan stops] --> D4[Toxic gas builds up] --> D5[DANGER]
+    end
+    subgraph SMART["Smart System (Priority-based)"]
+        S1[Power exceeded] --> S2[Lighting OFF first] --> S3[Shredder PAUSED] --> S4[Sorting slowed] --> S5["Fan STILL AT 100%<br/>SAFE"]
+    end
 ```
 
 Judges can SEE this: the lighting LED turns off, then shredder LED, but the fan stays on. Always.
@@ -189,10 +190,12 @@ What it is: A smart coffee roastery
 
 ### The 4 Stages
 
-```
-GREEN BEANS -> [ROASTING DRUM] -> [COOLING TRAY] -> [QC GRADING] -> PACKAGED
-               Motor 1 (tube       Motor 2 (fan      Servos sort
-               rotates)            blows to cool)    good vs bad
+```mermaid
+flowchart LR
+    A[GREEN BEANS] --> B["[ROASTING DRUM]<br/>Motor 1<br/>tube rotates"]
+    B --> C["[COOLING TRAY]<br/>Motor 2 fan<br/>blows to cool"]
+    C --> D["[QC GRADING]<br/>Servos sort<br/>good vs bad"]
+    D --> E[PACKAGED]
 ```
 
 ### What Each Part Does
@@ -251,12 +254,13 @@ What it is: Where your recycling bin stuff actually gets sorted
 
 ### The Stages
 
-```
-MIXED RECYCLING -> [SCREENING] -> [METAL SORT] -> [PLASTIC SORT] -> BALED OUTPUT
-                    Motor 1         Servo 1          Servo 2
-                    turntable       push arm          push arm
-
-                + Motor 3 (dust fan) + Motor 4 (baler)
+```mermaid
+flowchart LR
+    A[MIXED RECYCLING] --> B["[SCREENING]<br/>Motor 1<br/>turntable"]
+    B --> C["[METAL SORT]<br/>Servo 1<br/>push arm"]
+    C --> D["[PLASTIC SORT]<br/>Servo 2<br/>push arm"]
+    D --> E[BALED OUTPUT]
+    F["Motor 3 (dust fan)<br/>+ Motor 4 (baler)"] -.-> B & C & D
 ```
 
 ### What Each Part Does
