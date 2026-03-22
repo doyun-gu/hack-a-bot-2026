@@ -130,7 +130,7 @@ Circuit diagram:
 
 **2N2222 Pinout Reference (TO-92 package):**
 
-![2N2222 Pinout](../images/2N2222-pinout.webp)
+<img src="../images/2N2222-pinout.webp" alt="2N2222 Pinout" width="200">
 
 > **Demo script:** Toggle GP13 on/off every 2-3 seconds. Judges see: charge (LED dim) → release (LED glows and fades). Tell them: *"The capacitor captured wasted energy from the grid. When we release it, that stored energy powers this LED — same principle as regenerative braking, at bench scale."*
 >
