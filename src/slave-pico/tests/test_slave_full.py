@@ -221,36 +221,34 @@ while True:
             m_show("LInE OFF")
             print("  LINK LOST")
 
-    # ── Update display (rotate pages) ──
-    if not link_lost and count > 0 and time.ticks_diff(now, t_display) > DISPLAY_INTERVAL:
-        t_display = now
-        display_page = (display_page + 1) % 5
-
-        if latest['state'] == 3:  # FAULT — override all pages
-            m_show("FAULt   ")
-            m_brightness(15)
-        elif display_page == 0:
-            # Motor speed + servo angle: "SP60 A 90"
-            m_show(f"SP{latest['motor']:3d}A{latest['servo']:3d}")
-        elif display_page == 1:
-            # Bus voltage: "4920  mU"
-            m_show(f"{latest['bus_mV']:4d}  mU")
-        elif display_page == 2:
-            # Power: " 3.74  W"  (total watts)
-            w_int = int(latest['total_W'] * 100)
-            m_show(f" {w_int:4d}  0")  # approximate
-        elif display_page == 3:
-            # Production: "42  PASS" or " 5  rEJ"
-            if latest['passed'] > 0:
-                m_show(f"{latest['passed']:3d} PASS")
+    # ── Update display ──
+    if not link_lost and count > 0:
+        # FAULT — show immediately, override everything
+        if latest['state'] == 3:
+            # Flash effect: alternate bright/dim
+            if (now // 300) % 2 == 0:
+                m_show("FAULt   ")
+                m_brightness(15)
             else:
-                m_show(f"  0 PASS")
-        elif display_page == 4:
-            # IMU + efficiency
-            imu_int = int(latest['imu'] * 100)
-            m_show(f"I{imu_int:3d}E{latest['eff']:3d}")
-
-        if latest['state'] != 3:
+                m_clear()
+                m_brightness(0)
+        else:
             m_brightness(8)
+            # Rotate pages every 2 seconds
+            if time.ticks_diff(now, t_display) > DISPLAY_INTERVAL:
+                t_display = now
+                display_page = (display_page + 1) % 5
+
+            if display_page == 0:
+                m_show(f"SP{latest['motor']:3d}A{latest['servo']:3d}")
+            elif display_page == 1:
+                m_show(f"{latest['bus_mV']:4d}  mU")
+            elif display_page == 2:
+                m_show(f"{latest['passed']:3d} PASS")
+            elif display_page == 3:
+                m_show(f"  {latest['rejected']:2d} rEJ")
+            elif display_page == 4:
+                imu_int = int(latest['imu'] * 100)
+                m_show(f"I{imu_int:3d}E{latest['eff']:3d}")
 
     time.sleep_ms(10)
