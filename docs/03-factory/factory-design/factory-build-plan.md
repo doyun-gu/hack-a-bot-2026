@@ -80,168 +80,116 @@ spinning discs with gaps that sort by size.
 
 ## The Factory Layout (Top View)
 
-```
-+============================================================+
-|                                                            |
-|           GRIDCELL - BATTERY RECOVERY PLANT                |
-|                                                            |
-|   LOADING ZONE          SORTING STATION                    |
-|   (judge drops     +-------------------------+             |
-|    batteries       |                         |             |
-|    here)           |     TURNTABLE DISC      |             |
-|       \            |       (Motor 1)         |             |
-|        \           |                         |             |
-|         v          |    +----+               |             |
-|    +---------+     |    |    |  <-- item     |             |
-|    | DROP    |---->||   | () |   on disc     |             |
-|    | CHUTE   |     ||   |    |               |             |
-|    +---------+     |    +----+               |             |
-|                    |         \               |             |
-|                    |      spins clockwise    |             |
-|                    |            |            |             |
-|   +----------+    |            |            |   +-------+ |
-|   |          |    |     +----- v -----+     |   |       | |
-|   | SMALL    |<---|-----|  SIZE GAP   |     |   | HEAVY | |
-|   | BIN      |    |     | (slot cut   |     |   | BIN   | |
-|   | (falls   |    |     |  in disc)   |     |   |       | |
-|   |  thru)   |    |     +-------------+     |   +---^---+ |
-|   +----------+    |                         |       |      |
-|                    |    (large items         |  [SERVO 1]  |
-|                    |     stay on disc)       |   pushes    |
-|                    |         |               |   heavy     |
-|                    |         v               |   items     |
-|                    |   +-------------+       |   off disc  |
-|                    |   | WEIGHT      |       |             |
-|                    |   | CHECK ZONE  |       |             |
-|                    |   | (ADC reads  |       |             |
-|                    |   |  current    |       |             |
-|                    |   |  here)      |       |             |
-|                    |   +------+------+       |             |
-|                    |          |              |             |
-|                    |    heavy? ----YES---->[SERVO 1]       |
-|                    |          |              pushes to     |
-|                    |          NO             HEAVY BIN     |
-|                    |          |                            |
-|                    |          v                            |
-|   +----------+    |    [SERVO 2]            |             |
-|   | LIGHT    |<---|---- pushes to           |             |
-|   | BIN      |    |    LIGHT BIN            |             |
-|   +----------+    +-------------------------+             |
-|                                                            |
-|   +------------------+     +---------------------------+   |
-|   | SAFETY FAN       |     | STATUS TOWER              |   |
-|   | (Motor 2)        |     |                           |   |
-|   | [!] NEVER SHEDS  |     |  (G) Green  = Normal      |   |
-|   | Fume extraction   |     |  (Y) Yellow = Warning     |   |
-|   +------------------+     |  (R) Red    = FAULT        |   |
-|                             |  (B) Blue   = Saving      |   |
-|   [IMU on Motor 1]         +---------------------------+   |
-|   detects vibration                                        |
-|                             +---------------------------+   |
-|   LOAD PRIORITY LEDs:      | ELECTRONICS BAY           |   |
-|   P1 = Fan (NEVER OFF)     | [Pico A] [PCA9685]        |   |
-|   P2 = Turntable           | [MOSFETs] [Sense Rs]      |   |
-|   P3 = Servo sorting       | [Buck converters] [PSU]   |   |
-|   P4 = Status lights       +---------------------------+   |
-|        (shed first)                                        |
-|                                                            |
-|   ======= WIRELESS LINK (nRF24L01+) =======               |
-|                                                            |
-|   +-----------------------------------------------------+ |
-|   | CONTROL ROOM (Pico B)                                | |
-|   |                                                      | |
-|   | [OLED SCREEN]     [JOYSTICK]     [POTENTIOMETER]     | |
-|   |  Shows:            Manual         Sets weight        | |
-|   |  - Weight reading   override       threshold:        | |
-|   |  - Items sorted     + fault        "How heavy is     | |
-|   |  - Power usage      reset          heavy?"           | |
-|   |  - Sort breakdown                  Turn left=strict  | |
-|   |  - Energy saved                    Turn right=loose  | |
-|   |                                                      | |
-|   | [Status LEDs: R G]  [nRF24L01+]                     | |
-|   +-----------------------------------------------------+ |
-+============================================================+
+```mermaid
+graph TB
+    subgraph LOAD["LOADING ZONE"]
+        DROP["Drop Chute<br/>(Judge drops batteries)"]
+    end
+
+    subgraph SORT["SORTING STATION"]
+        DISC["Turntable Disc<br/>(DC Motor 1)<br/>Spins clockwise"]
+        GAP{"SIZE GAP<br/>(slot cut in disc)"}
+        WEIGHT{"WEIGHT CHECK<br/>(ADC reads current<br/>on GP27)"}
+        SV1["Servo 1<br/>pushes heavy<br/>items off"]
+        SV2["Servo 2<br/>pushes light<br/>items off"]
+    end
+
+    subgraph BINS["COLLECTION BINS"]
+        SMALL["SMALL BIN<br/>Button Cells<br/>(fell through gap)"]
+        HEAVY["HEAVY BIN<br/>Li-ION<br/>(pushed by Servo 1)"]
+        LIGHT["LIGHT BIN<br/>Alkaline<br/>(pushed by Servo 2)"]
+    end
+
+    subgraph SAFETY["SAFETY SYSTEMS"]
+        FAN["Safety Fan (Motor 2)<br/>NEVER SHEDS<br/>Fume extraction"]
+        IMU_S["BMI160 IMU on Motor 1<br/>Vibration detection"]
+        STATUS["MAX7219 Display<br/>Shows status wirelessly"]
+    end
+
+    subgraph ELEC["ELECTRONICS BAY"]
+        PICO["Pico A + PCA9685<br/>Motor Driver + Sense R<br/>Buck converters + PSU"]
+    end
+
+    subgraph CTRL["CONTROL ROOM (Pico B)"]
+        DISP["MAX7219 7-Segment<br/>Shows: faults, power,<br/>item counts, status"]
+    end
+
+    DROP --> DISC --> GAP
+    GAP -- "small → falls through" --> SMALL
+    GAP -- "large → stays on disc" --> WEIGHT
+    WEIGHT -- "heavy (high current)" --> SV1 --> HEAVY
+    WEIGHT -- "light (low current)" --> SV2 --> LIGHT
+
+    IMU_S -.-> DISC
+    PICO -.->|"nRF24L01+ wireless"| CTRL
+
+    style LOAD fill:#ff6b35,color:#fff
+    style SORT fill:#0f3460,color:#fff
+    style BINS fill:#2d6a4f,color:#fff
+    style SAFETY fill:#e94560,color:#fff
+    style ELEC fill:#1a1a2e,color:#fff
+    style CTRL fill:#16213e,color:#fff
 ```
 
 ---
 
 ## The Factory Layout (Side View)
 
-```
-                    LOADING
-                    CHUTE
-                      |
-                      v
-   +-----------------------------------------+
-   |          TURNTABLE (Motor 1)             |  <-- raised platform
-   |     +------+                             |
-   |     | item |    spins --->               |
-   |     +------+                             |
-   |              [GAP]                       |
-   |               ||                         |
-   |               vv                         |
-   |          +----------+                    |
-   |          |SMALL BIN |   (items fall thru)|
-   |          +----------+                    |
-   |                                          |
-   |  [SERVO 1 arm]--push-->  [HEAVY BIN]    |
-   |                                          |
-   |  [SERVO 2 arm]--push-->  [LIGHT BIN]    |
-   +-----------------------------------------+
-   |  ELECTRONICS BAY                        |
-   |  [Pico A] [PCA9685] [MOSFETs]          |
-   +-----------------------------------------+
+```mermaid
+graph TD
+    CHUTE["Loading Chute"] --> TURNTABLE["Turntable (Motor 1)<br/>Raised platform, spins →"]
+    TURNTABLE --> GAP["Size Gap"]
+    GAP -- "falls through" --> SMALL["Small Bin"]
+    TURNTABLE --> SV1["Servo 1 arm"] -- "pushes" --> HEAVY["Heavy Bin"]
+    TURNTABLE --> SV2["Servo 2 arm"] -- "pushes" --> LIGHT["Light Bin"]
 
-   [SAFETY FAN Motor 2]     [CONTROL ROOM]
-   mounted on side,          separate unit
-   always blowing            with OLED +
-                             joystick +
-                             pot
+    TURNTABLE --> ELEC["Electronics Bay<br/>Pico A · PCA9685 · Motor Driver"]
+
+    FAN["Safety Fan (Motor 2)<br/>Mounted on side"] -.-> TURNTABLE
+    CTRL["Control Room (Pico B)<br/>MAX7219 Display"] -.->|"wireless"| ELEC
+
+    style CHUTE fill:#ff6b35,color:#fff
+    style TURNTABLE fill:#0f3460,color:#fff
+    style SMALL fill:#2d6a4f,color:#fff
+    style HEAVY fill:#e94560,color:#fff
+    style LIGHT fill:#2d6a4f,color:#fff
+    style ELEC fill:#1a1a2e,color:#fff
+    style FAN fill:#e94560,color:#fff
+    style CTRL fill:#16213e,color:#fff
 ```
 
 ---
 
 ## Sorting Flow — Step by Step
 
-```
-STEP 1: Judge drops a battery onto the turntable
-        |
-STEP 2: Motor 1 spins the turntable
-        |
-STEP 3: Item reaches the SIZE GAP
-        |
-        +---> SMALL item? ---> Falls through gap ---> SMALL BIN (done!)
-        |
-        +---> LARGE item? ---> Stays on disc, keeps spinning
-              |
-STEP 4:       Item reaches WEIGHT CHECK ZONE
-              Pico A reads Motor 1 current from ADC GP27
-              |
-              +---> Current ABOVE threshold? (heavy)
-              |     ---> Servo 1 pushes item off ---> HEAVY BIN
-              |
-              +---> Current BELOW threshold? (light)
-                    ---> Servo 2 pushes item off ---> LIGHT BIN
+```mermaid
+graph TD
+    S1["Step 1: Judge drops battery<br/>onto turntable"] --> S2["Step 2: Motor 1 spins<br/>the turntable"]
+    S2 --> S3{"Step 3: Item reaches<br/>SIZE GAP"}
+    S3 -- "SMALL item<br/>falls through gap" --> SMALL_BIN["SMALL BIN<br/>(done!)"]
+    S3 -- "LARGE item<br/>stays on disc" --> S4{"Step 4: WEIGHT CHECK<br/>ADC reads Motor 1<br/>current (GP27)"}
+    S4 -- "Current ABOVE threshold<br/>(heavy)" --> SV1["Servo 1 pushes off"] --> HEAVY_BIN["HEAVY BIN"]
+    S4 -- "Current BELOW threshold<br/>(light)" --> SV2["Servo 2 pushes off"] --> LIGHT_BIN["LIGHT BIN"]
+
+    style S1 fill:#ff6b35,color:#fff
+    style S2 fill:#0f3460,color:#fff
+    style S3 fill:#533483,color:#fff
+    style S4 fill:#e94560,color:#fff
+    style SMALL_BIN fill:#2d6a4f,color:#fff
+    style HEAVY_BIN fill:#e94560,color:#fff
+    style LIGHT_BIN fill:#2d6a4f,color:#fff
 ```
 
 ### What Goes In Each Bin
 
-```
-+-------------------+--------------------+-------------------+
-|    SMALL BIN      |    LIGHT BIN       |    HEAVY BIN      |
-|  (fell through    |  (large but        |  (large and       |
-|   the gap)        |   light)           |   heavy)          |
-|                   |                    |                   |
-|  - AAA batteries  |  - Empty AA cells  |  - D batteries    |
-|  - Button cells   |  - Discharged      |  - Phone batteries|
-|  - Coin batteries |    lithium pouch   |  - Full 18650s    |
-|  - Watch          |  - Alkaline AA     |  - Laptop cells   |
-|    batteries      |    (used up)       |  - Lead-acid      |
-|                   |                    |    (small)        |
-| Label: "BUTTON    | Label: "ALKALINE   | Label: "LITHIUM   |
-|  CELL RECOVERY"   |  RECYCLING"        |  ION - CAUTION"   |
-+-------------------+--------------------+-------------------+
-```
+| SMALL BIN | LIGHT BIN | HEAVY BIN |
+|---|---|---|
+| Fell through the gap | Large but light | Large and heavy |
+| AAA batteries | Empty AA cells | D batteries |
+| Button cells | Discharged lithium pouch | Phone batteries |
+| Coin batteries | Alkaline AA (used up) | Full 18650s |
+| Watch batteries | | Laptop cells |
+| **Label:** "BUTTON CELL RECOVERY" | **Label:** "ALKALINE RECYCLING" | **Label:** "LITHIUM ION - CAUTION" |
 
 ---
 

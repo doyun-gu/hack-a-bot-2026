@@ -61,146 +61,133 @@ PCA9685 Channel Map:
 
 ## Factory Layout — Top View
 
-```
-+=====================================================================+
-|                                                                     |
-|              GRIDCELL — BATTERY RECOVERY PLANT                      |
-|              "Smart Sorting with HVAC Control"                      |
-|                                                                     |
-|  +-----------+     +------------------+     +------------------+    |
-|  | INTAKE    |     |   STAGE 1        |     |   STAGE 2        |    |
-|  | HOPPER    |     |   SIZE SORTING   |     |   WEIGHT SORTING |    |
-|  |           |     |                  |     |                  |    |
-|  | Batteries |     |  Conveyor belt   |     |  Conveyor belt   |    |
-|  | dumped    |     |  (Motor 1)       |     |  (Motor 1)       |    |
-|  | here by   |     |                  |     |                  |    |
-|  | judge     |     |  [180 #1]        |     |  [180 #2] HEAVY  |    |
-|  |    |      |     |  SIZE REJECT     |     |  SORT ARM        |    |
-|  |    v      |     |  ARM sweeps      |     |  pushes right    |    |
-|  | [90 #1]   |     |  bad items off   |     |       |          |    |
-|  | INTAKE    |====>|       |          |     |       v          |    |
-|  | GATE      |     |       v          |     |  +---------+    |    |
-|  | (open/    |     |  +---------+     |     |  | HEAVY   |    |    |
-|  |  close)   |     |  | HAZMAT  |     |     |  | BIN     |    |    |
-|  +-----------+     |  | BIN     |     |     |  | "Li-ION"|    |    |
-|                    |  | [!]     |     |     |  +---------+    |    |
-|                    |  +---------+     |     |                  |    |
-|                    |                  |     |  [180 #3] LIGHT  |    |
-|                    |   ............   |     |  SORT ARM        |    |
-|                    |   : SIZE GAP :   |     |  pushes left     |    |
-|                    |   : (physical:   |     |       |          |    |
-|                    |   : slot in  :   |     |       v          |    |
-|                    |   : belt)    :   |     |  +---------+    |    |
-|                    |   :....|.....:   |     |  | LIGHT   |    |    |
-|                    |        v         |     |  | BIN     |    |    |
-|                    |   +---------+    |     |  | "ALK"   |    |    |
-|                    |   | SMALL   |    |     |  +---------+    |    |
-|                    |   | BIN     |    |     |                  |    |
-|                    |   | "BUTTON |    |     |  [90 #2]         |    |
-|                    |   |  CELLS" |    |     |  TRANSFER =====>|    |
-|                    |   +---------+    |     |  GATE            |    |
-|                    +------------------+     +--------+---------+    |
-|                                                      |              |
-|                                                      v              |
-|                                             +------------------+    |
-|                                             |   STAGE 3        |    |
-|                                             |   OUTPUT &       |    |
-|                                             |   PACKAGING      |    |
-|                                             |                  |    |
-|                                             |  [180 #4]        |    |
-|                                             |  OUTPUT DIVERTER |    |
-|                                             |  routes items:   |    |
-|                                             |                  |    |
-|                                             |  LEFT       RIGHT|    |
-|                                             |   v           v  |    |
-|                                             | +-----+  +-----+|    |
-|                                             | |LINE |  |LINE ||    |
-|                                             | | A   |  | B   ||    |
-|                                             | |250g |  |1kg  ||    |
-|                                             | +-----+  +-----+|    |
-|                                             +------------------+    |
-|                                                                     |
-|  +---------------------------------------------------------------+  |
-|  |                        HVAC SYSTEM                            |  |
-|  |                                                               |  |
-|  |  +------------------+                                         |  |
-|  |  | MAIN FAN         |    DUCT WORK                            |  |
-|  |  | (DC Motor 2)     |========================================|  |
-|  |  | [!] NEVER OFF    |        |                  |             |  |
-|  |  | Safety critical  |        |                  |             |  |
-|  |  +------------------+   [90 #3]            [90 #4]            |  |
-|  |                         ZONE A             ZONE B             |  |
-|  |                         DAMPER             DAMPER             |  |
-|  |                           |                  |                |  |
-|  |                           v                  v                |  |
-|  |                     Airflow to          Airflow to            |  |
-|  |                     SORTING AREA        CONVEYOR/OUTPUT       |  |
-|  |                     (Stage 1 & 2)       (Stage 3)             |  |
-|  |                                                               |  |
-|  |  Smart HVAC Logic:                                            |  |
-|  |  - Fan speed adjusts to factory load                          |  |
-|  |  - Dampers direct air WHERE it's needed                       |  |
-|  |  - Sorting area gets more air (battery fumes)                 |  |
-|  |  - Output area gets less (no chemical risk)                   |  |
-|  |  - During THERMAL EVENT: both dampers FULL OPEN, fan MAX      |  |
-|  +---------------------------------------------------------------+  |
-|                                                                     |
-|  [90 #5 EMERGENCY GATE] — mounted at intake, slams shut on fault   |
-|  [IMU on Motor 1] — vibration detection = fault trigger             |
-|                                                                     |
-|  +---------------------------------------------------------------+  |
-|  | ELECTRONICS BAY                                                |  |
-|  | [Pico A] [PCA9685] [2x MOSFET] [2x Sense R] [Buck converters]|  |
-|  +---------------------------------------------------------------+  |
-|                                                                     |
-|  ============= WIRELESS (nRF24L01+) =============                  |
-|                                                                     |
-|  +---------------------------------------------------------------+  |
-|  | CONTROL ROOM (Pico B)                                         |  |
-|  |                                                                |  |
-|  | [OLED]           [JOYSTICK]           [POTENTIOMETER]          |  |
-|  | Dashboard        Manual override      Weight threshold         |  |
-|  |                  + fault reset         "heavy vs light"        |  |
-|  |                                                                |  |
-|  | [LED TOWER]      [LOAD PRIORITY LEDs]                          |  |
-|  | G Y R B          P1=Fan  P2=Conveyor  P3=Sorting  P4=Lights   |  |
-|  +---------------------------------------------------------------+  |
-+=====================================================================+
+```mermaid
+graph TB
+    subgraph INTAKE["INTAKE ZONE"]
+        HOPPER["Battery Hopper<br/>(Judge drops batteries here)"]
+        GATE1["90° #1 — INTAKE GATE<br/>(open/close)"]
+    end
+
+    subgraph STAGE1["STAGE 1 — SIZE SORTING"]
+        BELT1["Conveyor Belt<br/>(DC Motor 1)"]
+        ARM1["180° #1 — SIZE REJECT ARM<br/>(sweeps bad items off)"]
+        SIZE_GAP["SIZE GAP<br/>(physical slot in belt)"]
+        HAZMAT["HAZMAT BIN<br/>(oversized items)"]
+        SMALL["SMALL BIN<br/>(button cells)"]
+    end
+
+    subgraph STAGE2["STAGE 2 — WEIGHT SORTING"]
+        BELT2["Conveyor Belt<br/>(DC Motor 1)"]
+        ARM2["180° #2 — HEAVY SORT ARM<br/>(pushes right)"]
+        ARM3["180° #3 — LIGHT SORT ARM<br/>(pushes left)"]
+        GATE2["90° #2 — TRANSFER GATE"]
+        HEAVY["HEAVY BIN<br/>(Li-ION)"]
+        LIGHT["LIGHT BIN<br/>(Alkaline)"]
+    end
+
+    subgraph STAGE3["STAGE 3 — OUTPUT & PACKAGING"]
+        ARM4["180° #4 — OUTPUT DIVERTER"]
+        LINE_A["Line A<br/>(250g packaging)"]
+        LINE_B["Line B<br/>(1kg packaging)"]
+    end
+
+    subgraph HVAC["HVAC SYSTEM"]
+        FAN["Main Fan (DC Motor 2)<br/>NEVER OFF — Safety Critical"]
+        DAMP_A["90° #3 — Zone A Damper<br/>(Sorting Area)"]
+        DAMP_B["90° #4 — Zone B Damper<br/>(Output Area)"]
+    end
+
+    subgraph SAFETY["SAFETY"]
+        EGATE["90° #5 — EMERGENCY GATE<br/>(slams shut on fault)"]
+        IMU["BMI160 IMU on Motor 1<br/>(vibration = fault trigger)"]
+    end
+
+    subgraph ELECTRONICS["ELECTRONICS BAY"]
+        PICO_A["Pico A + PCA9685<br/>+ Motor Driver + Sense R"]
+    end
+
+    subgraph WIRELESS["WIRELESS LINK (nRF24L01+)"]
+        PICO_B["CONTROL ROOM (Pico B)<br/>MAX7219 Display"]
+    end
+
+    HOPPER --> GATE1 --> BELT1
+    ARM1 -- "oversized" --> HAZMAT
+    BELT1 --> SIZE_GAP
+    SIZE_GAP -- "falls through" --> SMALL
+    SIZE_GAP -- "stays on belt" --> BELT2
+    ARM2 -- "heavy" --> HEAVY
+    ARM3 -- "light" --> LIGHT
+    BELT2 --> GATE2 --> ARM4
+    ARM4 -- "left" --> LINE_A
+    ARM4 -- "right" --> LINE_B
+
+    FAN --> DAMP_A
+    FAN --> DAMP_B
+
+    IMU -.-> BELT1
+    PICO_A -.->|"wireless"| PICO_B
+
+    style INTAKE fill:#ff6b35,color:#fff
+    style STAGE1 fill:#0f3460,color:#fff
+    style STAGE2 fill:#533483,color:#fff
+    style STAGE3 fill:#2d6a4f,color:#fff
+    style HVAC fill:#e94560,color:#fff
+    style SAFETY fill:#e94560,color:#fff
+    style ELECTRONICS fill:#1a1a2e,color:#fff
+    style WIRELESS fill:#16213e,color:#fff
 ```
 
 ---
 
 ## Factory Layout — Side View
 
-```
-                INTAKE        STAGE 1            STAGE 2           STAGE 3
-                HOPPER      SIZE SORT          WEIGHT SORT         OUTPUT
+```mermaid
+graph LR
+    subgraph UPPER["Conveyor Belt Surface (DC Motor 1)"]
+        direction LR
+        IN["INTAKE<br/>Hopper"] --> S1["STAGE 1<br/>Size Sort"]
+        S1 --> S2["STAGE 2<br/>Weight Sort"]
+        S2 --> S3["STAGE 3<br/>Output"]
+    end
 
-                  |     [180 #1 arm]        [180 #2 arm]       [180 #4 arm]
-                  |          |                    |                  |
-                  v          v                    v                  v
-  [90 #1]   +==========================================================+
-  INTAKE --> | CONVEYOR BELT SURFACE  (driven by DC Motor 1)           |
-  GATE       |                                                          |
-             |   items travel left to right --->                        |
-             |                                                          |
-             |        [GAP]          [90 #2]                            |
-             |          |            TRANSFER                           |
-             |          v            GATE                               |
-             +==========================================================+
-             |          |                                               |
-             |     [SMALL BIN]    [HEAVY BIN]   [LIGHT BIN]   [A] [B]  |
-             |     under gap       to right      to left       output   |
-             +----------------------------------------------------------+
-             |  ELECTRONICS BAY                                         |
-             |  [Pico A] [PCA9685] [MOSFETs] [Sense Rs]               |
-             +----------------------------------------------------------+
+    subgraph ARMS["Servo Arms (above belt)"]
+        A1["180° #1<br/>Size Reject"]
+        A2["180° #2<br/>Heavy Sort"]
+        A4["180° #4<br/>Output Diverter"]
+    end
 
-  [DC Motor 2: FAN] =====> [DUCT] ==+== [90 #3 damper] ==> ZONE A (sorting)
-                                     |
-                                     +== [90 #4 damper] ==> ZONE B (output)
+    subgraph BINS["Collection Bins (below belt)"]
+        SMALL["SMALL BIN<br/>(under gap)"]
+        HEAVY["HEAVY BIN<br/>(pushed right)"]
+        LIGHT["LIGHT BIN<br/>(pushed left)"]
+        OUT_A["Line A"]
+        OUT_B["Line B"]
+    end
 
-  [90 #5 EMERGENCY GATE: blocks intake on fault]
+    subgraph BASE["Electronics Bay"]
+        ELEC["Pico A · PCA9685<br/>Motor Driver · Sense R"]
+    end
+
+    A1 -.-> S1
+    A2 -.-> S2
+    A4 -.-> S3
+    S1 --> SMALL
+    S2 --> HEAVY
+    S2 --> LIGHT
+    S3 --> OUT_A
+    S3 --> OUT_B
+
+    subgraph FAN_SYS["HVAC (DC Motor 2: Fan)"]
+        FAN["Fan"] --> DUCT["Duct"]
+        DUCT --> ZA["Zone A Damper<br/>(Sorting)"]
+        DUCT --> ZB["Zone B Damper<br/>(Output)"]
+    end
+
+    style UPPER fill:#0f3460,color:#fff
+    style ARMS fill:#533483,color:#fff
+    style BINS fill:#2d6a4f,color:#fff
+    style BASE fill:#1a1a2e,color:#fff
+    style FAN_SYS fill:#e94560,color:#fff
 ```
 
 ---
