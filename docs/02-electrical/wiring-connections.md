@@ -145,23 +145,13 @@
 | B19 | **5V (VBUS)** | MAX7219 **VCC** | Red | Display power (**5V for brightness**) |
 | B20 | **GND** | MAX7219 **GND** | Black | Display ground |
 
-### Joystick
+### ~~Joystick~~ — CANCELLED
 
-| # | From | To | Wire | Purpose |
-|---|---|---|---|---|
-| B21 | **Pico B GP26** | Joystick **VRx** | Green | X-axis analog |
-| B22 | **Pico B GP27** | Joystick **VRy** | Green | Y-axis analog |
-| B23 | **Pico B GP22** | Joystick **SW** | Blue | Button (active low) |
-| B24 | **3.3V** | Joystick **VCC** | Red thin | Joystick power |
-| B25 | **GND** | Joystick **GND** | Black | Joystick ground |
+> **CANCELLED:** Joystick removed — focus is on wireless communication and autonomous operation. GP22, GP26, GP27 freed on Pico B.
 
-### Potentiometer
+### ~~Potentiometer~~ — CANCELLED
 
-| # | From | To | Wire | Purpose |
-|---|---|---|---|---|
-| B26 | **3.3V** | Potentiometer pin 1 | Red thin | Pot power |
-| B27 | **GND** | Potentiometer pin 3 | Black | Pot ground |
-| B28 | **Pico B GP28** | Potentiometer pin 2 (wiper) | Green | Analog reading |
+> **CANCELLED:** Potentiometer removed — not needed for autonomous demo. GP28 freed on Pico B.
 
 ### ~~Status LEDs~~ — REMOVED
 
@@ -208,11 +198,11 @@
 | Pico B I2C | 6 | NOT STARTED | OLED |
 | Pico B SPI0 | 7 | DONE | nRF24L01+ verified |
 | Pico B SPI1 | 5 | DONE | MAX7219 7-segment display |
-| Pico B joystick | 5 | NOT STARTED | X + Y + button + VCC + GND |
-| Pico B potentiometer | 3 | NOT STARTED | Wiper + VCC + GND |
+| ~~Pico B joystick~~ | ~~5~~ | ~~CANCELLED~~ | ~~Focus on wireless/autonomous~~ |
+| ~~Pico B potentiometer~~ | ~~3~~ | ~~CANCELLED~~ | ~~Not needed for demo~~ |
 | ~~Pico B status LEDs~~ | ~~2~~ | ~~REMOVED~~ | ~~Replaced by MAX7219 display~~ |
 | Servos | 4 | NOT STARTED | 2 servos × signal, shared VCC + GND |
-| **Total** | **~74 wires** | | **~30 done, ~44 remaining** |
+| **Total** | **~66 wires** | | **~30 done, ~36 remaining** |
 
 ---
 
@@ -234,7 +224,7 @@ Wire in this order — test after each group:
 | 10 | Recycle path | A29-A32 | **IN PROGRESS** | Capacitor charges when GP13 HIGH |
 | 11 | ADC bus voltage | A33 | **IN PROGRESS** | ADC reads ~half of bus voltage |
 | 12 | Pico B I2C/OLED | B3-B8 | **TODO** | OLED displays text |
-| 13 | Pico B inputs | B21-B28 | **TODO** | `test_joystick.py` — values change |
+| ~~13~~ | ~~Pico B inputs~~ | ~~B21-B28~~ | ~~CANCELLED~~ | ~~Joystick + pot removed~~ |
 | 14 | Servos | S1-S4 | **TODO** | Servos move to test angles |
 
 **Test after EVERY group.** Don't wire everything then test — find problems early.
@@ -253,4 +243,5 @@ Wire in this order — test after each group:
 | 2026-03-22 | **Wire numbers renumbered** | A29+ renumbered after LED bank removal. Pico B wires renumbered to include MAX7219 (B16-B20). |
 | 2026-03-22 | **Wiring order revised** | Wireless-first priority. nRF on both Picos tested before anything else. |
 | 2026-03-22 | **Status LEDs (A36-A37, B29-B30) REMOVED** | All status indicators now on MAX7219 8-segment display. GP14/GP15 freed on both Picos. |
-| 2026-03-22 | **Progress markers added** | Steps 1-7 DONE, steps 8-14 remaining. Wire count reduced to ~74. |
+| 2026-03-22 | **Progress markers added** | Steps 1-7 DONE, steps 8-14 remaining. |
+| 2026-03-22 | **Joystick + Potentiometer CANCELLED** | Focus narrowed to wireless communication + autonomous operation. Manual operator input not needed for demo. GP22, GP26-28 freed on Pico B. Wire count reduced to ~66. |
