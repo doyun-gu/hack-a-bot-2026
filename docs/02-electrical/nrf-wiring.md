@@ -6,6 +6,14 @@
 
 ## Pin Layout
 
+### Reference Image (FRONT view — component side)
+
+![nRF24L01+ Pinout Reference](../images/nrf_pinout_reference.png)
+
+**WARNING: This is the FRONT view. When you flip the board, left and right are reversed. Always verify by reading the text labels on the BACK.**
+
+### Pin Diagram
+
 Looking at the module from the **top, antenna pointing up:**
 
 ```
