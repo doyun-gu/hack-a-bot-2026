@@ -236,11 +236,11 @@ Circuit diagram:
 |---|---|---|---|
 | Power supply | 7 | DONE | PSU → buck → boost → rails |
 | Pico A power | 2 | DONE | VSYS + GND |
-| Pico A I2C | 11 | PARTIAL | SDA/SCL wired, **4.7kΩ pull-ups NOT yet** |
+| Pico A I2C | 11 | DONE | BMI160 + PCA9685 connected, I2C wired |
 | Pico A SPI | 7 | DONE | nRF24L01+ verified |
-| Pico A motor switching | 8 | IN PROGRESS | PCA9685→MOSFET→motor |
+| Pico A motor switching | 9 | DONE | Motor driver connected |
 | ~~Pico A LED bank~~ | ~~6~~ | ~~REMOVED~~ | ~~Replaced by MAX7219 on Pico B~~ |
-| Pico A recycle path | 4 | IN PROGRESS | MOSFET + capacitor |
+| Pico A recycle path | 6 | DONE | 2N2222 + cap + LED |
 | Pico A ADC | 3 | IN PROGRESS | Bus voltage + 2 current sense |
 | ~~Pico A status LEDs~~ | ~~2~~ | ~~REMOVED~~ | ~~Replaced by MAX7219 display~~ |
 | Pico B power | 2 | DONE | VSYS + GND |
@@ -268,17 +268,17 @@ Wire in this order — test after each group:
 | 5 | Pico B SPI0/nRF | B9-B15 | DONE | `./flash.sh test` — PASS (0x0E) |
 | 6 | **Wireless test** | (no new wires) | DONE | Datagram test — 200+ packets, 0 bad |
 | 7 | Pico B SPI1/MAX7219 | B16-B20 | DONE | `./flash.sh test-display` — PASS |
-| 8 | Pico A I2C (PCA9685 + IMU) | A3-A13 | **PARTIAL** | SDA/SCL done, **need 4.7kΩ pull-ups** |
-| 9 | Motors via motor driver | A21-A29 | **IN PROGRESS** | Motor spins when PCA9685 Ch2/Ch3 set |
-| 10 | Recycle path (2N2222 + LED) | A30-A35 | **IN PROGRESS** | GP13 toggle → LED glows and fades |
-| 11 | ADC bus voltage | A36 | **IN PROGRESS** | ADC reads ~half of bus voltage |
+| 8 | Pico A I2C (PCA9685 + IMU) | A3-A13 | DONE | IMU + PCA9685 connected, I2C bus wired |
+| 9 | Motors via motor driver | A21-A29 | DONE | Motor driver connected, motors attached |
+| 10 | Recycle path (2N2222 + LED) | A30-A35 | DONE | 2N2222 + cap + LED wired (tested on GP22) |
+| 11 | ADC bus voltage | A36 | **TODO** | ADC reads ~half of bus voltage |
 | 12 | Pico B I2C/OLED | B3-B8 | **TODO** | OLED displays text |
 | ~~13~~ | ~~Pico B inputs~~ | ~~B21-B28~~ | ~~CANCELLED~~ | ~~Joystick + pot removed~~ |
 | 14 | Servos | S1-S4 | **TODO** | Servos move to test angles |
 
 **Test after EVERY group.** Don't wire everything then test — find problems early.
 
-**Progress:** Steps 1-7 DONE. Steps 8-14 remaining.
+**Progress:** Steps 1-10 DONE. Steps 11-14 remaining.
 
 ---
 
