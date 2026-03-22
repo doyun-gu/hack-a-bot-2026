@@ -6,35 +6,42 @@
   <img src="https://hackabot-2026.com/live/assets/images/projects/badges/creative.png" alt="Project 6 Creative Badge" height="100"/>
 </p>
 
-<p align="center">
-  <strong>A £15 smart factory controller powered by recycled energy</strong><br/>
-  Monitors, decides, and acts autonomously — replacing £162K of industrial equipment
-</p>
+<table>
+<tr>
+<td width="50%">
+<img src="docs/images/build/chassis_assembled.jpeg" alt="GridBox — Assembled Sorting Conveyor" width="100%"/>
+<br/>
+<img src="docs/images/build/full_system.jpeg" alt="GridBox — Full System with Electronics" width="100%"/>
+</td>
+<td width="50%">
 
-<p align="center">
-  <a href="docs/01-overview/gridbox-design.md">Design Doc</a> · <a href="docs/01-overview/context.md">Project Context</a> · <a href="docs/02-electrical/wiring-connections.md">Wiring Guide</a> · <a href="docs/04-team/team-plan.md">Team Plan</a>
-</p>
+### A £15 smart factory controller powered by recycled energy
 
-<p align="center">
-  <img src="docs/images/build/chassis_assembled.jpeg" alt="GridBox — Assembled Sorting Conveyor" width="420"/>
-  &nbsp;&nbsp;
-  <img src="docs/images/build/full_system.jpeg" alt="GridBox — Full System with Electronics" width="420"/>
-</p>
-<p align="center"><em>Left: 3D-printed sorting conveyor on MDF base &nbsp;|&nbsp; Right: Full system — conveyor + Picos + wireless + MAX7219 display</em></p>
+Monitors, decides, and acts autonomously — replacing **£162K** of industrial equipment.
+
+**What it does:**
+- Senses power usage at every branch via ADC
+- Autonomously reroutes excess energy via MOSFET switches
+- Detects equipment faults via IMU vibration analysis
+- Reports wirelessly to a SCADA dashboard
+
+**Built with:**
+- 2× Raspberry Pi Pico 2 (RP2350, dual-core ARM)
+- nRF24L01+ wireless (custom 6-type datagram protocol)
+- BMI160 IMU + PCA9685 PWM + SSD1306 OLED + MAX7219 7-segment
+- MicroPython + C SDK firmware
+
+**Team:** Doyun Gu (Lead) · Wooseong Jung (Electronics) · Billy Park (Mechatronics)
+
+<a href="docs/01-overview/gridbox-design.md">Design Doc</a> · <a href="docs/01-overview/context.md">Project Context</a> · <a href="docs/02-electrical/wiring-connections.md">Wiring Guide</a> · <a href="docs/04-team/team-plan.md">Team Plan</a>
+
+</td>
+</tr>
+</table>
 
 ---
 
-## Group 1 — Hack-A-Bot 2026, Project 6: Creative
-
-| Name | Role | Responsibility |
-|---|---|---|
-| **Doyun Gu** | System Designer / Lead | Power grid architecture, firmware (MicroPython + C), web dashboard, SCADA protocol, team coordination |
-| **Wooseong Jung** | Electronics Engineer | Circuit design, MOSFET switching, current sensing, IMU wiring, energy signature fault detection |
-| **Billy Park** | Mechatronics Engineer | CAD design (Fusion 360), 3D printing, conveyor mechanism, motor mounts, sorting system, physical assembly |
-
----
-
-## What We're Building
+## What We Built
 
 GridBox is a miniature **smart factory** — a water bottling / sorting plant powered by recycled energy. Two Raspberry Pi Pico 2 boards work together wirelessly: one controls the factory floor, the other is a remote SCADA monitoring station.
 
