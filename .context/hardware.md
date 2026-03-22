@@ -30,8 +30,8 @@
 | GP11 | ~~FREE~~ | — | Was Motor 2 MOSFET (now PCA9685 CH3) |
 | GP12 | ~~FREE~~ | — | Was LED bank (REMOVED — replaced by MAX7219 on Pico B) |
 | GP13 | MOSFET 3 | GPIO | Recycle path switch |
-| GP14 | Red LED | GPIO | Fault indicator |
-| GP15 | Green LED | GPIO | OK indicator |
+| GP14 | ~~FREE~~ | — | Was red LED (REMOVED — replaced by MAX7219) |
+| GP15 | ~~FREE~~ | — | Was green LED (REMOVED — replaced by MAX7219) |
 | GP16 | SPI MISO | SPI0 | Data in |
 | GP25 | Onboard LED | GPIO | Heartbeat |
 | GP26 | ADC0 | ADC | Bus voltage |
@@ -51,8 +51,8 @@
 | GP10 | SPI1 SCK | SPI1 | MAX7219 clock |
 | GP11 | SPI1 MOSI | SPI1 | MAX7219 data |
 | GP13 | MAX7219 CS | SPI1 | 7-seg chip select |
-| GP14 | Red LED | GPIO | Fault indicator |
-| GP15 | Green LED | GPIO | OK indicator |
+| GP14 | ~~FREE~~ | — | Was red LED (REMOVED — replaced by MAX7219) |
+| GP15 | ~~FREE~~ | — | Was green LED (REMOVED — replaced by MAX7219) |
 | GP16 | SPI MISO | SPI0 | Data in (nRF only) |
 | GP22 | Joystick BTN | GPIO | Button (pull-up) |
 | GP25 | Onboard LED | GPIO | Heartbeat |

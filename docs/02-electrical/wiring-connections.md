@@ -43,9 +43,9 @@
 | A8 | **3.3V** → 4.7kΩ → **GP5 (SCL)** | Pull-up resistor | — | I2C requires pull-ups |
 | A9 | **3.3V** | BMI160 **VCC** | Red thin | IMU power |
 | A10 | **GND** | BMI160 **GND** | Black thin | IMU ground |
-| A11 | **5V rail** | PCA9685 **VCC** | Orange | PCA9685 logic power |
+| A11 | **3.3V** | PCA9685 **VCC** | Red thin | PCA9685 logic power (3.3V matches Pico I2C) |
 | A12 | **GND** | PCA9685 **GND** | Black | PCA9685 ground |
-| A13 | **5V rail** | PCA9685 **V+** (motor power input) | Orange | Servo + motor power supply |
+| A13 | **5V rail** | PCA9685 **V+** (output power) | Orange | Servo + MOSFET gate drive power |
 
 ### SPI Bus (nRF24L01+)
 
