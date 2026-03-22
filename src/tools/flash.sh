@@ -143,6 +143,48 @@ flash_test_display() {
     mpremote run "$SRC_DIR/slave-pico/tests/test_max7219.py"
 }
 
+flash_test_wireless_master() {
+    echo "=== Wireless Test: MASTER (Pico A) — sends PING ==="
+    echo ""
+
+    echo "Stopping running code..."
+    mpremote soft-reset 2>/dev/null || true
+    sleep 2
+
+    echo "Uploading modules..."
+    upload "$SRC_DIR/shared/protocol.py" "protocol.py"
+    upload "$SRC_DIR/master-pico/micropython/heartbeat.py" "heartbeat.py"
+    upload "$SRC_DIR/master-pico/micropython/config.py" "config.py"
+    upload "$SRC_DIR/master-pico/micropython/nrf24l01.py" "nrf24l01.py"
+
+    echo ""
+    echo "Running wireless test (MASTER = PING sender)..."
+    echo "Plug in Pico B with test-wireless-slave to complete the test."
+    echo ""
+    mpremote run "$SRC_DIR/master-pico/tests/test_wireless.py"
+}
+
+flash_test_wireless_slave() {
+    echo "=== Wireless Test: SLAVE (Pico B) — replies PONG ==="
+    echo ""
+
+    echo "Stopping running code..."
+    mpremote soft-reset 2>/dev/null || true
+    sleep 2
+
+    echo "Uploading modules..."
+    upload "$SRC_DIR/shared/protocol.py" "protocol.py"
+    upload "$SRC_DIR/slave-pico/micropython/heartbeat.py" "heartbeat.py"
+    upload "$SRC_DIR/slave-pico/micropython/config.py" "config.py"
+    upload "$SRC_DIR/slave-pico/micropython/nrf24l01.py" "nrf24l01.py"
+
+    echo ""
+    echo "Running wireless test (SLAVE = PONG responder)..."
+    echo "Plug in Pico A with test-wireless-master to complete the test."
+    echo ""
+    mpremote run "$SRC_DIR/slave-pico/tests/test_wireless.py"
+}
+
 flash_test_nrf_display() {
     echo "=== Quick Test: nRF + MAX7219 Display ==="
     echo ""
@@ -179,14 +221,27 @@ case "$1" in
     test-nrf-display)
         flash_test_nrf_display
         ;;
+    test-wireless-master)
+        flash_test_wireless_master
+        ;;
+    test-wireless-slave)
+        flash_test_wireless_slave
+        ;;
     *)
-        echo "Usage: ./flash.sh [master|slave|test|test-display|test-nrf-display]"
+        echo "Usage: ./flash.sh <command>"
         echo ""
-        echo "  master            — Flash all master pico firmware"
-        echo "  slave             — Flash all slave pico firmware"
-        echo "  test              — Upload heartbeat + run nRF debug test"
-        echo "  test-display      — Upload heartbeat + run MAX7219 display test"
-        echo "  test-nrf-display  — Upload heartbeat + seg_display + run nRF test with display"
+        echo "  Flash firmware:"
+        echo "    master                — Flash all master pico firmware"
+        echo "    slave                 — Flash all slave pico firmware"
+        echo ""
+        echo "  Single-Pico tests:"
+        echo "    test                  — nRF SPI debug (master pinout)"
+        echo "    test-display          — MAX7219 display test"
+        echo "    test-nrf-display      — nRF + display combined test"
+        echo ""
+        echo "  Two-Pico wireless tests:"
+        echo "    test-wireless-master  — PING sender (flash to Pico A)"
+        echo "    test-wireless-slave   — PONG responder (flash to Pico B)"
         exit 1
         ;;
 esac

@@ -106,26 +106,58 @@ The Pico IS the power grid's switching fabric:
 
 ## Current State
 
-- **Phase:** Firmware complete, hardware testing + integration
-- **Commits:** 110+ on main
+- **Phase:** Hardware testing + integration
+- **Commits:** 130+ on main
 - **Team PRs merged:** Wooseong (4 PRs — electronics circuits, wiring, testing), Billy (1 PR — chassis)
-- **Done:**
-  - Full architecture, pin mapping, wiring plan, demo scenario
-  - All 21 MicroPython modules (13 master + 7 slave + 1 shared)
-  - Firmware v1 snapshot (basic) and v2 snapshot (datagram protocol + self-test)
-  - Protocol v2: 6 datagram types (DATA, HEARTBEAT, ALERT, ACK, COMMAND, STATUS)
-  - Debug system with LED blink codes + OLED error messages
-  - Failure handling protocol (F1-F6) + fault simulator for demo
-  - Startup self-test with error reporting
-  - Dumb vs Smart A/B comparison mode
-  - Web dashboard with SQLite database + mock data generator
-  - Documentation organised in numbered folders (01-overview through 05-archive)
-  - Pico hardware tested (LED + ADC confirmed working on partial-solder board)
-  - C SDK stubs created (CMakeLists.txt + main.c for both Picos)
-- **Next:**
-  - Complete hardware wiring (81 wires per wiring-connections.md)
-  - Integration test: wireless link between both Picos
-  - C SDK production firmware for demo day
-  - Factory chassis assembly (Billy)
-  - Full system demo rehearsal
+
+### Done
+
+- [x] Full architecture, pin mapping, wiring plan, demo scenario
+- [x] All 21 MicroPython modules (13 master + 7 slave + 1 shared)
+- [x] Firmware v1 snapshot (basic) and v2 snapshot (datagram protocol + self-test)
+- [x] Protocol v2: 6 datagram types (POWER, STATUS, PRODUCTION, HEARTBEAT, ALERT, COMMAND)
+- [x] Debug system with LED blink codes + OLED error messages
+- [x] Failure handling protocol (F1-F6) + fault simulator for demo
+- [x] Startup self-test with error reporting
+- [x] Dumb vs Smart A/B comparison mode
+- [x] Web dashboard with SQLite database + mock data generator
+- [x] Documentation organised in numbered folders (01-overview through 05-archive)
+- [x] Pico hardware tested (LED + ADC confirmed working on partial-solder board)
+- [x] C SDK drivers created (nRF, BMI160, PCA9685, SSD1306, power manager)
+- [x] Heartbeat LED system — timer-driven, activity-aware (normal/active/fault/boot)
+- [x] nRF24L01+ single-Pico SPI test — PASS (status register read/write verified)
+- [x] MAX7219 7-segment display — wired on SPI1, driver + test working
+- [x] Display indicator system — shows LINK On/OFF, FAULT codes, power readings
+- [x] C SDK combined test (test_hw.uf2) — nRF + MAX7219 + heartbeat in one binary
+- [x] Flash tool (flash.sh) with soft-reset, retry logic, test modes
+- [x] Wiring docs with pinout reference images (nRF + Pico 2 + MAX7219)
+
+### Todo — Testing (do in this order)
+
+- [ ] **1. Wire nRF to Pico A** (same pinout as Pico B: CE=GP0, CSN=GP1, SCK=GP2, MOSI=GP3, MISO=GP16)
+- [ ] **2. Test nRF on Pico A** — `./src/tools/flash.sh test` (single-Pico SPI check)
+- [ ] **3. Two-Pico wireless link** — PING/PONG handshake test (Pico A sends, Pico B replies)
+- [ ] **4. Protocol datagram test** — verify all 6 packet types pack/unpack correctly over wireless
+- [ ] **5. Telemetry end-to-end** — Pico A sends real sensor data, Pico B displays on OLED + 7-segment
+- [ ] **6. Command test** — Pico B sends joystick/pot commands, Pico A responds (motor speed, servo, mode)
+- [ ] **7. Fault injection test** — trigger each fault (F1-F6), verify display + LED + wireless alert
+
+### Todo — Hardware
+
+- [ ] Complete hardware wiring (81 wires per wiring-connections.md)
+- [ ] Connect BMI160 IMU to Pico A (I2C: SDA=GP4, SCL=GP5)
+- [ ] Connect PCA9685 PWM driver to Pico A (I2C: same bus, addr 0x40)
+- [ ] Connect OLED SSD1306 to Pico B (I2C: SDA=GP4, SCL=GP5)
+- [ ] Connect joystick + potentiometer to Pico B (ADC: GP26, GP27, GP28)
+- [ ] Connect DC motors + MOSFETs to Pico A (GP10-13)
+- [ ] Connect servos to PCA9685 (channels 0-1)
+- [ ] Power supply: 12V PSU → LM2596S buck → 5V bus
+
+### Todo — Production
+
+- [ ] C SDK production firmware for both Picos (demo day — rock-solid timing)
+- [ ] Factory chassis assembly (Billy)
+- [ ] Full system demo rehearsal
+- [ ] A/B comparison demo: dumb vs smart mode live on display
+
 - **Hackathon date:** TBD
