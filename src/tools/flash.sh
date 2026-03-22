@@ -124,6 +124,25 @@ flash_test() {
     mpremote run "$SRC_DIR/master-pico/tests/test_nrf_debug.py"
 }
 
+flash_test_display() {
+    echo "=== Quick Test: MAX7219 7-Segment Display ==="
+    echo ""
+
+    # Stop any running code first
+    echo "Stopping running code..."
+    mpremote soft-reset 2>/dev/null || true
+    sleep 2
+
+    echo "Uploading heartbeat module..."
+    upload "$SRC_DIR/slave-pico/micropython/heartbeat.py" "heartbeat.py"
+
+    echo ""
+    echo "Running MAX7219 display test..."
+    echo "(Should show 12345678, countdown, brightness sweep)"
+    echo ""
+    mpremote run "$SRC_DIR/slave-pico/tests/test_max7219.py"
+}
+
 case "$1" in
     master)
         flash_master
@@ -134,12 +153,16 @@ case "$1" in
     test)
         flash_test
         ;;
+    test-display)
+        flash_test_display
+        ;;
     *)
-        echo "Usage: ./flash.sh [master|slave|test]"
+        echo "Usage: ./flash.sh [master|slave|test|test-display]"
         echo ""
-        echo "  master  — Flash all master pico firmware"
-        echo "  slave   — Flash all slave pico firmware"
-        echo "  test    — Upload heartbeat + run nRF debug test"
+        echo "  master       — Flash all master pico firmware"
+        echo "  slave        — Flash all slave pico firmware"
+        echo "  test         — Upload heartbeat + run nRF debug test"
+        echo "  test-display — Upload heartbeat + run MAX7219 display test"
         exit 1
         ;;
 esac
