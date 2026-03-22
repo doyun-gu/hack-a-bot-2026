@@ -61,41 +61,88 @@
 | A19 | **3.3V** | nRF24L01+ **VCC** | Red thin | nRF power (**3.3V ONLY — 5V will kill it!**) |
 | A20 | **GND** | nRF24L01+ **GND** | Black | nRF ground |
 
-### Motor Switching (PCA9685 PWM → MOSFET → Motor)
+### Motor Switching — Via Motor Driver Module
 
-> **Changed:** Motor MOSFET gates are now driven by PCA9685 PWM channels (12-bit, 4096-step speed control) instead of Pico GPIO pins. The PCA9685 is already on the I2C bus (wires A3-A13). MOSFETs + flyback diodes + sense resistors stay the same.
+> **Changed (2026-03-22):** DC motors driven by a dedicated motor driver module (e.g. L298N / L293D), not MOSFETs. PCA9685 PWM outputs connect to the motor driver's input pins for speed control.
 
 | # | From | To | Wire | Purpose |
 |---|---|---|---|---|
-| A21 | **PCA9685 CH2** → 1kΩ → | MOSFET 1 **gate** | Yellow | Motor 1 PWM speed control |
-| A22 | Motor power rail → Motor 1 + terminal | Motor 1 **positive** | Red | Motor 1 power supply |
-| A23 | Motor 1 – terminal → **1Ω sense R** → | MOSFET 1 **drain** | Blue | Motor 1 current path + sensing |
-| A24 | MOSFET 1 **source** | **GND** | Black | Motor 1 ground return |
-| A25 | **PCA9685 CH3** → 1kΩ → | MOSFET 2 **gate** | Yellow | Motor 2 PWM speed control |
-| A26 | Motor power rail → Motor 2 + terminal | Motor 2 **positive** | Red | Motor 2 power supply |
-| A27 | Motor 2 – terminal → **1Ω sense R** → | MOSFET 2 **drain** | Blue | Motor 2 current path + sensing |
-| A28 | MOSFET 2 **source** | **GND** | Black | Motor 2 ground return |
+| A21 | **PCA9685 CH2** | Motor driver **IN1** or **ENA** | Yellow | Motor 1 PWM speed control |
+| A22 | **Motor driver OUT1** | Motor 1 **terminal +** | Red | Motor 1 output |
+| A23 | **Motor driver OUT2** | Motor 1 **terminal –** | Blue | Motor 1 output |
+| A24 | **PCA9685 CH3** | Motor driver **IN3** or **ENB** | Yellow | Motor 2 PWM speed control |
+| A25 | **Motor driver OUT3** | Motor 2 **terminal +** | Red | Motor 2 output |
+| A26 | **Motor driver OUT4** | Motor 2 **terminal –** | Blue | Motor 2 output |
+| A27 | **Motor power rail** | Motor driver **VMS / +12V** | Red | Motor power input |
+| A28 | **5V rail** | Motor driver **VCC / +5V** | Orange | Logic power |
+| A29 | **GND** | Motor driver **GND** | Black | Common ground |
+
+> **Note:** Exact pin names depend on your motor driver module. Update labels when you identify the specific board. Direction control pins (IN1/IN2 per motor) can be tied HIGH/LOW if you only need one direction.
 
 ### ~~LED Bank Switch~~ — REMOVED
 
 > **CANCELLED:** LED bank (wires A29-A34) replaced by MAX7219 8-digit 7-segment display on Pico B SPI1. Status indicators now shown wirelessly on the display. See `docs/02-electrical/max7219-wiring.md`.
 
-### Recycle Path Switch
+### Recycle Path Switch (2N2222 NPN + LED Indicator)
+
+> **Changed (2026-03-22):** Uses 2N2222 NPN transistor instead of MOSFET. LED shows recycled energy discharging — the "fade effect" visually proves energy was captured and reused.
+
+```
+Circuit diagram:
+
+    5V rail ──→ Cap (+) ──┬──→ LED (+) ──→ LED (–) ──[150Ω]──→ GND
+                          │
+                       Cap (–)
+                          │
+                      2N2222 Collector (C)
+                          │
+    GP13 ──[1kΩ]──→ 2N2222 Base (B)
+                          │
+               GND ←── 2N2222 Emitter (E)
+
+
+    2N2222 pinout (TO-92, flat side facing you):
+    Pin 1 = Emitter  → GND
+    Pin 2 = Base     → 1kΩ → GP13
+    Pin 3 = Collector → Cap (–)
+
+    See pinout diagram: docs/images/2N2222-pinout.webp
+
+
+    How it works:
+    ┌─────────────────────────────────────────────────────────┐
+    │ GP13 HIGH → transistor ON → cap charges from 5V rail   │
+    │            (LED dim — most current flows through 2N2222)│
+    │                                                         │
+    │ GP13 LOW  → transistor OFF → cap discharges through LED │
+    │            → LED GLOWS AND FADES ← judges see this!     │
+    └─────────────────────────────────────────────────────────┘
+```
 
 | # | From | To | Wire | Purpose |
 |---|---|---|---|---|
-| A29 | **Pico A GP13** → 1kΩ → | MOSFET 3 **gate** | Yellow | Recycle path switch |
-| A30 | 5V rail → | **100µF capacitor +** | Orange | Energy storage |
-| A31 | MOSFET 3 **drain** → | Capacitor – | Blue | Controlled charge path |
-| A32 | MOSFET 3 **source** | **GND** | Black | Recycle ground |
+| A30 | **Pico A GP13** | → **1kΩ resistor** → 2N2222 **Base (B)** | Yellow | Recycle path on/off control |
+| A31 | **5V rail** | **100µF capacitor (+)** | Orange | Energy storage (positive) |
+| A32 | **100µF capacitor (–)** | 2N2222 **Collector (C)** | Blue | Controlled charge path |
+| A33 | 2N2222 **Emitter (E)** | **GND** | Black | Transistor ground |
+| A34 | **100µF capacitor (+)** | **LED anode (+)** (long leg) | Red thin | Discharge path (recycled energy) |
+| A35 | **LED cathode (–)** (short leg) | → **150Ω resistor** → **GND** | Green | Current limiter for LED |
+
+**2N2222 Pinout Reference (TO-92 package):**
+
+![2N2222 Pinout](../images/2N2222-pinout.webp)
+
+> **Demo script:** Toggle GP13 on/off every 2-3 seconds. Judges see: charge (LED dim) → release (LED glows and fades). Tell them: *"The capacitor captured wasted energy from the grid. When we release it, that stored energy powers this LED — same principle as regenerative braking, at bench scale."*
+>
+> **Parts:** 1× 2N2222, 1× 1kΩ, 1× 150Ω, 1× 100µF (or parallel combination e.g. 40+40+20µF), 1× LED (any colour — green recommended for "recycled energy" theming)
 
 ### ADC Sensing
 
 | # | From | To | Wire | Purpose |
 |---|---|---|---|---|
-| A33 | 5V rail → **10kΩ** → junction → **10kΩ** → GND | Junction → **Pico A GP26** | Green | Bus voltage sensing (V/2 divider) |
-| A34 | Across Motor 1 **1Ω sense R** | **Pico A GP27** | Green | Motor 1 current sensing |
-| A35 | Across Motor 2 **1Ω sense R** | **Pico A GP28** | Green | Motor 2 current sensing |
+| A36 | 5V rail → **10kΩ** → junction → **10kΩ** → GND | Junction → **Pico A GP26** | Green | Bus voltage sensing (V/2 divider) |
+| A37 | Across Motor 1 **sense point** | **Pico A GP27** | Green | Motor 1 current sensing (optional) |
+| A38 | Across Motor 2 **sense point** | **Pico A GP28** | Green | Motor 2 current sensing (optional) |
 
 ### ~~Status LEDs~~ — REMOVED
 
@@ -222,9 +269,9 @@ Wire in this order — test after each group:
 | 6 | **Wireless test** | (no new wires) | DONE | Datagram test — 200+ packets, 0 bad |
 | 7 | Pico B SPI1/MAX7219 | B16-B20 | DONE | `./flash.sh test-display` — PASS |
 | 8 | Pico A I2C (PCA9685 + IMU) | A3-A13 | **PARTIAL** | SDA/SCL done, **need 4.7kΩ pull-ups** |
-| 9 | Motors via PCA9685 | A21-A28, A34-A35 | **IN PROGRESS** | Motor spins when PCA9685 Ch2/Ch3 set |
-| 10 | Recycle path | A29-A32 | **IN PROGRESS** | Capacitor charges when GP13 HIGH |
-| 11 | ADC bus voltage | A33 | **IN PROGRESS** | ADC reads ~half of bus voltage |
+| 9 | Motors via motor driver | A21-A29 | **IN PROGRESS** | Motor spins when PCA9685 Ch2/Ch3 set |
+| 10 | Recycle path (2N2222 + LED) | A30-A35 | **IN PROGRESS** | GP13 toggle → LED glows and fades |
+| 11 | ADC bus voltage | A36 | **IN PROGRESS** | ADC reads ~half of bus voltage |
 | 12 | Pico B I2C/OLED | B3-B8 | **TODO** | OLED displays text |
 | ~~13~~ | ~~Pico B inputs~~ | ~~B21-B28~~ | ~~CANCELLED~~ | ~~Joystick + pot removed~~ |
 | 14 | Servos | S1-S4 | **TODO** | Servos move to test angles |
@@ -247,3 +294,7 @@ Wire in this order — test after each group:
 | 2026-03-22 | **Status LEDs (A36-A37, B29-B30) REMOVED** | All status indicators now on MAX7219 8-segment display. GP14/GP15 freed on both Picos. |
 | 2026-03-22 | **Progress markers added** | Steps 1-7 DONE, steps 8-14 remaining. |
 | 2026-03-22 | **Joystick + Potentiometer CANCELLED** | Focus narrowed to wireless communication + autonomous operation. Manual operator input not needed for demo. GP22, GP26-28 freed on Pico B. Wire count reduced to ~66. |
+| 2026-03-22 | **MOSFETs → 2N2222 NPN transistor (recycle path)** | No MOSFETs available. 2N2222 NPN transistor used for recycle path switch (GP13 → 1kΩ → Base). Same function, just current-driven instead of voltage-driven. |
+| 2026-03-22 | **DC motors → motor driver module** | Motors driven by dedicated motor driver module (L298N/L293D) instead of MOSFET switching. PCA9685 PWM outputs connect to motor driver input pins. |
+| 2026-03-22 | **Motor MOSFET circuits (old A21-A28) REPLACED** | Rewired for motor driver module (A21-A29). Recycle path renumbered to A30-A35. |
+| 2026-03-22 | **Recycle path LED added** | LED + 150Ω on discharge path (A34-A35). Cap charges when GP13 HIGH, LED glows and fades when GP13 LOW — visual proof of energy recycling for judges. |
