@@ -54,7 +54,54 @@ Add a **10µF capacitor** directly across pins 1 and 2 (as close to the module a
 GND ───┴─── Pin 1 (GND)
 ```
 
-**Without this capacitor, the wireless will be unreliable or not work at all.** The nRF draws current in short bursts that cause voltage dips.
+**Without this capacitor, the wireless will be unreliable or not work at all.**
+
+### Why the Capacitor is Critical
+
+The nRF24L01+ draws current in short **bursts** — idle at 12mA, then suddenly 115mA during transmission (lasting ~1ms). This sudden current demand causes the 3.3V supply voltage to **dip**:
+
+```
+Without capacitor:
+
+3.3V ─────╲    ╱─────╲    ╱───── voltage
+           ╲  ╱       ╲  ╱
+            ╲╱   2.8V  ╲╱         ← dips below 2.7V minimum
+                                     nRF resets, loses packet
+           TX burst   TX burst
+```
+
+```
+With 10µF capacitor:
+
+3.3V ──────────────────────────── voltage stays stable
+           ~~3.2V  ~~3.2V        ← small dip, stays above 2.7V
+                                     capacitor supplies the burst current
+           TX burst   TX burst
+```
+
+The capacitor acts as a **tiny battery** — it stores charge and releases it during the current burst, keeping the voltage stable.
+
+### Common nRF Problems Solved by the Capacitor
+
+| Symptom | Without Cap | With Cap |
+|---|---|---|
+| `status=0xFF` (not responding) | Module resets during init | Stable power, responds correctly |
+| Packets send but never received | TX power dips, corrupted signal | Clean transmission |
+| Works for 5 seconds then stops | Voltage drifts below minimum | Stays stable indefinitely |
+| Random `LINK LOST` on SCADA | Receiver brownouts during RX | Consistent reception |
+| Works close but not at 2m+ | Weak transmission power | Full power, full range |
+
+### What If You Don't Have 10µF?
+
+| Alternative | Works? |
+|---|---|
+| 22µF or 47µF | Yes — bigger is fine, just use correct polarity |
+| 4.7µF | Marginal — may still have occasional drops |
+| 1µF | Not enough — bursts are too fast |
+| 100µF | Overkill but works — slower power-up |
+| No capacitor at all | Will likely fail — especially with PA+LNA version (higher current) |
+
+The PA+LNA version (which you have — it has the small antenna board) draws **more current** than the basic nRF24L01+ because the power amplifier boosts the signal. This makes the capacitor even more critical.
 
 ---
 
