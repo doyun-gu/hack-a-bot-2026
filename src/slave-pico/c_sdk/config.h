@@ -39,6 +39,15 @@
 #define JOY_CENTRE     2048     /* midpoint of 12-bit ADC */
 #define JOY_DEADZONE   200      /* ignore within this range */
 
+/* ============ SPI1 BUS (MAX7219 7-Segment Display) ============ */
+#define SPI1_PORT      spi1
+#define SPI1_SCK       10
+#define SPI1_MOSI      11
+#define SPI1_BAUD      10000000
+#define MAX7219_CS     13
+#define MAX7219_DIGITS 8
+#define MAX7219_INTENSITY 8   /* 0-15 */
+
 /* ============ STATUS LEDs ============ */
 #define LED_RED        14
 #define LED_GREEN      15
