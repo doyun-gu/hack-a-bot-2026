@@ -95,12 +95,9 @@
 | A34 | Across Motor 1 **1Ω sense R** | **Pico A GP27** | Green | Motor 1 current sensing |
 | A35 | Across Motor 2 **1Ω sense R** | **Pico A GP28** | Green | Motor 2 current sensing |
 
-### Status LEDs
+### ~~Status LEDs~~ — REMOVED
 
-| # | From | To | Wire | Purpose |
-|---|---|---|---|---|
-| A36 | **Pico A GP14** → 330Ω → | Red LED → GND | Red | Fault indicator |
-| A37 | **Pico A GP15** → 330Ω → | Green LED → GND | Green | OK indicator |
+> **CANCELLED:** External red/green status LEDs replaced by MAX7219 8-segment display on Pico B. GP14/GP15 freed on Pico A.
 
 ---
 
@@ -166,12 +163,9 @@
 | B27 | **GND** | Potentiometer pin 3 | Black | Pot ground |
 | B28 | **Pico B GP28** | Potentiometer pin 2 (wiper) | Green | Analog reading |
 
-### Status LEDs
+### ~~Status LEDs~~ — REMOVED
 
-| # | From | To | Wire | Purpose |
-|---|---|---|---|---|
-| B29 | **Pico B GP14** → 330Ω → | Red LED → GND | Red | Fault indicator |
-| B30 | **Pico B GP15** → 330Ω → | Green LED → GND | Green | OK indicator |
+> **CANCELLED:** External red/green status LEDs replaced by MAX7219 8-segment display. GP14/GP15 freed on Pico B.
 
 ---
 
@@ -199,26 +193,26 @@
 
 ## Wire Count Summary
 
-| Category | Wires | Notes |
-|---|---|---|
-| Power supply | 7 | PSU → buck → boost → rails |
-| Pico A power | 2 | VSYS + GND |
-| Pico A I2C | 11 | IMU + PCA9685 + pull-ups |
-| Pico A SPI | 7 | nRF24L01+ |
-| Pico A motor switching | 8 | 2 motors × (PCA9685→gate + power + sense + GND) |
-| ~~Pico A LED bank~~ | ~~6~~ | ~~REMOVED — replaced by MAX7219 on Pico B~~ |
-| Pico A recycle path | 4 | MOSFET + capacitor |
-| Pico A ADC | 3 | Bus voltage + 2 current sense |
-| Pico A status LEDs | 2 | Red + green |
-| Pico B power | 2 | VSYS + GND |
-| Pico B I2C | 6 | OLED |
-| Pico B SPI0 | 7 | nRF24L01+ |
-| Pico B SPI1 | 5 | MAX7219 7-segment display (NEW) |
-| Pico B joystick | 5 | X + Y + button + VCC + GND |
-| Pico B potentiometer | 3 | Wiper + VCC + GND |
-| Pico B status LEDs | 2 | Red + green |
-| Servos | 4 | 2 servos × signal, shared VCC + GND |
-| **Total** | **~78 wires** | |
+| Category | Wires | Status | Notes |
+|---|---|---|---|
+| Power supply | 7 | DONE | PSU → buck → boost → rails |
+| Pico A power | 2 | DONE | VSYS + GND |
+| Pico A I2C | 11 | PARTIAL | SDA/SCL wired, **4.7kΩ pull-ups NOT yet** |
+| Pico A SPI | 7 | DONE | nRF24L01+ verified |
+| Pico A motor switching | 8 | IN PROGRESS | PCA9685→MOSFET→motor |
+| ~~Pico A LED bank~~ | ~~6~~ | ~~REMOVED~~ | ~~Replaced by MAX7219 on Pico B~~ |
+| Pico A recycle path | 4 | IN PROGRESS | MOSFET + capacitor |
+| Pico A ADC | 3 | IN PROGRESS | Bus voltage + 2 current sense |
+| ~~Pico A status LEDs~~ | ~~2~~ | ~~REMOVED~~ | ~~Replaced by MAX7219 display~~ |
+| Pico B power | 2 | DONE | VSYS + GND |
+| Pico B I2C | 6 | NOT STARTED | OLED |
+| Pico B SPI0 | 7 | DONE | nRF24L01+ verified |
+| Pico B SPI1 | 5 | DONE | MAX7219 7-segment display |
+| Pico B joystick | 5 | NOT STARTED | X + Y + button + VCC + GND |
+| Pico B potentiometer | 3 | NOT STARTED | Wiper + VCC + GND |
+| ~~Pico B status LEDs~~ | ~~2~~ | ~~REMOVED~~ | ~~Replaced by MAX7219 display~~ |
+| Servos | 4 | NOT STARTED | 2 servos × signal, shared VCC + GND |
+| **Total** | **~74 wires** | | **~30 done, ~44 remaining** |
 
 ---
 
@@ -226,27 +220,26 @@
 
 Wire in this order — test after each group:
 
-| Order | Group | Wires | Test |
-|---|---|---|---|
-| 1 | Power supply chain | P1-P7 | Multimeter: 5V and 6-9V on rails |
-| 2 | Pico A power | A1-A2 | Pico A boots, onboard LED blinks |
-| 3 | Pico A SPI/nRF | A14-A20 | `./flash.sh test` — nRF reads status register |
-| 4 | Pico B power | B1-B2 | Pico B boots, onboard LED blinks |
-| 5 | Pico B SPI0/nRF | B9-B15 | `./flash.sh test` — nRF reads status register |
-| 6 | **Wireless test** | (no new wires) | `./flash.sh test-wireless-master` + `test-wireless-slave` |
-| 7 | Pico B SPI1/MAX7219 | B16-B20 | `./flash.sh test-display` — shows 12345678 |
-| 8 | Pico A I2C (PCA9685 + IMU) | A3-A13 | `test_i2c_scan.py` — finds 0x68 + 0x40 |
-| 9 | Motors via PCA9685 | A21-A28, A34-A35 | Motor spins when PCA9685 Ch2/Ch3 set |
-| 10 | Recycle path | A29-A32 | Capacitor charges when GP13 HIGH |
-| 11 | ADC bus voltage | A33 | ADC reads ~half of bus voltage |
-| 12 | Pico B I2C/OLED | B3-B8 | OLED displays text |
-| 13 | Pico B inputs | B21-B28 | `test_joystick.py` — values change |
-| 14 | Servos | S1-S4 | Servos move to test angles |
-| 15 | Status LEDs | A36-A37, B29-B30 | All 4 LEDs blink |
+| Order | Group | Wires | Status | Test |
+|---|---|---|---|---|
+| 1 | Power supply chain | P1-P7 | DONE | Multimeter: 5V and 6-9V on rails |
+| 2 | Pico A power | A1-A2 | DONE | Pico A boots, onboard LED blinks |
+| 3 | Pico A SPI/nRF | A14-A20 | DONE | `./flash.sh test` — PASS (0x0E) |
+| 4 | Pico B power | B1-B2 | DONE | Pico B boots, onboard LED blinks |
+| 5 | Pico B SPI0/nRF | B9-B15 | DONE | `./flash.sh test` — PASS (0x0E) |
+| 6 | **Wireless test** | (no new wires) | DONE | Datagram test — 200+ packets, 0 bad |
+| 7 | Pico B SPI1/MAX7219 | B16-B20 | DONE | `./flash.sh test-display` — PASS |
+| 8 | Pico A I2C (PCA9685 + IMU) | A3-A13 | **PARTIAL** | SDA/SCL done, **need 4.7kΩ pull-ups** |
+| 9 | Motors via PCA9685 | A21-A28, A34-A35 | **IN PROGRESS** | Motor spins when PCA9685 Ch2/Ch3 set |
+| 10 | Recycle path | A29-A32 | **IN PROGRESS** | Capacitor charges when GP13 HIGH |
+| 11 | ADC bus voltage | A33 | **IN PROGRESS** | ADC reads ~half of bus voltage |
+| 12 | Pico B I2C/OLED | B3-B8 | **TODO** | OLED displays text |
+| 13 | Pico B inputs | B21-B28 | **TODO** | `test_joystick.py` — values change |
+| 14 | Servos | S1-S4 | **TODO** | Servos move to test angles |
 
 **Test after EVERY group.** Don't wire everything then test — find problems early.
 
-**Priority order:** Steps 1-6 are CRITICAL (wireless link needed for demo). Steps 7-15 add features.
+**Progress:** Steps 1-7 DONE. Steps 8-14 remaining.
 
 ---
 
@@ -259,3 +252,5 @@ Wire in this order — test after each group:
 | 2026-03-22 | **MAX7219 display added to Pico B** | 5 new wires (B16-B20) on SPI1 bus. |
 | 2026-03-22 | **Wire numbers renumbered** | A29+ renumbered after LED bank removal. Pico B wires renumbered to include MAX7219 (B16-B20). |
 | 2026-03-22 | **Wiring order revised** | Wireless-first priority. nRF on both Picos tested before anything else. |
+| 2026-03-22 | **Status LEDs (A36-A37, B29-B30) REMOVED** | All status indicators now on MAX7219 8-segment display. GP14/GP15 freed on both Picos. |
+| 2026-03-22 | **Progress markers added** | Steps 1-7 DONE, steps 8-14 remaining. Wire count reduced to ~74. |
