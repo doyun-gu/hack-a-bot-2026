@@ -12,8 +12,10 @@
 
 ### Reference Pinouts
 
-![nRF24L01+ Pinout Reference](../images/nrf_pinout_reference.png)
-![Raspberry Pi Pico 2 Pinout Reference](../images/pico2_pinout_reference.svg)
+<p>
+<img src="../images/nrf_pinout_reference.png" alt="nRF24L01+ Pinout" width="350"/>
+<img src="../images/pico2_pinout_reference.svg" alt="Pico 2 Pinout" width="500"/>
+</p>
 
 **WARNING: The nRF image is the FRONT view. When you flip the board, left and right are reversed. Always verify by reading the text labels on the BACK.**
 
