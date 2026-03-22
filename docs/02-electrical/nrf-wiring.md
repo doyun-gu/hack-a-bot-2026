@@ -6,10 +6,6 @@
 
 ## Pin Layout
 
-### Wiring Diagram — nRF24L01+ to Pico 2
-
-![nRF24L01+ to Pico 2 Wiring](../images/wiring_nrf_to_pico.svg)
-
 ### Reference Pinouts
 
 <p>
@@ -138,11 +134,3 @@ Three ways to identify:
 2. **Dot marking** — small dot printed on the PCB near pin 1
 3. **Multimeter** — pin 1 (GND) has continuity with the metal RF shielding on top of the module
 
----
-
-## Full System Wiring Diagrams
-
-For context on how the nRF fits into the complete system:
-
-- **Pico A (Grid Controller):** ![Full wiring](../images/wiring_pico_a_full.svg)
-- **Pico B (SCADA Station):** ![Full wiring](../images/wiring_pico_b_full.svg)
