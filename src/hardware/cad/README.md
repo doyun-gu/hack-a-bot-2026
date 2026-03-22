@@ -1,6 +1,6 @@
-# CAD Designs — GridCell Battery Recovery Factory
+# CAD Designs — GridBox Sorting Conveyor
 
-All 3D printable parts for the sorting conveyor system.
+All 3D printable parts for the sorting conveyor system. Designed by Billy Park in Fusion 360.
 
 ---
 
