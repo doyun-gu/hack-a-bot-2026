@@ -6,40 +6,20 @@
   <img src="https://hackabot-2026.com/live/assets/images/projects/badges/creative.png" alt="Project 6 Creative Badge" height="100"/>
 </p>
 
-<table>
-<tr>
-<td width="50%">
-<img src="docs/images/build/chassis_assembled.jpeg" alt="GridBox — Assembled Sorting Conveyor" height="220"/>
-<br/>
-<img src="docs/images/build/full_system.jpeg" alt="GridBox — Full System with Electronics" height="220"/>
-</td>
-<td width="50%">
+<p align="center">
+  <strong>A £15 smart factory controller — built in 24 hours</strong><br/>
+  21 Mar 2026 12:00 — 22 Mar 2026 12:00
+</p>
 
-### A £15 smart factory controller powered by recycled energy
+<p align="center">
+  <img src="docs/images/build/chassis_assembled.jpeg" alt="GridBox — Assembled Sorting Conveyor" height="280"/>
+  &nbsp;&nbsp;
+  <img src="docs/images/build/full_system.jpeg" alt="GridBox — Full System with Electronics" height="280"/>
+</p>
 
-Monitors, decides, and acts autonomously — replacing **£162K** of industrial equipment.
-
-**What it does:**
-- Senses power usage at every branch via ADC
-- Autonomously reroutes excess energy via MOSFET switches
-- Detects equipment faults via IMU vibration analysis
-- Reports wirelessly to a SCADA dashboard
-
-**Built with:**
-- 2× Raspberry Pi Pico 2 (RP2350, dual-core ARM)
-- nRF24L01+ wireless (custom 6-type datagram protocol)
-- BMI160 IMU + PCA9685 PWM + SSD1306 OLED + MAX7219 7-segment
-- MicroPython + C SDK firmware
-
-**Team:** Doyun Gu (Lead) · Wooseong Jung (Electronics) · Billy Park (Mechatronics)
-
-**24-hour hackathon** · 21 Mar 2026 12:00 — 22 Mar 2026 12:00
-
-<a href="docs/01-overview/gridbox-design.md">Design Doc</a> · <a href="docs/01-overview/context.md">Project Context</a> · <a href="docs/02-electrical/wiring-connections.md">Wiring Guide</a> · <a href="docs/04-team/team-plan.md">Team Plan</a>
-
-</td>
-</tr>
-</table>
+<p align="center">
+  <a href="docs/01-overview/gridbox-design.md">Design Doc</a> · <a href="docs/01-overview/context.md">Project Context</a> · <a href="docs/02-electrical/wiring-connections.md">Wiring Guide</a> · <a href="docs/04-team/team-plan.md">Team Plan</a>
+</p>
 
 ---
 
