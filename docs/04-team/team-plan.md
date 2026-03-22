@@ -8,7 +8,7 @@
 
 | Member | Role | Strengths | Responsibility |
 |---|---|---|---|
-| **Doyun** | System Designer / Lead | Power grid architecture, firmware, AI-assisted dev, project management | System architecture design, power distribution scheme, firmware (MicroPython + C), web dashboard, OLED screens, wireless protocol, documentation, team coordination. Works with Claude Code |
+| **Doyun** | System Designer / Lead | Power grid architecture, firmware, project management | System architecture design, power distribution scheme, firmware (MicroPython + C), web dashboard, OLED screens, wireless protocol, documentation, team coordination |
 | **Wooseong** | Electronics Engineer | EE, circuit design, soldering, wiring | All wiring, power distribution implementation, MOSFET switching circuits, sensor connections, voltage dividers, I2C/SPI bus, testing circuits |
 | **Billy** | Mechanical Engineer | 3D printing, CAD, physical design, motor mounting | Factory chassis/enclosure, motor mounts, servo brackets, turntable/conveyor mechanism, physical factory layout, labels |
 
@@ -260,7 +260,7 @@ graph LR
 ## What Each Person Should Bring
 
 ### Doyun
-- [ ] Laptop (MacBook) with Claude Code, mpremote, VS Code
+- [ ] Laptop (MacBook) with mpremote, VS Code
 - [ ] USB cables (×2, USB-A to micro-USB for Pico)
 - [ ] MicroPython .uf2 firmware pre-downloaded
 - [ ] Pico SDK installed (for C build later)

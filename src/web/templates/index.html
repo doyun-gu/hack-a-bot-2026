@@ -447,16 +447,32 @@
             });
         }
 
+        // ─── roundRect polyfill ───
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (typeof r === 'number') r = [r, r, r, r];
+                const [tl, tr, br, bl] = r;
+                this.moveTo(x + tl, y);
+                this.lineTo(x + w - tr, y); this.arcTo(x + w, y, x + w, y + tr, tr);
+                this.lineTo(x + w, y + h - br); this.arcTo(x + w, y + h, x + w - br, y + h, br);
+                this.lineTo(x + bl, y + h); this.arcTo(x, y + h, x, y + h - bl, bl);
+                this.lineTo(x, y + tl); this.arcTo(x, y, x + tl, y, tl);
+                this.closePath();
+            };
+        }
+
         // ─── Power Flow — retina, orthogonal wires, requestAnimationFrame dots ───
         let latestData = {};
+        let pfError = false;
 
         function drawPowerFlow(canvas, d) {
             const dpr = window.devicePixelRatio || 1;
-            const cssW = canvas.offsetWidth, cssH = canvas.offsetHeight;
-            canvas.width = cssW * dpr; canvas.height = cssH * dpr;
+            const w = canvas.offsetWidth, h = canvas.offsetHeight;
+            if (w === 0 || h === 0) return;
+            canvas.width = w * dpr; canvas.height = h * dpr;
             const ctx = canvas.getContext('2d');
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-            ctx.clearRect(0, 0, cssW, cssH);
+            ctx.clearRect(0, 0, w, h);
             const now = performance.now();
 
             const m1On = (d.m1_speed || 0) > 0, m2On = (d.m2_speed || 0) > 0;
@@ -485,22 +501,26 @@
 
             // ─── Box drawing ───
             function box(x, y, title, sub, active, borderColor) {
-                ctx.fillStyle = tc('--card');
-                ctx.strokeStyle = active ? borderColor : tc('--border');
+                const cardColor = tc('--card') || '#161b22';
+                const borderFallback = tc('--border') || '#21262d';
+                const textColor = tc('--text') || '#c9d1d9';
+                const dimColor = tc('--text-dim') || '#484f58';
+                ctx.fillStyle = cardColor;
+                ctx.strokeStyle = active ? borderColor : borderFallback;
                 ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.roundRect(x, y, bw, bh, br); ctx.fill(); ctx.stroke();
-                ctx.fillStyle = tc('--text'); ctx.font = '600 12px Inter';
+                ctx.fillStyle = textColor; ctx.font = '600 12px Inter';
                 ctx.fillText(title, x + 10, y + 20);
                 if (sub) {
-                    ctx.fillStyle = active ? borderColor : tc('--text-dim');
+                    ctx.fillStyle = active ? borderColor : dimColor;
                     ctx.font = '400 10px "JetBrains Mono"';
                     ctx.fillText(sub, x + 10, y + 38);
                 }
                 // Status dot (6px, top-right)
-                ctx.fillStyle = active ? borderColor : tc('--text-dim');
+                ctx.fillStyle = active ? borderColor : dimColor;
                 ctx.beginPath(); ctx.arc(x + bw - 14, y + 14, 3, 0, Math.PI * 2); ctx.fill();
                 if (!active) {
-                    ctx.strokeStyle = tc('--text-dim'); ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
+                    ctx.strokeStyle = dimColor; ctx.lineWidth = 1; ctx.setLineDash([2, 2]);
                     ctx.beginPath(); ctx.arc(x + bw - 14, y + 14, 3, 0, Math.PI * 2); ctx.stroke();
                     ctx.setLineDash([]);
                 }
@@ -508,7 +528,7 @@
 
             // ─── Wire drawing (2px, orthogonal) ───
             function wire(points, active, color) {
-                ctx.strokeStyle = active ? (color || '#3fb950') : tc('--border');
+                ctx.strokeStyle = active ? (color || '#3fb950') : (tc('--border') || '#21262d');
                 ctx.lineWidth = 2; ctx.setLineDash([]);
                 ctx.beginPath();
                 ctx.moveTo(points[0][0], points[0][1]);
@@ -588,7 +608,7 @@
             box(col3x, ledY, 'Status LEDs', state, ledActive, ledColor);
 
             // ═══ COLUMN LABELS (9px uppercase grey) ═══
-            ctx.fillStyle = tc('--text-dim'); ctx.font = '400 9px Inter';
+            ctx.fillStyle = tc('--text-dim') || '#484f58'; ctx.font = '400 9px Inter';
             ctx.fillText('SUPPLY', col1x, 14);
             ctx.fillText('CONVERSION', col2x, 14);
             ctx.fillText('OUTPUTS', col3x, 14);
@@ -598,7 +618,11 @@
         function powerFlowLoop() {
             const canvas = document.getElementById('power-flow');
             if (canvas && Object.keys(latestData).length > 0) {
-                drawPowerFlow(canvas, latestData);
+                try {
+                    drawPowerFlow(canvas, latestData);
+                } catch (e) {
+                    if (!pfError) { console.error('Power flow error:', e); pfError = true; }
+                }
             }
             requestAnimationFrame(powerFlowLoop);
         }
@@ -614,6 +638,9 @@
                     document.getElementById('conn-text').textContent = 'Offline';
                     return;
                 }
+
+                // Store data for power flow animation loop (must be before any DOM ops that might throw)
+                latestData = d;
 
                 const age = (Date.now() - new Date(d.timestamp).getTime()) / 1000;
                 document.getElementById('conn-dot').className = 'conn-dot ' + (age < 5 ? 'ok' : 'lost');
@@ -742,9 +769,6 @@
                 document.getElementById('s1-bar').style.width = (s1a / 180 * 100) + '%';
                 document.getElementById('s2-angle-val').textContent = s2a;
                 document.getElementById('s2-bar').style.width = (s2a / 180 * 100) + '%';
-
-                // Store data for power flow animation loop
-                latestData = d;
 
             } catch (e) {
                 document.getElementById('conn-dot').className = 'conn-dot lost';

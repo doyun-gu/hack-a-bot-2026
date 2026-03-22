@@ -173,20 +173,6 @@ docs/                      ← documentation updates
 
 ---
 
-## If You're Using Claude Code / AI Assistant
-
-Paste this at the start of your chat so your AI knows the project:
-
-```
-Read the file docs/context.md in this repo for full project context.
-I am working on the branch [your-branch-name].
-My role is [Electronics / Mechanical].
-```
-
-Your AI will then understand the full architecture, pin mapping, and what you're responsible for.
-
----
-
 ## Emergency Git Commands
 
 ```bash

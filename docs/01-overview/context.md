@@ -159,7 +159,7 @@ hack-a-bot-2026/
 │   ├── hardware/               ← CAD, wiring diagrams, datasheets
 │   └── tools/                  ← flash.sh, serial monitor
 ├── README.md                   ← Public-facing project README
-└── .gitignore                  ← notes/, CLAUDE.md, build artifacts
+└── .gitignore                  ← notes/, build artifacts
 ```
 
 ---

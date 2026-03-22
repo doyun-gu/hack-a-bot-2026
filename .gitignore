@@ -1,8 +1,9 @@
 # Local notes and brainstorming (not for GitHub)
 notes/
 
-# Claude Code (not for GitHub)
+# Project context (local only)
 .claude/
+.context/
 CLAUDE.md
 
 # Build artifacts
@@ -33,3 +34,4 @@ venv/
 .DS_Store
 src/master-pico/c_sdk/wireless_test/build/
 src/master-pico/c_sdk/blink/build/
+.gstack/
