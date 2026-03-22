@@ -9,6 +9,7 @@
 ### Reference Pinouts
 
 <p>
+<img src="../images/max7219_pinout_reference.webp" alt="MAX7219 7-Segment Pinout" width="450"/>
 <img src="../images/pico2_pinout_reference.png" alt="Pico 2 Pinout" width="500"/>
 </p>
 
