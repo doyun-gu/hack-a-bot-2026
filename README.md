@@ -15,6 +15,11 @@
   <a href="docs/01-overview/gridbox-design.md">Design Doc</a> · <a href="docs/01-overview/context.md">Project Context</a> · <a href="docs/02-electrical/wiring-connections.md">Wiring Guide</a> · <a href="docs/04-team/team-plan.md">Team Plan</a>
 </p>
 
+<p align="center">
+  <img src="docs/images/chassis_cad.png" alt="GridBox Sorting Conveyor — CAD Render" width="500"/>
+</p>
+<p align="center"><em>Sorting conveyor chassis — designed by Billy Park in Fusion 360</em></p>
+
 ---
 
 ## Group 1 — Hack-A-Bot 2026, Project 6: Creative
