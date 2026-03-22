@@ -89,6 +89,15 @@ flowchart LR
 
 ## 3. Pin Mapping
 
+### Reference Pinouts
+
+> Use these images to locate physical pin positions when wiring.
+
+<p>
+<img src="../images/pico2_pinout_reference.png" alt="Pico 2 Pinout" width="600"/>
+<img src="../images/nrf_pinout_reference.png" alt="nRF24L01+ Pinout" width="350"/>
+</p>
+
 ### Pico A — Grid Controller
 
 ```mermaid

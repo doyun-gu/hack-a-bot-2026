@@ -4,6 +4,16 @@
 
 ---
 
+## Reference Pinout
+
+> Use this to locate the GP pins referenced in the table below.
+
+<p>
+<img src="../images/pico2_pinout_reference.png" alt="Pico 2 Pinout" width="600"/>
+</p>
+
+---
+
 ## Resistors Required
 
 | # | Value | Colour Bands | Qty | Purpose | Connected Between |

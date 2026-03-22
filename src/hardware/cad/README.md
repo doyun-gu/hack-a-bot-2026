@@ -2,6 +2,8 @@
 
 All 3D printable parts for the sorting conveyor system. Designed by Billy Park in Fusion 360.
 
+<img src="../../../docs/images/chassis_cad.png" alt="GridBox Chassis CAD Render" width="600"/>
+
 ---
 
 ## Folder Structure

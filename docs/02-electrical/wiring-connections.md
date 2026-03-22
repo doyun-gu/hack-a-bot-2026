@@ -8,6 +8,17 @@
 
 ---
 
+## Reference Pinouts
+
+> **Keep these open while wiring.** Match every GP number below to this diagram.
+
+<p>
+<img src="../images/pico2_pinout_reference.png" alt="Pico 2 Pinout" width="600"/>
+<img src="../images/nrf_pinout_reference.png" alt="nRF24L01+ Pinout" width="350"/>
+</p>
+
+---
+
 ## Power Supply Chain
 
 | # | From | To | Wire | Purpose |

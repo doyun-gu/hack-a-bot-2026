@@ -4,6 +4,16 @@
 
 ---
 
+## Reference Pinout
+
+> Motors connect via PCA9685 PWM channels and MOSFET switches. Use this to locate the Pico pins.
+
+<p>
+<img src="../images/pico2_pinout_reference.png" alt="Pico 2 Pinout" width="600"/>
+</p>
+
+---
+
 ## Motor Datasheet
 
 | Parameter | Value |

@@ -79,6 +79,7 @@ docs/
 │
 └── images/                     ← Reference images + diagrams
     ├── logo.png, uom_black.png            ← Branding
+    ├── chassis_cad.png                    ← Chassis CAD render (Billy's conveyor design)
     ├── pico2_pinout_reference.png         ← Pico 2 pinout
     ├── nrf_pinout_*.png                   ← nRF24L01+ pinout + capacitor
     ├── max7219_pinout_reference.webp      ← MAX7219 pinout

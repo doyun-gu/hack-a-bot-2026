@@ -4,6 +4,14 @@
 
 ---
 
+## Reference Pinout
+
+<p>
+<img src="../images/pico2_pinout_reference.png" alt="Pico 2 Pinout" width="600"/>
+</p>
+
+---
+
 ## Pico Power Limits
 
 | Power Source | Max Current | Voltage |

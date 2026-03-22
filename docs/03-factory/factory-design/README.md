@@ -2,6 +2,14 @@
 
 > **Note (2026-03-22):** Some files in this directory reference joystick and potentiometer inputs that were later cancelled to focus on wireless communication and autonomous operation. See the [wiring connections](../../02-electrical/wiring-connections.md) change log for the full scope reduction. The [demo script](../demo-script.md) reflects the final design.
 
+## Chassis CAD Render
+
+<img src="../../images/chassis_cad.png" alt="GridBox Chassis CAD Render" width="600"/>
+
+> Sorting conveyor chassis designed by Billy Park in Fusion 360. Full CAD files in [`src/hardware/cad/`](../../../src/hardware/cad/).
+
+---
+
 | File | Author | Contents |
 |---|---|---|
 | [`weight-sensing-sorting.md`](weight-sensing-sorting.md) | Doyun | Weight detection via motor current — 4-LED station system, sorting logic, calibration |
