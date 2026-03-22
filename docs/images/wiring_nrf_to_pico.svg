@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <style>
+      .title { font-size: 20px; font-weight: bold; fill: #1a1a2e; }
+      .subtitle { font-size: 12px; fill: #e74c3c; font-weight: bold; }
+      .pin-label { font-size: 11px; fill: #fff; font-weight: bold; text-anchor: middle; }
+      .pin-desc { font-size: 10px; fill: #555; }
+      .wire-label { font-size: 9px; font-weight: bold; }
+      .warning { font-size: 11px; fill: #e74c3c; font-weight: bold; }
+      .note { font-size: 10px; fill: #666; }
+      .component-title { font-size: 14px; font-weight: bold; fill: #fff; text-anchor: middle; }
+      .component-sub { font-size: 10px; fill: #ccc; text-anchor: middle; }
+    </style>
+    <!-- Arrow marker -->
+    <marker id="arrowR" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#e74c3c"/>
+    </marker>
+    <marker id="arrowG" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#27ae60"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="620" fill="#f8f9fa" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="35" class="title" text-anchor="middle">nRF24L01+ → Pico 2 Wiring Diagram</text>
+  <text x="450" y="52" class="subtitle" text-anchor="middle">⚠ 3.3V ONLY — 5V DESTROYS THE MODULE</text>
+
+  <!-- ==================== PICO 2 ==================== -->
+  <!-- Pico body -->
+  <rect x="60" y="100" width="280" height="440" rx="16" fill="#1a1a2e" stroke="#2d2d5e" stroke-width="2"/>
+  <rect x="60" y="100" width="280" height="40" rx="16" fill="#16213e"/>
+  <rect x="60" y="124" width="280" height="16" fill="#16213e"/>
+  <text x="200" y="125" class="component-title">Raspberry Pi Pico 2</text>
+  <text x="200" y="138" class="component-sub">RP2350</text>
+
+  <!-- USB port -->
+  <rect x="170" y="88" width="60" height="18" rx="4" fill="#555" stroke="#777" stroke-width="1"/>
+  <text x="200" y="101" font-size="8" fill="#aaa" text-anchor="middle">USB</text>
+
+  <!-- Pico pin rows — LEFT side (active pins highlighted) -->
+  <!-- GP0 - Pin 1 -->
+  <rect x="60" y="160" width="50" height="22" rx="4" fill="#e67e22"/>
+  <text x="85" y="175" class="pin-label">GP0</text>
+  <text x="115" y="175" font-size="9" fill="#aaa">1</text>
+
+  <!-- GP1 - Pin 2 -->
+  <rect x="60" y="188" width="50" height="22" rx="4" fill="#e67e22"/>
+  <text x="85" y="203" class="pin-label">GP1</text>
+  <text x="115" y="203" font-size="9" fill="#aaa">2</text>
+
+  <!-- GND - Pin 3 -->
+  <rect x="60" y="216" width="50" height="22" rx="4" fill="#2c3e50"/>
+  <text x="85" y="231" class="pin-label">GND</text>
+  <text x="115" y="231" font-size="9" fill="#aaa">3</text>
+
+  <!-- GP2 - Pin 4 -->
+  <rect x="60" y="244" width="50" height="22" rx="4" fill="#3498db"/>
+  <text x="85" y="259" class="pin-label">GP2</text>
+  <text x="115" y="259" font-size="9" fill="#aaa">4</text>
+
+  <!-- GP3 - Pin 5 -->
+  <rect x="60" y="272" width="50" height="22" rx="4" fill="#3498db"/>
+  <text x="85" y="287" class="pin-label">GP3</text>
+  <text x="115" y="287" font-size="9" fill="#aaa">5</text>
+
+  <!-- Dots for unused pins -->
+  <text x="85" y="315" font-size="10" fill="#555" text-anchor="middle">⋮</text>
+
+  <!-- GP16 further down - RIGHT side -->
+  <rect x="290" y="370" width="50" height="22" rx="4" fill="#9b59b6"/>
+  <text x="315" y="385" class="pin-label">GP16</text>
+  <text x="282" y="385" font-size="9" fill="#aaa">21</text>
+
+  <!-- 3V3 on RIGHT side -->
+  <rect x="290" y="160" width="50" height="22" rx="4" fill="#e74c3c"/>
+  <text x="315" y="175" class="pin-label">3V3</text>
+  <text x="282" y="175" font-size="9" fill="#aaa">36</text>
+
+  <!-- GND on RIGHT side bottom -->
+  <rect x="290" y="500" width="50" height="22" rx="4" fill="#2c3e50"/>
+  <text x="315" y="515" class="pin-label">GND</text>
+  <text x="282" y="515" font-size="9" fill="#aaa">38</text>
+
+  <!-- ==================== nRF24L01+ ==================== -->
+  <!-- nRF body -->
+  <rect x="570" y="140" width="260" height="300" rx="12" fill="#1a1a2e" stroke="#2d2d5e" stroke-width="2"/>
+  <text x="700" y="170" class="component-title">nRF24L01+ PA+LNA</text>
+  <text x="700" y="186" class="component-sub">2.4GHz Wireless Module</text>
+
+  <!-- Antenna symbol -->
+  <rect x="675" y="100" width="50" height="46" rx="6" fill="#2d2d5e" stroke="#444" stroke-width="1"/>
+  <line x1="700" y1="108" x2="700" y2="140" stroke="#e74c3c" stroke-width="2"/>
+  <line x1="688" y1="115" x2="700" y2="108" stroke="#e74c3c" stroke-width="2"/>
+  <line x1="712" y1="115" x2="700" y2="108" stroke="#e74c3c" stroke-width="2"/>
+  <text x="700" y="134" font-size="8" fill="#aaa" text-anchor="middle">ANT</text>
+
+  <!-- nRF pins — 2x4 layout -->
+  <!-- Pin 1 GND (bottom-left) -->
+  <rect x="590" y="220" width="55" height="28" rx="4" fill="#2c3e50"/>
+  <text x="617" y="239" class="pin-label">GND</text>
+  <text x="617" y="254" font-size="9" fill="#888" text-anchor="middle">Pin 1</text>
+
+  <!-- Pin 2 VCC (bottom-right) -->
+  <rect x="705" y="220" width="55" height="28" rx="4" fill="#e74c3c"/>
+  <text x="732" y="239" class="pin-label">VCC</text>
+  <text x="732" y="254" font-size="9" fill="#888" text-anchor="middle">Pin 2</text>
+
+  <!-- Pin 3 CE -->
+  <rect x="590" y="268" width="55" height="28" rx="4" fill="#e67e22"/>
+  <text x="617" y="287" class="pin-label">CE</text>
+  <text x="617" y="302" font-size="9" fill="#888" text-anchor="middle">Pin 3</text>
+
+  <!-- Pin 4 CSN -->
+  <rect x="705" y="268" width="55" height="28" rx="4" fill="#e67e22"/>
+  <text x="732" y="287" class="pin-label">CSN</text>
+  <text x="732" y="302" font-size="9" fill="#888" text-anchor="middle">Pin 4</text>
+
+  <!-- Pin 5 SCK -->
+  <rect x="590" y="316" width="55" height="28" rx="4" fill="#3498db"/>
+  <text x="617" y="335" class="pin-label">SCK</text>
+  <text x="617" y="350" font-size="9" fill="#888" text-anchor="middle">Pin 5</text>
+
+  <!-- Pin 6 MOSI -->
+  <rect x="705" y="316" width="55" height="28" rx="4" fill="#3498db"/>
+  <text x="732" y="335" class="pin-label">MOSI</text>
+  <text x="732" y="350" font-size="9" fill="#888" text-anchor="middle">Pin 6</text>
+
+  <!-- Pin 7 MISO -->
+  <rect x="590" y="364" width="55" height="28" rx="4" fill="#9b59b6"/>
+  <text x="617" y="383" class="pin-label">MISO</text>
+  <text x="617" y="398" font-size="9" fill="#888" text-anchor="middle">Pin 7</text>
+
+  <!-- Pin 8 IRQ -->
+  <rect x="705" y="364" width="55" height="28" rx="4" fill="#7f8c8d" opacity="0.5"/>
+  <text x="732" y="383" class="pin-label" opacity="0.6">IRQ</text>
+  <text x="732" y="398" font-size="9" fill="#888" text-anchor="middle">Pin 8</text>
+  <line x1="710" y1="370" x2="755" y2="390" stroke="#e74c3c" stroke-width="2"/>
+  <text x="770" y="383" font-size="9" fill="#e74c3c" font-weight="bold">NC</text>
+
+  <!-- ==================== WIRES ==================== -->
+
+  <!-- Wire: GP0 → CE (orange) -->
+  <path d="M110,171 L460,171 L460,282 L590,282" fill="none" stroke="#e67e22" stroke-width="3" stroke-linecap="round"/>
+  <text x="420" y="166" class="wire-label" fill="#e67e22">CE</text>
+
+  <!-- Wire: GP1 → CSN (orange) -->
+  <path d="M110,199 L440,199 L440,282 L705,282" fill="none" stroke="#d35400" stroke-width="3" stroke-linecap="round" stroke-dasharray="8,4"/>
+  <text x="420" y="210" class="wire-label" fill="#d35400">CSN</text>
+
+  <!-- Wire: GP2 → SCK (blue) -->
+  <path d="M110,255 L480,255 L480,330 L590,330" fill="none" stroke="#3498db" stroke-width="3" stroke-linecap="round"/>
+  <text x="490" y="310" class="wire-label" fill="#3498db">SCK</text>
+
+  <!-- Wire: GP3 → MOSI (blue dashed) -->
+  <path d="M110,283 L500,283 L500,330 L705,330" fill="none" stroke="#2980b9" stroke-width="3" stroke-linecap="round" stroke-dasharray="8,4"/>
+  <text x="510" y="318" class="wire-label" fill="#2980b9">MOSI</text>
+
+  <!-- Wire: GP16 → MISO (purple) -->
+  <path d="M340,381 L470,381 L470,378 L590,378" fill="none" stroke="#9b59b6" stroke-width="3" stroke-linecap="round"/>
+  <text x="490" y="395" class="wire-label" fill="#9b59b6">MISO</text>
+
+  <!-- Wire: 3V3 → VCC (red) -->
+  <path d="M340,171 L540,171 L540,234 L705,234" fill="none" stroke="#e74c3c" stroke-width="3.5" stroke-linecap="round"/>
+  <text x="542" y="165" class="wire-label" fill="#e74c3c">3.3V ⚡</text>
+
+  <!-- Wire: GND → GND (black) -->
+  <path d="M340,511 L540,511 L540,234 L590,234" fill="none" stroke="#2c3e50" stroke-width="3.5" stroke-linecap="round"/>
+  <text x="545" y="505" class="wire-label" fill="#2c3e50">GND</text>
+
+  <!-- ==================== CAPACITOR ==================== -->
+  <rect x="540" y="455" width="120" height="65" rx="8" fill="#fff3cd" stroke="#ffc107" stroke-width="2"/>
+  <text x="600" y="474" font-size="11" font-weight="bold" fill="#856404" text-anchor="middle">10µF Cap</text>
+  <text x="600" y="488" font-size="9" fill="#856404" text-anchor="middle">REQUIRED</text>
+
+  <!-- Cap symbol -->
+  <line x1="580" y1="500" x2="580" y2="514" stroke="#856404" stroke-width="2"/>
+  <line x1="572" y1="504" x2="588" y2="504" stroke="#856404" stroke-width="3"/>
+  <line x1="572" y1="510" x2="588" y2="510" stroke="#856404" stroke-width="3"/>
+  <line x1="580" y1="500" x2="580" y2="496" stroke="#856404" stroke-width="2"/>
+  <text x="592" y="500" font-size="8" fill="#856404">+ VCC</text>
+  <text x="592" y="516" font-size="8" fill="#856404">− GND</text>
+
+  <!-- Cap connection lines -->
+  <line x1="575" y1="496" x2="545" y2="496" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <line x1="575" y1="516" x2="545" y2="516" stroke="#2c3e50" stroke-width="1.5" stroke-dasharray="3,2"/>
+  <text x="558" y="492" font-size="7" fill="#e74c3c">to VCC</text>
+  <text x="558" y="528" font-size="7" fill="#2c3e50">to GND</text>
+
+  <!-- ==================== LEGEND ==================== -->
+  <rect x="30" y="560" width="840" height="50" rx="8" fill="#eef" stroke="#dde" stroke-width="1"/>
+
+  <rect x="50" y="572" width="16" height="12" rx="2" fill="#e67e22"/>
+  <text x="72" y="582" font-size="10" fill="#333">Control (CE/CSN)</text>
+
+  <rect x="180" y="572" width="16" height="12" rx="2" fill="#3498db"/>
+  <text x="202" y="582" font-size="10" fill="#333">SPI Data (SCK/MOSI)</text>
+
+  <rect x="340" y="572" width="16" height="12" rx="2" fill="#9b59b6"/>
+  <text x="362" y="582" font-size="10" fill="#333">SPI Return (MISO)</text>
+
+  <rect x="490" y="572" width="16" height="12" rx="2" fill="#e74c3c"/>
+  <text x="512" y="582" font-size="10" fill="#333">Power (3.3V)</text>
+
+  <rect x="600" y="572" width="16" height="12" rx="2" fill="#2c3e50"/>
+  <text x="622" y="582" font-size="10" fill="#333">Ground</text>
+
+  <rect x="700" y="572" width="16" height="12" rx="2" fill="#ffc107"/>
+  <text x="722" y="582" font-size="10" fill="#333">Capacitor (10µF)</text>
+
+  <!-- Same wiring on both Picos note -->
+  <text x="450" y="600" font-size="10" fill="#666" text-anchor="middle" font-style="italic">Both Pico A and Pico B use identical nRF wiring — same pins, same capacitor</text>
+</svg>

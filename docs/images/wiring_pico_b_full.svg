@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <style>
+      .title { font-size: 22px; font-weight: bold; fill: #1a1a2e; }
+      .subtitle { font-size: 12px; fill: #666; }
+      .pin-label { font-size: 10px; fill: #fff; font-weight: bold; text-anchor: middle; }
+      .mod-title { font-size: 13px; font-weight: bold; fill: #fff; text-anchor: middle; }
+      .mod-sub { font-size: 9px; fill: #bbb; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="600" fill="#f8f9fa" rx="12"/>
+  <text x="500" y="32" class="title" text-anchor="middle">Pico B — SCADA Station — Full Wiring</text>
+  <text x="500" y="48" class="subtitle" text-anchor="middle">Monitoring, display, and user input</text>
+
+  <!-- ==================== PICO B (CENTER) ==================== -->
+  <rect x="350" y="70" width="240" height="440" rx="14" fill="#1a1a2e" stroke="#2d2d5e" stroke-width="2"/>
+  <rect x="350" y="70" width="240" height="36" rx="14" fill="#16213e"/>
+  <rect x="350" y="92" width="240" height="14" fill="#16213e"/>
+  <text x="470" y="94" class="mod-title">Pico 2 — SCADA Station</text>
+
+  <!-- USB -->
+  <rect x="440" y="58" width="60" height="16" rx="4" fill="#555" stroke="#777"/>
+  <text x="470" y="70" font-size="7" fill="#aaa" text-anchor="middle">USB → Mac</text>
+
+  <!-- LEFT PINS -->
+  <rect x="355" y="120" width="44" height="20" rx="3" fill="#e67e22"/>
+  <text x="377" y="134" class="pin-label">GP0</text>
+
+  <rect x="355" y="144" width="44" height="20" rx="3" fill="#e67e22"/>
+  <text x="377" y="158" class="pin-label">GP1</text>
+
+  <rect x="355" y="168" width="44" height="20" rx="3" fill="#34495e"/>
+  <text x="377" y="182" class="pin-label">GND</text>
+
+  <rect x="355" y="192" width="44" height="20" rx="3" fill="#3498db"/>
+  <text x="377" y="206" class="pin-label">GP2</text>
+
+  <rect x="355" y="216" width="44" height="20" rx="3" fill="#3498db"/>
+  <text x="377" y="230" class="pin-label">GP3</text>
+
+  <rect x="355" y="240" width="44" height="20" rx="3" fill="#1abc9c"/>
+  <text x="377" y="254" class="pin-label">GP4</text>
+
+  <rect x="355" y="264" width="44" height="20" rx="3" fill="#1abc9c"/>
+  <text x="377" y="278" class="pin-label">GP5</text>
+
+  <rect x="355" y="330" width="44" height="20" rx="3" fill="#e74c3c"/>
+  <text x="377" y="344" class="pin-label">GP14</text>
+
+  <rect x="355" y="354" width="44" height="20" rx="3" fill="#27ae60"/>
+  <text x="377" y="368" class="pin-label">GP15</text>
+
+  <!-- RIGHT PINS -->
+  <rect x="541" y="120" width="44" height="20" rx="3" fill="#e74c3c"/>
+  <text x="563" y="134" class="pin-label">3V3</text>
+
+  <rect x="541" y="168" width="44" height="20" rx="3" fill="#34495e"/>
+  <text x="563" y="182" class="pin-label">GND</text>
+
+  <rect x="541" y="290" width="44" height="20" rx="3" fill="#9b59b6"/>
+  <text x="563" y="304" class="pin-label">GP16</text>
+
+  <rect x="541" y="330" width="44" height="20" rx="3" fill="#8e44ad"/>
+  <text x="563" y="344" class="pin-label">GP22</text>
+
+  <rect x="541" y="390" width="44" height="20" rx="3" fill="#2ecc71"/>
+  <text x="563" y="404" class="pin-label">GP26</text>
+
+  <rect x="541" y="414" width="44" height="20" rx="3" fill="#2ecc71"/>
+  <text x="563" y="428" class="pin-label">GP27</text>
+
+  <rect x="541" y="438" width="44" height="20" rx="3" fill="#2ecc71"/>
+  <text x="563" y="452" class="pin-label">GP28</text>
+
+  <rect x="541" y="470" width="44" height="20" rx="3" fill="#34495e"/>
+  <text x="563" y="484" class="pin-label">GND</text>
+
+  <!-- ==================== nRF24L01+ (TOP LEFT) ==================== -->
+  <rect x="30" y="80" width="200" height="130" rx="10" fill="#2d2d5e" stroke="#444" stroke-width="1.5"/>
+  <text x="130" y="102" class="mod-title">nRF24L01+ PA+LNA</text>
+  <text x="130" y="116" class="mod-sub">SPI0 — 2.4GHz — Same as Pico A</text>
+
+  <text x="50" y="136" font-size="9" fill="#e67e22">CE  ← GP0</text>
+  <text x="50" y="150" font-size="9" fill="#e67e22">CSN ← GP1</text>
+  <text x="50" y="164" font-size="9" fill="#3498db">SCK ← GP2</text>
+  <text x="50" y="178" font-size="9" fill="#3498db">MOSI← GP3</text>
+  <text x="50" y="192" font-size="9" fill="#9b59b6">MISO← GP16</text>
+  <text x="145" y="136" font-size="9" fill="#e74c3c">VCC ← 3V3</text>
+  <text x="145" y="150" font-size="9" fill="#888">GND</text>
+  <rect x="145" y="157" width="64" height="14" rx="3" fill="#ffc107"/>
+  <text x="177" y="168" font-size="8" fill="#333" text-anchor="middle" font-weight="bold">+10µF Cap</text>
+
+  <!-- nRF wires -->
+  <line x1="355" y1="130" x2="230" y2="130" stroke="#e67e22" stroke-width="2"/>
+  <line x1="355" y1="154" x2="230" y2="146" stroke="#d35400" stroke-width="2" stroke-dasharray="5,3"/>
+  <line x1="355" y1="202" x2="230" y2="160" stroke="#3498db" stroke-width="2"/>
+  <line x1="355" y1="226" x2="230" y2="174" stroke="#2980b9" stroke-width="2" stroke-dasharray="5,3"/>
+  <!-- GP16 wraps -->
+  <path d="M585,300 L630,300 L630,60 L120,60 L120,80" fill="none" stroke="#9b59b6" stroke-width="2"/>
+  <!-- 3V3 -->
+  <path d="M585,130 L620,130 L620,68 L200,68 L200,80" fill="none" stroke="#e74c3c" stroke-width="2"/>
+
+  <!-- ==================== OLED (LEFT MIDDLE) ==================== -->
+  <rect x="30" y="260" width="200" height="100" rx="10" fill="#2c3e50" stroke="#1a252f" stroke-width="1.5"/>
+  <text x="130" y="282" class="mod-title">SSD1306 OLED</text>
+  <text x="130" y="296" class="mod-sub">I2C0 — Addr 0x3C — 128×64</text>
+
+  <text x="50" y="318" font-size="9" fill="#1abc9c">SDA ← GP4</text>
+  <text x="50" y="332" font-size="9" fill="#1abc9c">SCL ← GP5</text>
+  <text x="50" y="346" font-size="9" fill="#e74c3c">VCC ← 3V3</text>
+  <text x="145" y="318" font-size="9" fill="#888">GND ← GND</text>
+
+  <!-- OLED display mockup -->
+  <rect x="145" y="328" width="70" height="28" rx="3" fill="#000" stroke="#555"/>
+  <text x="180" y="340" font-size="6" fill="#00ff00" text-anchor="middle">GRIDBOX v2.0</text>
+  <text x="180" y="350" font-size="5" fill="#00ff00" text-anchor="middle">12.4V 2.1A OK</text>
+
+  <!-- I2C wires -->
+  <line x1="355" y1="250" x2="230" y2="314" stroke="#1abc9c" stroke-width="2"/>
+  <line x1="355" y1="274" x2="230" y2="328" stroke="#16a085" stroke-width="2" stroke-dasharray="5,3"/>
+
+  <!-- ==================== STATUS LEDs (BOTTOM LEFT) ==================== -->
+  <rect x="30" y="390" width="200" height="60" rx="10" fill="#555" stroke="#444" stroke-width="1.5"/>
+  <text x="130" y="412" class="mod-title">Status LEDs</text>
+  <circle cx="65" cy="432" r="7" fill="#e74c3c" opacity="0.8"/>
+  <text x="80" y="436" font-size="9" fill="#eee">GP14 → 330Ω → Red</text>
+  <circle cx="65" cy="448" r="7" fill="#27ae60" opacity="0.8"/>
+  <text x="80" y="452" font-size="9" fill="#eee">GP15 → 330Ω → Green</text>
+
+  <line x1="355" y1="340" x2="230" y2="428" stroke="#e74c3c" stroke-width="2"/>
+  <line x1="355" y1="364" x2="230" y2="444" stroke="#27ae60" stroke-width="2"/>
+
+  <!-- ==================== JOYSTICK (RIGHT) ==================== -->
+  <rect x="720" y="260" width="240" height="160" rx="10" fill="#1a5276" stroke="#154360" stroke-width="1.5"/>
+  <text x="840" y="282" class="mod-title">Joystick Module</text>
+  <text x="840" y="296" class="mod-sub">2-axis analog + digital button</text>
+
+  <!-- Joystick visual -->
+  <circle cx="780" cy="360" r="25" fill="#2c3e50" stroke="#555" stroke-width="2"/>
+  <circle cx="780" cy="360" r="10" fill="#444"/>
+  <line x1="780" y1="345" x2="780" y2="340" stroke="#888" stroke-width="1.5"/>
+  <text x="780" y="337" font-size="7" fill="#aaa" text-anchor="middle">↑Y</text>
+  <line x1="795" y1="360" x2="800" y2="360" stroke="#888" stroke-width="1.5"/>
+  <text x="808" y="363" font-size="7" fill="#aaa">X→</text>
+
+  <text x="825" y="324" font-size="10" fill="#5dade2" font-weight="bold">GP26 → X axis (ADC0)</text>
+  <text x="825" y="342" font-size="10" fill="#5dade2" font-weight="bold">GP27 → Y axis (ADC1)</text>
+  <text x="825" y="360" font-size="10" fill="#af7ac5" font-weight="bold">GP22 → Button (pull-up)</text>
+  <text x="825" y="380" font-size="9" fill="#85c1e9">VCC ← 3V3</text>
+  <text x="825" y="394" font-size="9" fill="#85c1e9">GND ← GND</text>
+  <text x="825" y="412" font-size="8" fill="#aed6f1" font-style="italic">Center ≈ 1.65V each axis</text>
+
+  <!-- Joystick wires -->
+  <line x1="585" y1="400" x2="720" y2="320" stroke="#2ecc71" stroke-width="2"/>
+  <line x1="585" y1="424" x2="720" y2="338" stroke="#2ecc71" stroke-width="2"/>
+  <line x1="585" y1="340" x2="720" y2="356" stroke="#8e44ad" stroke-width="2"/>
+
+  <!-- ==================== POTENTIOMETER (RIGHT BOTTOM) ==================== -->
+  <rect x="720" y="440" width="240" height="80" rx="10" fill="#6c3483" stroke="#5b2c6f" stroke-width="1.5"/>
+  <text x="840" y="462" class="mod-title">Potentiometer</text>
+  <text x="840" y="476" class="mod-sub">Threshold / Priority Dial</text>
+
+  <!-- Pot symbol -->
+  <line x1="745" y1="498" x2="785" y2="498" stroke="#bb8fce" stroke-width="3"/>
+  <line x1="765" y1="488" x2="765" y2="498" stroke="#bb8fce" stroke-width="2"/>
+  <polygon points="760,488 770,488 765,480" fill="#bb8fce"/>
+
+  <text x="800" y="498" font-size="10" fill="#d7bde2" font-weight="bold">GP28 → Wiper (ADC2)</text>
+  <text x="800" y="512" font-size="9" fill="#bb8fce">3V3 → one end, GND → other</text>
+
+  <!-- Pot wire -->
+  <line x1="585" y1="448" x2="720" y2="494" stroke="#2ecc71" stroke-width="2"/>
+
+  <!-- ==================== USB Serial note ==================== -->
+  <rect x="350" y="520" width="240" height="40" rx="6" fill="#fff3cd" stroke="#ffc107"/>
+  <text x="470" y="537" font-size="10" fill="#856404" text-anchor="middle" font-weight="bold">USB Serial → Mac → Flask Dashboard</text>
+  <text x="470" y="551" font-size="9" fill="#856404" text-anchor="middle">localhost:5000 — real-time SCADA view</text>
+
+  <!-- ==================== LEGEND ==================== -->
+  <rect x="30" y="565" width="940" height="30" rx="6" fill="#eef" stroke="#dde"/>
+  <rect x="50" y="574" width="12" height="10" rx="2" fill="#e67e22"/>
+  <text x="68" y="583" font-size="9" fill="#333">nRF Ctrl</text>
+  <rect x="130" y="574" width="12" height="10" rx="2" fill="#3498db"/>
+  <text x="148" y="583" font-size="9" fill="#333">SPI</text>
+  <rect x="180" y="574" width="12" height="10" rx="2" fill="#1abc9c"/>
+  <text x="198" y="583" font-size="9" fill="#333">I2C</text>
+  <rect x="230" y="574" width="12" height="10" rx="2" fill="#2ecc71"/>
+  <text x="248" y="583" font-size="9" fill="#333">ADC</text>
+  <rect x="280" y="574" width="12" height="10" rx="2" fill="#8e44ad"/>
+  <text x="298" y="583" font-size="9" fill="#333">Digital In</text>
+  <rect x="360" y="574" width="12" height="10" rx="2" fill="#e74c3c"/>
+  <text x="378" y="583" font-size="9" fill="#333">Power</text>
+  <rect x="420" y="574" width="12" height="10" rx="2" fill="#9b59b6"/>
+  <text x="438" y="583" font-size="9" fill="#333">MISO</text>
+
+  <text x="550" y="583" font-size="9" fill="#666" font-style="italic">Identical nRF wiring to Pico A — same pins GP0-3, GP16, 3V3, GND + 10µF cap</text>
+</svg>
