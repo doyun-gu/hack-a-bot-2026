@@ -30,11 +30,10 @@ NRF_DATA_RATE = 250      # kbps (250, 1000, or 2000)
 NRF_TX_ADDR = b'NSYNT'   # 5-byte TX address
 NRF_RX_ADDR = b'NSYNR'   # 5-byte RX address
 
-# ============ MOSFET SWITCHES (GPIO) ============
-MOSFET_MOTOR1 = 10       # GP10 → Motor 1 (fan)
-MOSFET_MOTOR2 = 11       # GP11 → Motor 2 (pump/conveyor)
-MOSFET_LED_BANK = 12     # GP12 → LED bank
-MOSFET_RECYCLE = 13      # GP13 → Recycle path
+# ============ MOSFET SWITCHES ============
+# Motor MOSFETs now driven by PCA9685 PWM (CH2, CH3) — not GPIO
+# GP10, GP11, GP12 are FREE (no longer used for MOSFET gates)
+MOSFET_RECYCLE = 13      # GP13 → Recycle path (binary on/off, no PWM needed)
 
 # ============ STATUS LEDs ============
 LED_RED = 14             # GP14
@@ -86,12 +85,12 @@ WEIGHT_THRESHOLD_HEAVY = 0.15  # above = reject heavy
 WEIGHT_THRESHOLD_JAM = 0.30    # above = jam fault
 
 # ============ LOAD PRIORITIES (for shedding) ============
-# P1=highest priority (keep), P4=lowest (shed first)
+# P1=highest priority (keep), P3=lowest (shed first)
+# LED bank removed — replaced by MAX7219 display on Pico B
 LOAD_PRIORITY = {
     'motor1': 1,    # fan — critical cooling
     'motor2': 2,    # conveyor — important
-    'leds': 3,      # LED bank — shed early
-    'recycle': 4,   # recycle path — shed first
+    'recycle': 3,   # recycle path — shed first
 }
 
 # ============ ENERGY SIGNATURE ============

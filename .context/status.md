@@ -41,14 +41,17 @@ All firmware modules written. Now testing hardware and building toward demo.
 
 ## Todo — Hardware
 
-- [ ] Complete 81-wire wiring (per wiring-connections.md)
+- [ ] Complete ~78-wire wiring (per wiring-connections.md Rev 2)
 - [ ] Connect BMI160 IMU to Pico A (I2C: SDA=GP4, SCL=GP5)
 - [ ] Connect PCA9685 PWM driver to Pico A (I2C: same bus, addr 0x40)
+- [ ] Connect DC motors: PCA9685 CH2/CH3 → 1kΩ → MOSFET gates (+ sense resistors + flyback diodes)
 - [ ] Connect OLED SSD1306 to Pico B (I2C: SDA=GP4, SCL=GP5)
 - [ ] Connect joystick + potentiometer to Pico B (ADC: GP26, GP27, GP28)
-- [ ] Connect DC motors + MOSFETs to Pico A (GP10-13)
+- [ ] Connect recycle path MOSFET on GP13
 - [ ] Connect servos to PCA9685 (channels 0-1)
 - [ ] Power supply: 12V PSU → LM2596S buck → 5V bus
+- [x] ~~Connect LED bank on GP12~~ — **REPLACED** by MAX7219 display on Pico B SPI1
+- [x] ~~Motor MOSFETs on GP10/GP11~~ — **REPLACED** by PCA9685 Ch2/Ch3 → MOSFET
 
 ## Todo — Production
 

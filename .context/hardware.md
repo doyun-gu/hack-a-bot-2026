@@ -7,11 +7,11 @@
 | Pico 2 (RP2350) | 2 | — | — | Main controllers |
 | nRF24L01+ PA+LNA | 2 | SPI0 | — | 2.4GHz wireless |
 | BMI160 IMU | 1 | I2C0 | 0x68 | Vibration/fault detection |
-| PCA9685 | 1 | I2C0 | 0x40 | 16-ch PWM servo driver |
+| PCA9685 | 1 | I2C0 | 0x40 | 16-ch PWM driver (servos + motor MOSFETs) |
 | SSD1306 OLED | 1 | I2C0 | 0x3C | 128x64 display |
 | MAX7219 7-seg | 1 | SPI1 | — | 8-digit status display |
 | MG90S Servo | 2 | PCA9685 | Ch 0-1 | Valve + quality gate |
-| DC Motor | 2 | GPIO+MOSFET | — | Fan + pump/conveyor |
+| DC Motor | 2 | PCA9685→MOSFET | — | Fan + pump/conveyor |
 | Joystick | 1 | ADC+GPIO | — | Operator X/Y + button |
 | Potentiometer | 1 | ADC | — | Operator speed control |
 | Red/Green LEDs | 4 | GPIO | — | Status indicators |
@@ -26,10 +26,10 @@
 | GP3 | SPI MOSI | SPI0 | Data out |
 | GP4 | I2C SDA | I2C0 | BMI160 + PCA9685 |
 | GP5 | I2C SCL | I2C0 | BMI160 + PCA9685 |
-| GP10 | MOSFET 1 | GPIO | Motor 1 switch |
-| GP11 | MOSFET 2 | GPIO | Motor 2 switch |
-| GP12 | MOSFET 3 | GPIO | LED station switch |
-| GP13 | MOSFET 4 | GPIO | Recycle path switch |
+| GP10 | ~~FREE~~ | — | Was Motor 1 MOSFET (now PCA9685 CH2) |
+| GP11 | ~~FREE~~ | — | Was Motor 2 MOSFET (now PCA9685 CH3) |
+| GP12 | ~~FREE~~ | — | Was LED bank (REMOVED — replaced by MAX7219 on Pico B) |
+| GP13 | MOSFET 3 | GPIO | Recycle path switch |
 | GP14 | Red LED | GPIO | Fault indicator |
 | GP15 | Green LED | GPIO | OK indicator |
 | GP16 | SPI MISO | SPI0 | Data in |
@@ -98,4 +98,7 @@
 - nRF24L01+ uses **same pinout on both Picos** (CE=GP0, CSN=GP1, SCK=GP2, MOSI=GP3, MISO=GP16)
 - MAX7219 on SPI1 to avoid bus conflict with nRF on SPI0
 - Pico 2 mounts as `RP2350` in BOOTSEL mode (not `RPI-RP2` like Pico 1)
-- Full 81-wire wiring plan in `docs/02-electrical/wiring-connections.md`
+- Full ~78-wire wiring plan in `docs/02-electrical/wiring-connections.md`
+- Motor MOSFET gates driven by PCA9685 Ch2/Ch3 (12-bit PWM speed control), not GPIO
+- LED bank REMOVED — replaced by MAX7219 display, status shown wirelessly
+- 3 MOSFETs total: Motor 1, Motor 2, Recycle path (was 4)

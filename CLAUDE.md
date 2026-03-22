@@ -155,16 +155,19 @@ The Pico IS the power grid's switching fabric:
 - [ ] **6. Command test** — Pico B sends joystick/pot commands, Pico A responds (motor speed, servo, mode)
 - [ ] **7. Fault injection test** — trigger each fault (F1-F6), verify display + LED + wireless alert
 
-### Todo — Hardware
+### Todo — Hardware (revised 2026-03-22)
 
-- [ ] Complete hardware wiring (81 wires per wiring-connections.md)
-- [ ] Connect BMI160 IMU to Pico A (I2C: SDA=GP4, SCL=GP5)
-- [ ] Connect PCA9685 PWM driver to Pico A (I2C: same bus, addr 0x40)
+- [ ] Complete hardware wiring (~78 wires per wiring-connections.md Rev 2)
+- [ ] Connect PCA9685 PWM driver to Pico A (I2C: SDA=GP4, SCL=GP5, addr 0x40)
+- [ ] Connect DC motors: PCA9685 CH2/CH3 → 1kΩ → MOSFET gate (+ sense R + flyback diode)
+- [ ] Connect BMI160 IMU to Pico A (I2C: same bus, addr 0x68)
 - [ ] Connect OLED SSD1306 to Pico B (I2C: SDA=GP4, SCL=GP5)
 - [ ] Connect joystick + potentiometer to Pico B (ADC: GP26, GP27, GP28)
-- [ ] Connect DC motors + MOSFETs to Pico A (GP10-13)
+- [ ] Connect recycle path MOSFET (GP13)
 - [ ] Connect servos to PCA9685 (channels 0-1)
 - [ ] Power supply: 12V PSU → LM2596S buck → 5V bus
+- [x] ~~LED bank on GP12~~ — **REPLACED** by MAX7219 display on Pico B
+- [x] ~~Motor MOSFETs on GP10/GP11~~ — **REPLACED** by PCA9685 Ch2/Ch3 → MOSFET
 
 ### Todo — Production
 
