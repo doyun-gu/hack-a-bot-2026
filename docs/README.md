@@ -78,6 +78,15 @@ docs/
 │       └── steadyhand-proposal.md   ← SteadyHand (95pts alternative)
 │
 └── images/                     ← Reference images + diagrams
+    ├── build/                             ← Build photos from hackathon day
+    │   ├── chassis_assembled.jpeg         ← Sorting conveyor on MDF base
+    │   ├── full_system.jpeg               ← Complete system with electronics + display
+    │   ├── oled_live.jpeg                 ← OLED SCADA display showing live readings
+    │   ├── conveyor_closeup.jpeg          ← Conveyor belt with sorting objects
+    │   ├── wireless_test.jpeg             ← Terminal: 200+ packets, 0 errors
+    │   ├── workbench.jpeg                 ← Electronics workbench during build
+    │   ├── integration.jpeg               ← Full integration — chassis + electronics
+    │   └── cad_workstation.jpeg           ← Billy designing in Fusion 360
     ├── logo.png, uom_black.png            ← Branding
     ├── chassis_cad.png                    ← Chassis CAD render (Billy's conveyor design)
     ├── pico2_pinout_reference.png         ← Pico 2 pinout
