@@ -134,6 +134,31 @@ hack-a-bot-2026/
 
 ---
 
+## Codebase Stats
+
+**259 source files — 44,186 lines of code**
+
+### By Language
+| Language | Lines |
+|---|---|
+| Python | 36,799 |
+| C/C++ | 5,673 |
+| Shell | 928 |
+| HTML | 786 |
+
+### By Component
+| Component | Lines | What |
+|---|---|---|
+| Firmware snapshots | 25,336 | 4 frozen releases (v1–v4) |
+| Master Pico | 8,509 | MicroPython + C SDK + 15 tests |
+| Slave Pico | 4,989 | MicroPython + C SDK + 6 tests |
+| Demo | 1,674 | Integration demo scripts |
+| Web Dashboard | 1,325 | Flask + SQLite + HTML |
+| Tools/Scripts | 1,260 | Flash, build, test scripts |
+| Shared Protocol | 358 | Wireless datagram protocol |
+
+---
+
 ## Supported By
 
 <table align="center">
