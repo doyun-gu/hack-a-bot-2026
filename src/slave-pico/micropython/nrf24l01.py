@@ -7,6 +7,11 @@ Uses register-level SPI commands per the nRF24L01+ datasheet.
 from machine import Pin, SPI
 import time
 
+try:
+    import heartbeat as _hb
+except ImportError:
+    _hb = None
+
 # ============ nRF24L01+ REGISTERS ============
 CONFIG = 0x00
 EN_AA = 0x01
@@ -210,6 +215,8 @@ class NRF24L01:
             self._csn_high()
 
         # Pulse CE to transmit
+        if _hb:
+            _hb.activity()
         self.ce.value(1)
         time.sleep_us(15)
         self.ce.value(0)
@@ -258,6 +265,9 @@ class NRF24L01:
         """Read received packet. Returns data bytes or None."""
         if not self.available():
             return None
+
+        if _hb:
+            _hb.activity()
 
         # Read payload
         self._csn_low()

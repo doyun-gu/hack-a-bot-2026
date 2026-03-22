@@ -11,6 +11,7 @@ import time
 import json
 
 import config
+import heartbeat
 from nrf24l01 import NRF24L01
 from bmi160 import BMI160, ACC_RANGE_4G, GYR_RANGE_500
 from pca9685 import PCA9685
@@ -349,6 +350,8 @@ def main():
     loop_count = 0
     cycle_index = 0
 
+    # Boot complete — switch heartbeat to normal
+    heartbeat.set_state("normal")
     print("\n[MASTER] Entering main loop (100Hz)")
     print("=" * 40)
 
@@ -403,17 +406,20 @@ def main():
             if actions and motor_ctrl:
                 fault_mgr.execute_actions(actions)
 
-            # === 9. Status LEDs ===
+            # === 9. Status LEDs + heartbeat ===
             state = fault_mgr.get_state()
             if state in ("FAULT", "EMERGENCY"):
                 hw['led_red'].value(1)
                 hw['led_green'].value(0)
+                heartbeat.set_state("fault")
             elif state in ("WARNING", "DRIFT"):
                 hw['led_red'].value(loop_count % 10 < 5)  # blink
                 hw['led_green'].value(0)
+                heartbeat.set_state("normal")
             else:
                 hw['led_red'].value(0)
                 hw['led_green'].value(1)
+                heartbeat.set_state("normal")
 
             # === 10. Send telemetry via wireless (rotation schedule) ===
             if (hw['nrf'] and pack_power and

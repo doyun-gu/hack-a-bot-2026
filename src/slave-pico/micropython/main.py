@@ -10,6 +10,7 @@ from machine import Pin, I2C, SPI, ADC
 import time
 
 import config
+import heartbeat
 from nrf24l01 import NRF24L01
 from ssd1306 import SSD1306
 from dashboard import Dashboard
@@ -207,6 +208,8 @@ def main():
     prev_direction = "CENTRE"
     prev_pot = 50
 
+    # Boot complete — switch heartbeat to normal
+    heartbeat.set_state("normal")
     print("\n[SLAVE] Entering main loop")
     print("=" * 40)
 
