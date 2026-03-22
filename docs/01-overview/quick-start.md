@@ -18,7 +18,7 @@ Start with the project [README](../../README.md) for a high-level overview of wh
 
 ## 4. See the wiring guide for hardware (5 min)
 
-[`../02-electrical/wiring-connections.md`](../02-electrical/wiring-connections.md) — 81 wires numbered with test order. Follow this when wiring the breadboards.
+[`../02-electrical/wiring-connections.md`](../02-electrical/wiring-connections.md) — ~66 wires numbered with test order and progress tracking. Follow this when wiring the breadboards.
 
 ## 5. Flash firmware to a Pico
 
@@ -43,7 +43,7 @@ python src/web/app.py --no-serial --mock
 python src/web/app.py --port /dev/tty.usbmodem*
 ```
 
-Open [http://localhost:5000](http://localhost:5000) in your browser.
+Open [http://localhost:8080](http://localhost:8080) in your browser.
 
 ## 7. Run tests on the Pico
 
@@ -87,4 +87,4 @@ In [`gridbox-design.md` § 8](gridbox-design.md#8-demo-scenario-water-bottling-p
 | Pin assignments | `src/master-pico/micropython/config.py` |
 | Flash tool | `src/tools/flash.sh master\|slave` |
 | Mock data | `src/tools/mock-data.py` |
-| Frozen firmware | `firmware/01-v1/` and `firmware/02-v2/` |
+| Frozen firmware | `firmware/01-v1/` through `firmware/04-v4/` |

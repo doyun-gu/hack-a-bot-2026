@@ -18,7 +18,7 @@ GridBox is a £15 smart infrastructure controller that does what £162K systems 
 SENSE → DECIDE → ACT → REPORT → (loop)
 ```
 
-**Pico A (Grid Controller)** reads voltage and current at every power branch via ADC, monitors equipment vibration via a 6-axis IMU, then autonomously controls MOSFET power switches and motor speeds. **Pico B (SCADA Station)** receives wireless telemetry and displays a live dashboard on an OLED screen, with joystick/potentiometer for operator override.
+**Pico A (Grid Controller)** reads voltage and current at every power branch via ADC, monitors equipment vibration via a 6-axis IMU, then autonomously controls power switches and motor speeds. **Pico B (SCADA Station)** receives wireless telemetry and displays live status on an OLED screen and MAX7219 7-segment display.
 
 ## Key Metrics
 
@@ -53,7 +53,7 @@ SENSE → DECIDE → ACT → REPORT → (loop)
 | Member | Role |
 |---|---|
 | **Doyun Gu** | System Designer / Lead — architecture, firmware, wireless protocol, dashboard, docs |
-| **Wooseong Jung** | Electronics Engineer — all 81 wires, power distribution, MOSFETs, sensors |
+| **Wooseong Jung** | Electronics Engineer — ~66 wires, power distribution, motor driver, sensors |
 | **Billy Park** | Mechanical Engineer — factory chassis, 3D printing, motor mounts, assembly |
 
 ## Demo (3 Minutes)
@@ -62,9 +62,9 @@ SENSE → DECIDE → ACT → REPORT → (loop)
 |---|---|---|
 | 1. Power on | Recycled energy powers a miniature water bottling plant | Problem framing |
 | 2. Auto-start | Motors spin, servos move, LEDs light — no buttons pressed | Autonomous startup |
-| 3. Turn dial | Motor speeds change, OLED updates live | Demand-based control |
-| 4. Shake motor | IMU detects fault → motor stops → power reroutes → OLED: FAULT | Autonomous fault response |
-| 5. Press joystick | System recovers, resumes production | Self-healing |
+| 3. Wireless SCADA | Pico B display shows live motor speed, servo angle, fault status | Real-time wireless telemetry |
+| 4. Shake motor | IMU detects fault → motor stops → power reroutes → display: FAULT | Autonomous fault response |
+| 5. Auto-recovery | Vibration drops → system restores loads in priority order | Self-healing |
 | 6. Energy summary | OLED shows "Smart mode saved 52% vs dumb mode" | Quantified sustainability |
 
 **Pitch:** *"We didn't build a gadget. We built an infrastructure company in a box. Same £15 system runs a water plant, greenhouse, recycling centre, or HVAC. Today we show you one. The platform runs them all."*

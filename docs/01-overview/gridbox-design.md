@@ -38,13 +38,11 @@ graph LR
     subgraph SENSORS["Sensors"]
         IMU["BMI160 IMU"]
         ADC_S["ADC: voltage + current"]
-        POT_A["Potentiometer"]
     end
 
     subgraph PICO_B["Pico B — SCADA"]
         OLED["OLED Dashboard"]
-        JOY["Joystick"]
-        POT_B["Potentiometer"]
+        SEG["MAX7219 7-Segment"]
     end
 
     INPUT --> PICO_A
@@ -140,12 +138,12 @@ graph TB
 | **GP3** | nRF24L01+ MOSI | SPI0 | nRF MOSI |
 | **GP4** | I2C SDA | I2C0 | BMI160 SDA + PCA9685 SDA |
 | **GP5** | I2C SCL | I2C0 | BMI160 SCL + PCA9685 SCL |
-| **GP10** | Motor 1 power switch | GPIO → MOSFET | MOSFET gate (controls Motor 1 power) |
-| **GP11** | Motor 2 power switch | GPIO → MOSFET | MOSFET gate (controls Motor 2 power) |
-| **GP12** | LED load switch | GPIO → MOSFET | MOSFET gate (controls LED bank) |
-| **GP13** | Recycle path switch | GPIO → MOSFET | MOSFET gate (routes excess to capacitor) |
-| **GP14** | Status LED red | GPIO | Red LED + 330Ω resistor |
-| **GP15** | Status LED green | GPIO | Green LED + 330Ω resistor |
+| **GP10** | ~~Motor 1~~ | — | *Freed — motors via motor driver module* |
+| **GP11** | ~~Motor 2~~ | — | *Freed — motors via motor driver module* |
+| **GP12** | ~~LED bank~~ | — | *Freed — replaced by MAX7219 on Pico B* |
+| **GP13** | Recycle path switch | GPIO → 2N2222 NPN | 1kΩ → 2N2222 base (energy recycling LED) |
+| **GP14** | ~~Status LED red~~ | — | *Freed — replaced by MAX7219 display* |
+| **GP15** | ~~Status LED green~~ | — | *Freed — replaced by MAX7219 display* |
 | **GP16** | nRF24L01+ MISO | SPI0 | nRF MISO |
 | **GP26** | Bus voltage sense | ADC0 | Voltage divider (10kΩ + 10kΩ) from bus |
 | **GP27** | Motor 1 current sense | ADC1 | Across 1Ω sense resistor |
@@ -164,13 +162,16 @@ graph TB
 | **GP3** | nRF24L01+ MOSI | SPI0 | nRF MOSI |
 | **GP4** | I2C SDA | I2C0 | OLED SDA |
 | **GP5** | I2C SCL | I2C0 | OLED SCL |
-| **GP14** | Status LED red | GPIO | Red LED |
-| **GP15** | Status LED green | GPIO | Green LED |
+| **GP10** | MAX7219 CLK | SPI1 | MAX7219 CLK pin |
+| **GP11** | MAX7219 DIN | SPI1 | MAX7219 data pin |
+| **GP13** | MAX7219 CS | GPIO | MAX7219 chip select |
+| **GP14** | ~~Status LED red~~ | — | *Freed — replaced by MAX7219 display* |
+| **GP15** | ~~Status LED green~~ | — | *Freed — replaced by MAX7219 display* |
 | **GP16** | nRF24L01+ MISO | SPI0 | nRF MISO |
-| **GP22** | Joystick button | GPIO (pull-up) | Joystick switch |
-| **GP26** | Joystick X | ADC0 | Joystick X axis |
-| **GP27** | Joystick Y | ADC1 | Joystick Y axis |
-| **GP28** | Potentiometer | ADC2 | Threshold/priority dial |
+| **GP22** | ~~Joystick button~~ | — | *Cancelled — autonomous demo* |
+| **GP26** | ~~Joystick X~~ | — | *Cancelled — autonomous demo* |
+| **GP27** | ~~Joystick Y~~ | — | *Cancelled — autonomous demo* |
+| **GP28** | ~~Potentiometer~~ | — | *Cancelled — autonomous demo* |
 
 ---
 
@@ -305,10 +306,10 @@ graph TB
     subgraph PICO_B_SW["Pico B — SCADA Firmware"]
         RX["Receive nRF packets"]
         DISPLAY["Update OLED dashboard"]
-        INPUT["Read joystick + potentiometer"]
+        SEG_D["Update MAX7219 display"]
         CMD["Send commands to Pico A"]
 
-        RX --> DISPLAY --> INPUT --> CMD --> RX
+        RX --> DISPLAY --> SEG_D --> CMD --> RX
     end
 
     CORE0 -->|"wireless"| PICO_B_SW
@@ -333,7 +334,7 @@ src/
 │   ├── main.py                 # Entry point + display loop
 │   ├── config.py               # Pin assignments
 │   ├── dashboard.py            # OLED screen rendering (4 views)
-│   ├── operator.py             # Joystick + potentiometer input
+│   ├── seg_display.py          # MAX7219 7-segment display driver
 │   ├── ssd1306.py              # OLED driver
 │   └── nrf24l01.py             # Wireless RX + command TX
 │
@@ -404,7 +405,7 @@ stateDiagram-v2
     HEALTHY --> WARNING: 1–2g
     WARNING --> HEALTHY: drops < 1g
     WARNING --> FAULT: > 2g for 3s
-    FAULT --> HEALTHY: joystick reset
+    FAULT --> HEALTHY: vibration drops below 1g
 ```
 
 | State | IMU Reading | Autonomous Action | OLED |
@@ -445,7 +446,7 @@ graph TB
     end
 
     subgraph ROOM_F["CONTROL ROOM"]
-        SCADA_F["Pico B + OLED + Joystick + Pot"]
+        SCADA_F["Pico B + OLED + MAX7219"]
     end
 
     FLOOR -->|"wireless"| ROOM_F
@@ -466,9 +467,9 @@ graph LR
 |---|---|---|---|
 | 1 | Plug in PSU | "This is recycled energy powering a water plant" | Problem framing |
 | 2 | System auto-starts | Motors spin, servos move, LEDs light — no buttons pressed | Autonomous startup |
-| 3 | Turn potentiometer | Motor speeds change, OLED updates live | Demand-based control |
-| 4 | Shake Motor 1 | IMU detects → motor stops → power reroutes → OLED: FAULT | Autonomous fault response |
-| 5 | Press joystick to reset | System recovers, resumes production | Self-healing |
+| 3 | Wireless SCADA | Pico B display shows live motor speed, servo angle, fault status | Real-time wireless telemetry |
+| 4 | Shake Motor 1 | IMU detects → motor stops → power reroutes → display: FAULT | Autonomous fault response |
+| 5 | Auto-recovery | Vibration drops → system restores loads in priority order | Self-healing |
 | 6 | Show OLED energy summary | "Smart mode saved 52% vs dumb mode" | Quantified sustainability |
 
 **Pitch:** *"We didn't build a gadget. We built an infrastructure company in a box. Same £15 system runs a water plant, greenhouse, recycling centre, or HVAC. Today we show you one. The platform runs them all."*
@@ -524,7 +525,7 @@ gantt
 
     section Display + SCADA
     OLED dashboard (4 views)             :07:00, 1h30min
-    Joystick override + commands         :08:30, 30min
+    MAX7219 display + wireless status    :08:30, 30min
     Web dashboard on laptop              :09:00, 1h
 
     section Hardware Assembly
@@ -549,7 +550,7 @@ gantt
 | Motor draws too much current | Buck-boost handles up to 20A. Pico never touches motor power directly |
 | ADC noise on current sensing | Average 10 readings per measurement. Capacitor across sense resistor |
 | nRF24L01+ unreliable | Retry logic + running average. Timeout → OLED shows "LINK LOST" |
-| IMU thresholds wrong | Tune with potentiometer on Pico B. Adjustable during demo |
+| IMU thresholds wrong | Pre-calibrate in firmware. Adjust threshold constants in config.py |
 | "It's just motors turning on and off" | Emphasise the INTELLIGENCE: autonomous decisions, cubic law savings, ISO standards |
 
 ---
@@ -568,12 +569,14 @@ gantt
 | 8 | 300W Buck-Boost Converter | 1 | Kit | — |
 | 9 | 12V 6A PSU | 1 | Kit | — |
 | 10 | OLED 0.96" SSD1306 | 1 | Kit | — |
-| 11 | Analog Joystick | 1 | Kit | — |
-| 12 | Potentiometer | 1 | Kit | — |
+| 11 | ~~Analog Joystick~~ | ~~1~~ | ~~Kit~~ | *Cancelled — autonomous demo* |
+| 12 | ~~Potentiometer~~ | ~~1~~ | ~~Kit~~ | *Cancelled — autonomous demo* |
 | 13 | Breadboard (400-tie) | 2+ | Kit | — |
 | 14 | LEDs (assorted colours) | 4+ | Kit | — |
 | 15 | Resistors (330Ω, 1kΩ, 1Ω, 10kΩ) | ~10 | Kit | — |
-| 16 | NPN transistor or MOSFET | 4 | Kit (assorted) | — |
+| 16 | 2N2222 NPN transistor | 1 | Kit | Recycle path switch |
+| 16b | MAX7219 8-digit 7-segment | 1 | Kit | Live status display on Pico B |
+| 16c | Motor driver module | 1 | Kit | L298N/L293D for DC motors |
 | 17 | Capacitor (100µF) | 1 | Kit (assorted) | — |
 | 18 | 22AWG solid wire | — | Kit | — |
 | 19 | M3 screws | — | Kit | — |

@@ -1,5 +1,7 @@
 # Factory Design
 
+> **Note (2026-03-22):** Some files in this directory reference joystick and potentiometer inputs that were later cancelled to focus on wireless communication and autonomous operation. See the [wiring connections](../../02-electrical/wiring-connections.md) change log for the full scope reduction. The [demo script](../demo-script.md) reflects the final design.
+
 | File | Author | Contents |
 |---|---|---|
 | [`weight-sensing-sorting.md`](weight-sensing-sorting.md) | Doyun | Weight detection via motor current — 4-LED station system, sorting logic, calibration |

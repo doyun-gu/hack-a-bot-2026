@@ -40,7 +40,7 @@ graph LR
     PICO_A --> S2[Servo: Sort Gate]
     PICO_A -->|"nRF24L01+ wireless"| PICO_B[Pico B: SCADA Station]
     PICO_B --> OLED[OLED Dashboard]
-    PICO_B --> JOY[Joystick Control]
+    PICO_B --> SEG[MAX7219 7-Segment]
     PICO_A -->|"USB serial"| WEB[Laptop: Web Dashboard]
 ```
 
@@ -52,8 +52,8 @@ graph LR
 | **Autonomous fault detection** | IMU vibration monitoring (ISO 10816) + current signature analysis. Detects bearing wear, jams, loose connections |
 | **Intelligent load shedding** | Bus voltage drops → system sheds non-essential loads by priority. Critical systems stay powered |
 | **Weight-based sorting** | Motor current change = item weight. Timed servo gate sorts good/bad at the end of the belt |
-| **Wireless SCADA** | 6-type binary datagram protocol at 50Hz. OLED dashboard with 5 views. Joystick override + potentiometer setpoint |
-| **Failure simulator** | Inject faults on command during demo — judges watch the system handle wireless dropout, motor stall, power sag, IMU failure |
+| **Wireless SCADA** | 6-type binary datagram protocol at 50Hz. OLED dashboard with 5 views. MAX7219 7-segment live status display |
+| **Failure simulator** | Inject faults during demo — judges watch the system handle wireless dropout, motor stall, power sag, IMU failure |
 | **Web dashboard** | Live graphs on laptop via USB serial. SQLite database for persistent data logging |
 
 ### The Demo
@@ -61,11 +61,11 @@ graph LR
 | Step | What Happens |
 |---|---|
 | 1 | Power on — system auto-starts, motors spin, LEDs green |
-| 2 | Turn potentiometer — motor speeds change, OLED updates live |
-| 3 | Place items on turntable — sorted by weight into PASS / REJECT bins |
+| 2 | Wireless SCADA — Pico B display shows live speed, angle, fault status |
+| 3 | Place items on conveyor — sorted by weight into PASS / REJECT bins |
 | 4 | Shake motor — fault detected in <100ms, motor stops, power reroutes |
-| 5 | Press joystick to reset — system recovers automatically |
-| 6 | Show OLED — "Smart mode saved 69% energy vs dumb mode" |
+| 5 | Auto-recovery — vibration drops, system restores loads automatically |
+| 6 | Energy summary — "Smart mode saved 69% energy vs dumb mode" |
 
 ---
 
@@ -86,8 +86,8 @@ graph LR
 | **Wireless** | nRF24L01+ PA+LNA, 2.4GHz, custom 6-type binary datagram protocol |
 | **Sensors** | BMI160 IMU (vibration), ADC (voltage + current via 1Ω sense resistors) |
 | **Actuators** | 2× DC Motor (200RPM geared), 2× MG90S Servo, via PCA9685 PWM driver |
-| **Display** | 0.96" SSD1306 OLED (128×64, 5 dashboard views) |
-| **Switching** | N-channel MOSFETs on GPIO for power routing |
+| **Display** | 0.96" SSD1306 OLED (128×64, 5 views) + MAX7219 8-digit 7-segment |
+| **Switching** | Motor driver module + 2N2222 NPN transistor for energy recycling |
 | **Firmware** | MicroPython (development) + C SDK (production demo) |
 | **Dashboard** | Flask + SQLite + live graphs on laptop |
 | **Power** | 12V PSU → LM2596S buck (5V logic) + 300W buck-boost (motor power) |
@@ -103,7 +103,8 @@ hack-a-bot-2026/
 ├── firmware/                       ← Frozen firmware snapshots (flash directly)
 │   ├── 01-v1/                      ← MicroPython v1 (21 modules)
 │   ├── 02-v2/                      ← + datagram protocol, self-test, A/B comparison
-│   └── 03-v3/                      ← + mock data, C stubs, integration test
+│   ├── 03-v3/                      ← + mock data, C stubs, integration test
+│   └── 04-v4/                      ← + wireless verified, architecture diagrams
 │
 ├── src/                            ← Development source code (11,500+ lines)
 │   ├── master-pico/
@@ -113,7 +114,7 @@ hack-a-bot-2026/
 │   ├── slave-pico/
 │   │   ├── micropython/            ← Pico B: 9 MicroPython modules
 │   │   ├── c_sdk/                  ← Pico B: C production firmware (3 drivers + main.c)
-│   │   └── tests/                  ← 4 OLED + display test scripts
+│   │   └── tests/                  ← 6 display + wireless test scripts
 │   ├── shared/protocol.py          ← 6-type binary datagram protocol (32-byte packets)
 │   ├── web/                        ← Flask dashboard + SQLite + mock data generator
 │   ├── hardware/electronics/       ← Circuit schematics + test logs (Wooseong)

@@ -7,7 +7,7 @@
 | Person | Role | Position |
 |---|---|---|
 | **Presenter** | Talks, points at things, drives the narrative | Front of table |
-| **Operator** | Controls potentiometer, triggers faults, monitors laptop | Behind the rig |
+| **Operator** | Triggers faults, monitors laptop, manages hardware | Behind the rig |
 | **Backup** | Watches dashboard, ready to switch to backup demo | At laptop |
 
 ---
@@ -48,21 +48,21 @@
 
 ---
 
-### Interactive — "You Control It" (0:45–1:15)
+### Wireless SCADA — "Two Brains, One System" (0:45–1:15)
 
 **Presenter says:**
 
-> "Now here's where it gets interactive. This potentiometer controls the sorting sensitivity."
+> "The two Picos are talking wirelessly over a 2.4GHz radio link — fifty packets per second, six different data types. Watch the display on Pico B."
 
-*[Invite judge to turn the potentiometer]*
+*[Point at the MAX7219 7-segment display]*
 
-> "Turn it left for tighter quality control — more items get rejected. Turn it right for looser — more items pass. The threshold updates in real time."
+> "That's live motor speed, servo angle, and system status — transmitted wirelessly from the controller. No wires between the two boards."
 
-> "You can also see the motor speed changing — the Pico applies the Affinity Laws: P is proportional to n-cubed. A twenty percent speed reduction saves forty-nine percent power. That's not software magic, that's thermodynamics."
+> "The motor speed is optimised using the Affinity Laws: P is proportional to n-cubed. A twenty percent speed reduction saves forty-nine percent power. That's not software magic, that's thermodynamics."
 
-**Operator:** If judge is hesitant, gently turn the pot yourself to demonstrate.
+**Operator:** Ensure the MAX7219 display is cycling through pages (speed, voltage, items, IMU data).
 
-**Judges should see:** Dashboard values change in response to pot movement. Speed and power numbers shift visibly.
+**Judges should see:** MAX7219 display updating live, dashboard showing wireless packet stats, both Picos operating independently.
 
 ---
 
@@ -102,7 +102,7 @@
 
 *[Point at dashboard — red indicators, fault log]*
 
-> "And now watch — it self-heals. The vibration drops, the system restores loads in priority order. Motor one first, then LEDs, then the recycle path. No human intervention."
+> "And now watch — it self-heals. The vibration drops, the system restores loads in priority order. Motor one first, then the recycle path. No human intervention."
 
 **Judges should see:** Red status on dashboard, fault logged, then automatic recovery. Green status returns.
 
@@ -188,7 +188,7 @@
 |---|---|---|
 | 0:00–0:15 | Opening | 15s |
 | 0:15–0:45 | Normal operation | 30s |
-| 0:45–1:15 | Interactive (potentiometer) | 30s |
+| 0:45–1:15 | Wireless SCADA link | 30s |
 | 1:15–1:45 | Sorting demo | 30s |
 | 1:45–2:15 | Fault injection + recovery | 30s |
 | 2:15–2:30 | Dumb vs Smart comparison | 15s |

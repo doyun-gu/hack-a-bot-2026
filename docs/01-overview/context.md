@@ -172,14 +172,14 @@ hack-a-bot-2026/
 | **Wooseong** | Electronics Engineer | All wiring, power distribution, MOSFET circuits, sensors, voltage dividers, I2C/SPI bus |
 | **Billy** | Mechanical Engineer | Factory chassis, 3D printing, motor mounts, servo brackets, turntable/conveyor, labels |
 
-See `docs/team-plan.md` for full task lists, timeline, and milestones.
+See `docs/04-team/team-plan.md` for full task lists, timeline, and milestones.
 
 ## Team Instructions
 
 - **To understand the project:** Read this file
-- **To see your task list:** Read `docs/team-plan.md`
-- **To see the full architecture:** Read `docs/gridbox-design.md`
+- **To see your task list:** Read `docs/04-team/team-plan.md`
+- **To see the full architecture:** Read `docs/01-overview/gridbox-design.md`
 - **To work on firmware:** Check `src/README.md` for dev workflow
-- **To see why GridBox was chosen:** Check `docs/ideas/` for all 14 ideas explored
-- **To wire hardware:** Follow pin mapping in `docs/gridbox-design.md` section 3-4
-- **Questions about design decisions:** Check `docs/gridbox-proposal.md`
+- **To see why GridBox was chosen:** Check `docs/05-archive/ideas/` for all 14 ideas explored
+- **To wire hardware:** Follow pin mapping in `docs/01-overview/gridbox-design.md` section 3-4
+- **Questions about design decisions:** Check `docs/01-overview/gridbox-proposal.md`
