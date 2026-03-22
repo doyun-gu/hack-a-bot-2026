@@ -175,7 +175,7 @@ class IMU:
             if az > 32767: az -= 65536
             s = 4.0 / 32768.0
             return math.sqrt((ax*s)**2 + (ay*s)**2 + (az*s)**2)
-        except:
+        except OSError:
             return 1.0
 
 

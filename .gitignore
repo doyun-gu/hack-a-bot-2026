@@ -32,6 +32,12 @@ venv/
 
 # macOS
 .DS_Store
-src/master-pico/c_sdk/wireless_test/build/
+
+# Office temp files
+~$*
+
+# Backup files
+*.bak
+src/master-pico/c_sdk/wireless_test/build*/
 src/master-pico/c_sdk/blink/build/
 .gstack/

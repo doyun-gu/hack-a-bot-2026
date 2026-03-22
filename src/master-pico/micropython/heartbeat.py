@@ -26,7 +26,7 @@ import time
 # Find the LED pin
 try:
     _led = Pin("LED", Pin.OUT)
-except:
+except (ValueError, TypeError):
     _led = Pin(25, Pin.OUT)
 
 # State

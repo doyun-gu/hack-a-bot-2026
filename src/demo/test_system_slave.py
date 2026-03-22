@@ -226,5 +226,5 @@ if __name__ == '__main__':
         print(f"\nERROR: {e}")
         try:
             Seg().show("ERR")
-        except:
+        except Exception:
             pass

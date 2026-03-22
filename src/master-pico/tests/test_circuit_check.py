@@ -68,7 +68,7 @@ try:
                     test("BMI160 chip ID = 0xD1", True, "")
                 else:
                     warn("BMI160 chip ID", f"Got 0x{chip_id[0]:02X}, expected 0xD1 — may be different IMU")
-            except:
+            except OSError:
                 warn("BMI160", "Found but can't read chip ID — loose connection?")
         elif 0x69 in devices:
             test("BMI160 IMU (0x69 — SDO=HIGH)", True, "")

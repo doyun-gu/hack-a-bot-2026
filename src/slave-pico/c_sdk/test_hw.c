@@ -19,6 +19,7 @@
 
 #include "config.h"
 #include "max7219.h"
+#include "nrf24l01.h"
 
 /* ============ Heartbeat LED (Timer-driven) ============ */
 

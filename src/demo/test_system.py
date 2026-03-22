@@ -379,7 +379,7 @@ def test_shake(i2c, nrf):
             if i % 10 == 0:
                 nrf.send_text(f"  {rms:.1f}G")
                 print(f"  Waiting... RMS={rms:.2f}g")
-        except:
+        except OSError:
             pass
         time.sleep_ms(100)
 
@@ -411,7 +411,7 @@ def test_telemetry(i2c, nrf):
             ax = (data[1] << 8 | data[0])
             if ax > 32767: ax -= 65536
             rms_val = abs(ax * 4.0 / 32768.0)
-        except:
+        except OSError:
             rms_val = 1.0
 
         # Simulated power

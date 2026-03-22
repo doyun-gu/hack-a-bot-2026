@@ -188,7 +188,7 @@ if __name__ == "__main__":
     import os
     try:
         os.remove('test_cal.json')
-    except:
+    except OSError:
         pass
 
     print("\nCalibration test complete")

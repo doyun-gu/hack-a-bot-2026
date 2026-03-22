@@ -347,7 +347,7 @@ if __name__ == '__main__':
         try:
             seg = SevenSeg()
             seg.show("Err")
-        except:
+        except Exception:
             pass
         led = Pin(LED_PIN, Pin.OUT)
         for _ in range(20):

@@ -1,7 +1,7 @@
-# GridBox — Project Context (Copy-Paste to AI)
+# GridBox — Complete Project Context
 
-> Paste this at the start of any AI chat to give full project context.
-> Last updated: 2026-03-21
+> Full technical context for understanding GridBox.
+> Last updated: 2026-03-22
 
 ---
 

@@ -10,7 +10,7 @@ import time
 # Try both LED pin methods (Pico 1 vs Pico 2)
 try:
     led = Pin("LED", Pin.OUT)
-except:
+except (ValueError, TypeError):
     led = Pin(25, Pin.OUT)
 
 print("Fast blink — 20 times")

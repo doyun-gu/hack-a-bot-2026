@@ -68,8 +68,8 @@ def m_clear():
 def m_show(text):
     """Show up to 8 chars on display (right-aligned)."""
     text = text[:8]
-    # Pad to 8 chars
-    text = text.rjust(8)
+    while len(text) < 8:
+        text = ' ' + text
     for i, ch in enumerate(text):
         m_write(8 - i, SEG.get(ch, 0x00))
 
