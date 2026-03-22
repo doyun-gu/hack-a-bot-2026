@@ -9,9 +9,9 @@
 <table>
 <tr>
 <td width="50%">
-<img src="docs/images/build/chassis_assembled.jpeg" alt="GridBox — Assembled Sorting Conveyor" width="100%"/>
+<img src="docs/images/build/chassis_assembled.jpeg" alt="GridBox — Assembled Sorting Conveyor" height="220"/>
 <br/>
-<img src="docs/images/build/full_system.jpeg" alt="GridBox — Full System with Electronics" width="100%"/>
+<img src="docs/images/build/full_system.jpeg" alt="GridBox — Full System with Electronics" height="220"/>
 </td>
 <td width="50%">
 
@@ -177,19 +177,19 @@ hack-a-bot-2026/
 
 <table>
 <tr>
-<td align="center"><img src="docs/images/build/oled_live.jpeg" width="280"/><br/><em>OLED SCADA display — live readings</em></td>
-<td align="center"><img src="docs/images/build/conveyor_closeup.jpeg" width="280"/><br/><em>Sorting conveyor with test objects</em></td>
-<td align="center"><img src="docs/images/build/wireless_test.jpeg" width="280"/><br/><em>Wireless protocol — 200+ packets, 0 errors</em></td>
+<td align="center" width="33%"><img src="docs/images/build/oled_live.jpeg" height="200"/><br/><em>OLED SCADA display — live readings</em></td>
+<td align="center" width="33%"><img src="docs/images/build/conveyor_closeup.jpeg" height="200"/><br/><em>Sorting conveyor with test objects</em></td>
+<td align="center" width="33%"><img src="docs/images/build/wireless_test.jpeg" height="200"/><br/><em>Wireless protocol — 200+ packets, 0 errors</em></td>
 </tr>
 <tr>
-<td align="center"><img src="docs/images/build/workbench.jpeg" width="280"/><br/><em>Electronics workbench — Pico + PSU + multimeter</em></td>
-<td align="center"><img src="docs/images/build/integration.jpeg" width="280"/><br/><em>Full integration — chassis + electronics</em></td>
-<td align="center"><img src="docs/images/build/cad_workstation.jpeg" width="280"/><br/><em>Billy designing chassis in Fusion 360</em></td>
+<td align="center" width="33%"><img src="docs/images/build/workbench.jpeg" height="200"/><br/><em>Electronics workbench</em></td>
+<td align="center" width="33%"><img src="docs/images/build/integration.jpeg" height="200"/><br/><em>Full integration — chassis + electronics</em></td>
+<td align="center" width="33%"><img src="docs/images/build/cad_workstation.jpeg" height="200"/><br/><em>Billy designing chassis in Fusion 360</em></td>
 </tr>
 </table>
 
 <p align="center">
-<img src="docs/images/chassis_cad.png" width="500"/><br/>
+<img src="docs/images/chassis_cad.png" height="200"/><br/>
 <em>CAD render — sorting conveyor designed by Billy Park in Fusion 360</em>
 </p>
 
