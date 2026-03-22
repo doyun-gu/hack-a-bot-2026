@@ -1,6 +1,6 @@
 # Project Status
 
-**Last updated:** 2026-03-22
+**Last updated:** 2026-03-22 (evening)
 
 ## Phase: Hardware Testing + Integration
 
@@ -26,16 +26,17 @@ All firmware modules written. Now testing hardware and building toward demo.
 - [x] C SDK combined test (test_hw.uf2) — nRF + MAX7219 + heartbeat LED
 - [x] Flash tool (flash.sh) with soft-reset, retry, 7 test modes
 - [x] Wiring docs with pinout reference images
+- [x] nRF24L01+ on Pico A — PASS (status 0x0E, channel write/read OK)
+- [x] Two-Pico wireless link — PASS (standalone master + USB slave)
+- [x] Datagram protocol over wireless — PASS (all 6 types, 200+ packets, 0 bad, bidirectional)
 
 ## Todo — Testing (in order)
 
-1. [ ] **Wire nRF to Pico A** (same pinout: CE=GP0, CSN=GP1, SCK=GP2, MOSI=GP3, MISO=GP16)
-2. [ ] **Test nRF on Pico A** — `./src/tools/flash.sh test`
-3. [ ] **Two-Pico wireless link** — PING/PONG handshake
-   - `./src/tools/flash.sh test-wireless-master` (Pico A)
-   - `./src/tools/flash.sh test-wireless-slave` (Pico B)
-4. [ ] **Protocol datagram test** — verify all 6 packet types over wireless
-5. [ ] **Telemetry end-to-end** — Pico A sends sensor data, Pico B displays
+1. [x] ~~Wire nRF to Pico A~~ — DONE
+2. [x] ~~Test nRF on Pico A~~ — PASS (status 0x0E, channel=100)
+3. [x] ~~Two-Pico wireless link~~ — PASS (PING/PONG + datagram test)
+4. [x] ~~Protocol datagram test~~ — PASS (200+ packets, 0 bad, all 6 types, bidirectional)
+5. [ ] **Telemetry end-to-end** — Pico A sends REAL sensor data, Pico B displays
 6. [ ] **Command test** — Pico B sends joystick/pot commands, Pico A responds
 7. [ ] **Fault injection** — trigger F1-F6, verify display + LED + wireless alert
 

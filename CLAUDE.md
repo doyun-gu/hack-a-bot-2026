@@ -147,10 +147,10 @@ The Pico IS the power grid's switching fabric:
 
 ### Todo — Testing (do in this order)
 
-- [ ] **1. Wire nRF to Pico A** (same pinout as Pico B: CE=GP0, CSN=GP1, SCK=GP2, MOSI=GP3, MISO=GP16)
-- [ ] **2. Test nRF on Pico A** — `./src/tools/flash.sh test` (single-Pico SPI check)
-- [ ] **3. Two-Pico wireless link** — PING/PONG handshake test (Pico A sends, Pico B replies)
-- [ ] **4. Protocol datagram test** — verify all 6 packet types pack/unpack correctly over wireless
+- [x] ~~1. Wire nRF to Pico A~~ — DONE
+- [x] ~~2. Test nRF on Pico A~~ — PASS (status 0x0E, channel write/read OK)
+- [x] ~~3. Two-Pico wireless link~~ — PASS (standalone master + USB slave)
+- [x] ~~4. Protocol datagram test~~ — PASS (200+ packets, 0 bad, all 6 types, bidirectional)
 - [ ] **5. Telemetry end-to-end** — Pico A sends real sensor data, Pico B displays on OLED + 7-segment
 - [ ] **6. Command test** — Pico B sends joystick/pot commands, Pico A responds (motor speed, servo, mode)
 - [ ] **7. Fault injection test** — trigger each fault (F1-F6), verify display + LED + wireless alert
