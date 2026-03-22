@@ -251,7 +251,17 @@ Circuit diagram:
 | ~~Pico B potentiometer~~ | ~~3~~ | ~~CANCELLED~~ | ~~Not needed for demo~~ |
 | ~~Pico B status LEDs~~ | ~~2~~ | ~~REMOVED~~ | ~~Replaced by MAX7219 display~~ |
 | Servos | 4 | NOT STARTED | 2 servos × signal, shared VCC + GND |
-| **Total** | **~66 wires** | | **~30 done, ~36 remaining** |
+| **Total** | **~66 wires** | | **~48 done, ~10 TODO, ~18 cancelled** |
+
+### Progress Summary
+
+| Status | Count | Wires | Categories |
+|---|---|---|---|
+| DONE | 10 | ~48 | Power, Pico A (power, I2C, SPI, motors, recycle), Pico B (power, SPI0, SPI1) |
+| TODO | 3 | ~13 | ADC sensing (3), OLED (6), Servos (4) |
+| CANCELLED/REMOVED | 5 | ~18 | LED bank (6), status LEDs A (2), status LEDs B (2), joystick (5), potentiometer (3) |
+
+**Completion: 10/13 active tasks done (77%). 3 remaining.**
 
 ---
 
